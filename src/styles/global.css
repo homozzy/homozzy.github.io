@@ -339,3 +339,166 @@ a:hover { color: var(--accent); }
 .site-footer a { text-decoration: underline; text-underline-offset: 3px; }
 
 main { min-height: 60vh; padding-bottom: 1rem; }
+
+/* ========== 读书录 ========== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.8rem;
+  margin: 1.6rem 0 0.4rem;
+}
+.mini-stat {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  text-align: center;
+}
+.mini-stat strong { display: block; font-size: 1.35rem; letter-spacing: 0.02em; }
+.mini-stat span { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.72rem; color: var(--muted); }
+
+.block-title {
+  font-size: 1.25rem;
+  margin: 1.8rem 0 1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.count {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.extra-grid { display: grid; gap: 0.6rem; }
+.extra-item {
+  display: flex;
+  gap: 0.7rem;
+  align-items: baseline;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.92rem;
+}
+.extra-cat {
+  flex: 0 0 56px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+
+.quote-list { display: grid; gap: 0.8rem; }
+.quote-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.1rem 1.3rem 1rem;
+}
+.quote-card p { font-size: 1.02rem; line-height: 1.9; }
+.quote-card cite {
+  display: block;
+  text-align: right;
+  font-style: normal;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-top: 0.5rem;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.reading-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.reading-toolbar input {
+  flex: 1 1 240px;
+  padding: 0.55rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  outline: none;
+}
+.reading-toolbar input:focus { border-color: var(--accent); }
+.year-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.chip {
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+}
+.chip.on { background: var(--accent); border-color: var(--accent); color: #faf6ee; }
+
+.meta-line {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 0.4rem 0 1rem;
+}
+
+.year-group { margin-top: 1.2rem; }
+.year-head {
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.note-list { display: grid; gap: 0.7rem; }
+.note {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+}
+.note summary {
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  list-style: none;
+}
+.note summary::-webkit-details-marker { display: none; }
+.note summary::before {
+  content: "▸";
+  color: var(--muted);
+  font-size: 0.85rem;
+  transition: transform 0.2s;
+}
+.note[open] summary::before { transform: rotate(90deg); }
+.note-date {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.72rem;
+  color: var(--muted);
+  min-width: 9.5em;
+}
+.note-book { font-weight: 700; }
+.note-author { color: var(--muted); font-size: 0.85rem; }
+.tag-wrote { color: var(--accent); border-color: var(--accent); }
+
+.note-text {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--line);
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+  color: var(--ink);
+  max-width: 68ch;
+}
+.note-foot { margin-top: 0.6rem; font-size: 0.78rem; }
+.note-foot a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.note-foot a:hover { color: var(--accent); }

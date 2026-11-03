@@ -1,0 +1,176 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+import readingNotes from '../data/reading-notes.json';
+
+type Note = {
+  id: string;
+  date: string;
+  year: string;
+  kind: string;
+  book: string;
+  author: string;
+  text: string;
+  url?: string;
+};
+const notes = readingNotes as Note[];
+
+const years = [...new Set(notes.map((n) => n.year))].sort((a, b) => Number(b) - Number(a));
+const byYear = new Map<string, Note[]>();
+for (const n of notes) {
+  const list = byYear.get(n.year) ?? [];
+  list.push(n);
+  byYear.set(n.year, list);
+}
+
+const quotes = [
+  { text: '哪有什么“黄金时代”，从来都是勇毅者以自己的名字开创的纪元。', src: '《荒野上的大师》笔记（2024.11.05）' },
+  { text: '生活是属于每个人自己的感受，不属于任何别人的看法。', src: '《活着》笔记（2024.06.15）' },
+  { text: '给岁月以文明是我们这个民族给这个世界最大的财富，给文明以岁月是对文明最残忍的抛弃。', src: '《历史的教训》笔记（2025.05.14）' },
+  { text: '生命存在本身就是意义。如果能够在有限的生命里留下属于自己的痕迹，创造一些前所未有的东西，生命的长度就能无限延长。', src: '《饥饿》笔记（2024.08.20）' },
+  { text: '真相重要，一如既往。我们能否及时明查真相，也取决于我们自己。', src: '《后真相》笔记（2026.01.03）' },
+];
+
+const extraBooks = [
+  { cat: '经济史', name: '《航海、货币与贸易——从经济学角度看世界历史》 波音' },
+  { cat: '当代史', name: '《筚路维艰：中国社会主义路径的五次选择》 萧冬连' },
+  { cat: '秦汉史', name: '《三国前夜：士大夫政治与东汉皇权的崩解》 张向荣' },
+  { cat: '秦汉史', name: '《祥瑞：王莽和他的时代》 张向荣' },
+  { cat: '政治学', name: '《中国政治的细节》 周鑫宇' },
+  { cat: '影视', name: '《乱》 黑泽明（影片）' },
+];
+
+const fmtDate = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${y} 年 ${m} 月 ${d} 日`;
+};
+---
+
+<BaseLayout title={`读书录 · ${SITE.title}`} description="2015 至今的微博读书笔记，52 条原文全文收录——文史、科幻、心理与人性。">
+  <div class="container" style="padding-top: 3rem;">
+    <p class="eyebrow">Reading Journal · Weibo</p>
+    <h1 class="page-title">读书录<span class="accent">.</span></h1>
+    <p class="lead" style="font-size:1.15rem; max-width:46ch;">
+      从《物种起源》到《智人之上》，从春秋战国到大宋繁华，从契诃夫到华城——
+      十一年的微博读书笔记，原样收录、随时回看。
+    </p>
+
+    <div class="stats-grid" aria-label="统计">
+      <div class="mini-stat"><strong>52</strong><span>条笔记</span></div>
+      <div class="mini-stat"><strong>55</strong><span>本（部）书</span></div>
+      <div class="mini-stat"><strong>2015–2026</strong><span>时间跨度</span></div>
+      <div class="mini-stat"><strong>2024</strong><span>最密集年份 · 31 条</span></div>
+    </div>
+    <p class="muted" style="font-size:0.82rem; margin-top:0.8rem;">
+      整理自微博 @homozzy · 收录 51 条读书笔记 + 1 篇创作连载《稻田里的沉默》 · 金句摘录与原文链接保留自笔记原文。
+    </p>
+
+    <hr class="rule" />
+
+    <h2 class="block-title">补充书目 <span class="count">已读待笔记 · 6</span></h2>
+    <div class="extra-grid">
+      {extraBooks.map((b) => (
+        <div class="extra-item">
+          <span class="extra-cat">{b.cat}</span>
+          <span>{b.name}</span>
+        </div>
+      ))}
+    </div>
+
+    <h2 class="block-title">金句摘录 <span class="count">摘自笔记原文</span></h2>
+    <div class="quote-list">
+      {quotes.map((q) => (
+        <blockquote class="quote-card">
+          <p>{q.text}</p>
+          <cite>— {q.src}</cite>
+        </blockquote>
+      ))}
+    </div>
+
+    <hr class="rule" />
+
+    <h2 class="block-title">笔记全录 <span class="count">52 条 · 全文原样收录</span></h2>
+    <div class="reading-toolbar">
+      <input id="note-q" type="search" placeholder="搜索书名或正文关键词…" autocomplete="off" aria-label="搜索笔记" />
+      <div class="year-chips" role="group" aria-label="按年份筛选">
+        <button class="chip on" data-y="">全部</button>
+        {years.map((y) => <button class="chip" data-y={y}>{y}</button>)}
+      </div>
+    </div>
+    <p id="note-meta" class="meta-line" aria-live="polite">共 {notes.length} 条笔记</p>
+
+    {years.map((y) => (
+      <section class="year-group" data-year-group={y}>
+        <h3 class="year-head">{y} <span class="count">{byYear.get(y)!.length} 条</span></h3>
+        <div class="note-list">
+          {byYear.get(y)!.map((n) => {
+            const wrote = n.kind === 'wrote';
+            return (
+              <details
+                class="note"
+                data-year={n.year}
+                data-search={`${n.book} ${n.author} ${n.text}`.toLowerCase()}
+              >
+                <summary>
+                  <span class="note-date">{fmtDate(n.date)}</span>
+                  <span class="note-book">《{n.book}》</span>
+                  {n.author && (() => {
+                    const a = n.author.replace(/^[—–-]\s*/, '').trim();
+                    return a ? <span class="note-author">{a}</span> : null;
+                  })()}
+                  {wrote && <span class="tag tag-wrote">创作</span>}
+                </summary>
+                <div class="note-text">{n.text}</div>
+                <div class="note-foot">
+                  {n.url && (
+                    <a href={n.url} target="_blank" rel="noopener noreferrer">微博原文 ↗</a>
+                  )}
+                </div>
+              </details>
+            );
+          })}
+        </div>
+      </section>
+    ))}
+    <p id="note-empty" class="muted" style="text-align:center; padding:2rem 0; display:none;">没有匹配的笔记</p>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const input = document.getElementById('note-q');
+      const meta = document.getElementById('note-meta');
+      const empty = document.getElementById('note-empty');
+      const groups = document.querySelectorAll('.year-group');
+      const notes = document.querySelectorAll('.note');
+      const chips = document.querySelectorAll('.year-chips .chip');
+      let year = '';
+
+      const render = () => {
+        const q = (input.value || '').trim().toLowerCase();
+        let shown = 0;
+        notes.forEach((el) => {
+          const matchYear = !year || el.dataset.year === year;
+          const matchQ = !q || (el.dataset.search || '').includes(q);
+          const ok = matchYear && matchQ;
+          el.style.display = ok ? '' : 'none';
+          if (ok) shown++;
+        });
+        groups.forEach((g) => {
+          const visible = [...g.querySelectorAll('.note')].filter((n) => n.style.display !== 'none').length;
+          g.style.display = visible ? '' : 'none';
+        });
+        meta.textContent = `共 ${shown} 条笔记` + (year ? ` · ${year} 年` : '') + (q ? ` · 搜索「${q}」` : '');
+        empty.style.display = shown ? 'none' : 'block';
+      };
+
+      input?.addEventListener('input', render);
+      chips.forEach((chip) =>
+        chip.addEventListener('click', () => {
+          year = chip.dataset.y || '';
+          chips.forEach((c) => c.classList.toggle('on', c === chip));
+          render();
+        }),
+      );
+    })();
+  </script>
+</BaseLayout>

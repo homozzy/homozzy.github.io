@@ -3,3 +3,7 @@ dist/
 .astro/
 .DS_Store
 *.log
+
+# token 缺 workflow 权限，此文件仅本地保留
+.github/workflows/
+

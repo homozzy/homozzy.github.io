@@ -37,10 +37,23 @@ tags: ["文史"]
 正文……
 ```
 
+## 发布（GitHub Pages）
+
+线上地址：**https://homozzy.github.io/**（公开仓库 [homozzy/homozzy.github.io](https://github.com/homozzy/homozzy.github.io)，分支 `gh-pages` 是站点源）。
+
+每次更新：
+
+```powershell
+pwsh scripts/publish-gh-pages.ps1   # 构建 + 把 dist/ 打进 gh-pages 分支 + 推送
+```
+
+Pages 通过网页端 Settings → Pages 或 API 配置为 `gh-pages` 分支根目录；发布后 1–2 分钟生效。
+（gh token 缺 `workflow` 权限，所以未启用 Actions 自动部署；如需每次 push 自动构建，执行 `gh auth refresh -h github.com -s workflow` 再把 `.github/workflows/deploy.yml` 加回仓库即可。）
+
 ## 发布前 TODO
 
-- [ ] `astro.config.mjs` 的 `site:` 换成正式域名（RSS / sitemap / 分享卡片依赖它）
-- [ ] `public/robots.txt` 同步更新 Sitemap 地址
+- [x] ~~`astro.config.mjs` 的 `site:` 换成正式域名~~（已设为 https://homozzy.github.io）
+- [x] ~~`public/robots.txt` 同步更新~~
 - [ ] 关于页补充院校名（src/pages/about.astro）
 - [ ] 作品页补充：个人工作台的技术栈 / 链接 / 截图（src/pages/works.astro）
 - [ ] 首篇文章发布前过一遍（src/content/blog/chongyang.md）

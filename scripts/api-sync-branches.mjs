@@ -36,10 +36,14 @@ const gitBlobSha = (buf) =>
 // ---- 收集本地文件清单（路径 -> sha）----
 const local = new Map();
 if (branch === 'main') {
-  const out = execSync('git ls-tree -r --name-only main', { encoding: 'utf8', cwd: ROOT });
-  for (const rel of out.split('\n').filter(Boolean)) {
+  const out = execSync('git ls-tree -r main', { encoding: 'utf8', cwd: ROOT });
+  for (const line of out.split('\n').filter(Boolean)) {
+    const m = line.match(/^(\d+)\s+(\w+)\s+([0-9a-f]+)\t(.+)$/);
+    if (!m) continue;
+    const [, , type, sha, rel] = m;
+    if (type !== 'blob') continue;
     const buf = fs.readFileSync(path.join(ROOT, rel));
-    local.set(rel.replace(/\\/g, '/'), { sha: gitBlobSha(buf), content: buf.toString('utf8') });
+    local.set(rel.replace(/\\/g, '/'), { sha, content: buf.toString('utf8') });
   }
 } else {
   const base = path.join(ROOT, 'dist');

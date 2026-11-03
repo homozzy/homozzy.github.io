@@ -1,0 +1,30 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>我的文档 · homo · 读书研思</title><meta name="description" content="教案与清单沉淀中。"><link rel="canonical" href="https://homozzy.github.io/docs/"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="application/rss+xml" title="homo · 读书研思" href="/rss.xml"><meta property="og:title" content="我的文档 · homo · 读书研思"><meta property="og:description" content="教案与清单沉淀中。"><meta property="og:type" content="website"><meta property="og:url" content="https://homozzy.github.io/docs/"><meta property="og:locale" content="zh_CN"><meta name="generator" content="Astro v7.4.5"><script>
+      // 防止主题闪烁：尽早应用保存的主题，否则跟随系统
+      (() => {
+        const saved = localStorage.getItem('theme');
+        const dark = saved
+          ? saved === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.DofX4vve.css"></head><body><header class="site-header"><div class="container"><a class="brand" href="/">homo<span class="accent">.</span><small>读书研思</small></a><nav class="nav-links" aria-label="主导航"><a href="/" class>首页</a><a href="/features" class="active">功能</a><a href="/blog" class>博客</a><a href="/reading" class>读书录</a><a href="/about" class>关于</a><button id="theme-toggle" class="icon-btn" type="button" aria-label="切换亮 / 暗主题" title="切换亮 / 暗主题"><!-- 月亮：亮色模式下显示（点击切暗） --><svg id="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg><!-- 太阳：暗色模式下显示（点击切亮） --><svg id="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="display:none"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M19.4 4.6l-1.8 1.8M6.4 17.6l-1.8 1.8"></path></svg></button><script>
+  (() => {
+    const btn = document.getElementById('theme-toggle');
+    const moon = document.getElementById('icon-moon');
+    const sun = document.getElementById('icon-sun');
+
+    const sync = () => {
+      const dark = document.documentElement.dataset.theme === 'dark';
+      moon.style.display = dark ? 'none' : 'block';
+      sun.style.display = dark ? 'block' : 'none';
+    };
+    sync();
+
+    btn?.addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      sync();
+    });
+  })();
+</script></nav></div></header><main><div class="container-narrow" style="padding-top: 3rem;"><p class="eyebrow">Docs</p><h1 class="page-title">我的文档<span class="accent">.</span></h1><div class="planned"><div class="big">📝</div><h2>规划中</h2><p class="muted">想把教案、学习笔记和常用清单沉淀在这里。目前还没有上传。</p><p class="muted" style="margin-top:0.8rem; font-size:0.85rem;">先看 <a href="/reading" class="accent">读书录</a> 和 <a href="/blog" class="accent">博客</a>；功能入口见 <a href="/features" class="accent">功能总览</a>。</p></div></div></main><footer class="site-footer"><div class="container"><span>© 2026 homo · 以文字记录，以行走丈量。</span><span><a href="mailto:1191615708@qq.com">1191615708@qq.com</a><span aria-hidden="true"> · </span><a href="/rss.xml">RSS</a></span></div></footer></body></html>

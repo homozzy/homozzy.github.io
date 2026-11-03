@@ -1,0 +1,108 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>账本 · homo · 读书研思</title><meta name="description" content="本地收支小账本：数据只保存在本机浏览器。"><link rel="canonical" href="https://homozzy.github.io/ledger/"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="application/rss+xml" title="homo · 读书研思" href="/rss.xml"><meta property="og:title" content="账本 · homo · 读书研思"><meta property="og:description" content="本地收支小账本：数据只保存在本机浏览器。"><meta property="og:type" content="website"><meta property="og:url" content="https://homozzy.github.io/ledger/"><meta property="og:locale" content="zh_CN"><meta name="generator" content="Astro v7.4.5"><script>
+      // 防止主题闪烁：尽早应用保存的主题，否则跟随系统
+      (() => {
+        const saved = localStorage.getItem('theme');
+        const dark = saved
+          ? saved === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.DofX4vve.css"></head><body><header class="site-header"><div class="container"><a class="brand" href="/">homo<span class="accent">.</span><small>读书研思</small></a><nav class="nav-links" aria-label="主导航"><a href="/" class>首页</a><a href="/features" class="active">功能</a><a href="/blog" class>博客</a><a href="/reading" class>读书录</a><a href="/about" class>关于</a><button id="theme-toggle" class="icon-btn" type="button" aria-label="切换亮 / 暗主题" title="切换亮 / 暗主题"><!-- 月亮：亮色模式下显示（点击切暗） --><svg id="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg><!-- 太阳：暗色模式下显示（点击切亮） --><svg id="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="display:none"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M19.4 4.6l-1.8 1.8M6.4 17.6l-1.8 1.8"></path></svg></button><script>
+  (() => {
+    const btn = document.getElementById('theme-toggle');
+    const moon = document.getElementById('icon-moon');
+    const sun = document.getElementById('icon-sun');
+
+    const sync = () => {
+      const dark = document.documentElement.dataset.theme === 'dark';
+      moon.style.display = dark ? 'none' : 'block';
+      sun.style.display = dark ? 'block' : 'none';
+    };
+    sync();
+
+    btn?.addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      sync();
+    });
+  })();
+</script></nav></div></header><main><div class="container-narrow" style="padding-top: 3rem;"><p class="eyebrow">Ledger</p><h1 class="page-title">账本<span class="accent">.</span></h1><p class="muted">本地的小账本：数据只存在你这台浏览器（localStorage），不上传、不同步。换电脑/清缓存会丢——记得去<a href="/sync" class="accent">数据同步</a>导出备份。</p><form id="ledger-form" class="form-grid" style="margin-top: 1.4rem;"><label class="field"><span class="label">日期</span><input class="input" id="f-date" type="date" required></label><label class="field"><span class="label">类型</span><select class="input" id="f-type"><option value="expense">支出</option><option value="income">收入</option></select></label><label class="field"><span class="label">分类</span><select class="input" id="f-cat"></select></label><label class="field"><span class="label">金额（元）</span><input class="input" id="f-amount" type="number" min="0" step="0.01" placeholder="0.00" required></label><label class="field" style="grid-column: 1 / -1;"><span class="label">备注</span><input class="input" id="f-note" type="text" placeholder="例：午饭" maxlength="60"></label><div style="grid-column: 1 / -1;"><button class="btn" type="submit">＋ 记一笔</button></div></form><div style="display:flex; justify-content:space-between; align-items:end; gap:1rem; margin-top:1.5rem;"><h2 class="block-title" style="margin:0;">流水 <span class="count" id="ledger-count"></span></h2><label class="field" style="min-width: 180px;"><span class="label">按月份筛选</span><select class="input" id="f-month"></select></label></div><div class="table-wrap"><table class="ledger"><thead><tr><th>日期</th><th>分类</th><th>备注</th><th>金额</th><th></th></tr></thead><tbody id="ledger-body"></tbody><tfoot><tr><td colspan="3">本月合计</td><td colspan="2" id="ledger-sum"></td></tr></tfoot></table></div><p id="ledger-empty" class="muted" style="display:none; text-align:center; padding: 1.5rem 0;">还没有记录。记一笔开始。</p></div><script>
+    (() => {
+      const KEY = 'ledger-entries-v1';
+      const CATS = {
+        expense: ['餐饮', '交通', '购物', '居家', '娱乐', '教育', '医疗', '其他'],
+        income: ['工资', '补贴', '其他'],
+      };
+      const $ = (id) => document.getElementById(id);
+      const today = () => new Date().toISOString().slice(0, 10);
+      const monthOf = (d) => d.slice(0, 7);
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
+      const save = (rows) => localStorage.setItem(KEY, JSON.stringify(rows));
+      const fmt = (n) => n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      const dateEl = $('f-date'); dateEl.value = today();
+      const typeEl = $('f-type'); const catEl = $('f-cat');
+      const fillCats = () => { catEl.innerHTML = CATS[typeEl.value].map(c => `<option>${c}</option>`).join(''); };
+      fillCats(); typeEl.addEventListener('change', fillCats);
+
+      const monthEl = $('f-month'); const bodyEl = $('ledger-body');
+      const sumEl = $('ledger-sum'); const countEl = $('ledger-count'); const emptyEl = $('ledger-empty');
+
+      const refreshMonths = (rows) => {
+        const months = [...new Set(rows.map(r => monthOf(r.date)))].sort().reverse();
+        const cur = monthEl.value;
+        monthEl.innerHTML = ['<option value="">全部月份</option>', ...months.map(m => `<option value="${m}">${m}</option>`)].join('');
+        if (months.includes(cur)) monthEl.value = cur;
+      };
+
+      const render = () => {
+        const rows = load();
+        refreshMonths(rows);
+        const m = monthEl.value;
+        const view = rows.filter(r => !m || monthOf(r.date) === m).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+        countEl.textContent = `${rows.length} 笔 · 当前显示 ${view.length} 笔`;
+        emptyEl.style.display = view.length ? 'none' : 'block';
+        let income = 0, expense = 0;
+        bodyEl.innerHTML = view.map(r => {
+          const sign = r.type === 'income' ? 1 : -1;
+          if (r.type === 'income') income += r.amount; else expense += r.amount;
+          return `<tr data-id="${r.id}">
+            <td>${r.date}</td>
+            <td>${r.cat}</td>
+            <td>${(r.note || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</td>
+            <td class="${r.type === 'income' ? 'ledger-income' : 'ledger-expense'}">${r.type === 'income' ? '+' : '-'}${fmt(r.amount)}</td>
+            <td><button class="btn btn-ghost btn-sm" data-del="${r.id}" type="button">删</button></td>
+          </tr>`;
+        }).join('');
+        sumEl.innerHTML = `<span class="ledger-income">+${fmt(income)}</span> / <span class="ledger-expense">-${fmt(expense)}</span> · 结余 <strong>${fmt(income - expense)}</strong>`;
+      };
+
+      document.getElementById('ledger-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const rows = load();
+        rows.push({
+          id: Date.now(),
+          date: dateEl.value,
+          type: typeEl.value,
+          cat: catEl.value,
+          amount: Number(document.getElementById('f-amount').value),
+          note: document.getElementById('f-note').value.trim(),
+        });
+        save(rows);
+        document.getElementById('f-amount').value = '';
+        document.getElementById('f-note').value = '';
+        render();
+      });
+
+      bodyEl.addEventListener('click', (e) => {
+        const id = e.target?.getAttribute?.('data-del');
+        if (!id) return;
+        const rows = load().filter(r => String(r.id) !== String(id));
+        save(rows);
+        render();
+      });
+      monthEl.addEventListener('change', render);
+      render();
+    })();
+  </script></main><footer class="site-footer"><div class="container"><span>© 2026 homo · 以文字记录，以行走丈量。</span><span><a href="mailto:1191615708@qq.com">1191615708@qq.com</a><span aria-hidden="true"> · </span><a href="/rss.xml">RSS</a></span></div></footer></body></html>

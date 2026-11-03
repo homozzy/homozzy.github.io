@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+---
+
+<BaseLayout title={`我的日记本 · ${SITE.title}`} description="日记不公开。">
+  <div class="container-narrow" style="padding-top: 3rem;">
+    <p class="eyebrow">Diary</p>
+    <h1 class="page-title">我的日记本<span class="accent">.</span></h1>
+    <div class="planned">
+      <div class="big">🔒</div>
+      <h2>私密，不公开</h2>
+      <p class="muted">日记是只属于自己的东西。这里不会出现任何内容。</p>
+      <p class="muted" style="margin-top:0.8rem; font-size:0.85rem;">公开的记录见 <a href="/reading" class="accent">读书录</a>。</p>
+    </div>
+  </div>
+</BaseLayout>

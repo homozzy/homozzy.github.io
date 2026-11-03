@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+---
+
+<BaseLayout title={`我的网站 · ${SITE.title}`} description="homo 的网站入口汇总。">
+  <div class="container" style="padding-top: 3rem;">
+    <p class="eyebrow">My Sites</p>
+    <h1 class="page-title">我的网站<span class="accent">.</span></h1>
+
+    <div class="extra-grid" style="margin-top: 1.2rem;">
+      <a class="extra-item" href="https://homozzy.github.io/" style="text-decoration:none; color:inherit;">
+        <span class="extra-cat">本站</span>
+        <span><strong>homozzy.github.io</strong> — 个人网站：博客、读书录、藏书阁、账本、全站搜索。</span>
+      </a>
+      <a class="extra-item" href="https://github.com/homozzy" rel="noopener" target="_blank" style="text-decoration:none; color:inherit;">
+        <span class="extra-cat">GitHub</span>
+        <span><strong>github.com/homozzy</strong> — 源代码公开托管。</span>
+      </a>
+      <a class="extra-item" href="/rss.xml" style="text-decoration:none; color:inherit;">
+        <span class="extra-cat">RSS</span>
+        <span><strong>/rss.xml</strong> — 博客更新订阅源。</span>
+      </a>
+    </div>
+
+    <p class="muted" style="font-size:0.85rem; margin-top:1.4rem;">以后有了正式域名，这里会替换成主站地址。</p>
+  </div>
+</BaseLayout>

@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+---
+
+<BaseLayout title={`全站搜索 · ${SITE.title}`} description="搜索本站全部页面与 52 条读书笔记。">
+  <div class="container-narrow" style="padding-top: 3rem;">
+    <p class="eyebrow">Search</p>
+    <h1 class="page-title">全站搜索<span class="accent">.</span></h1>
+    <p class="muted">覆盖全站页面、博客与 52 条读书笔记。结果在本地计算，不上传关键词。</p>
+
+    <input id="q" class="input" type="search" placeholder="输入关键词，例如：重阳、活着、威斯特伐利亚…" autocomplete="off" aria-label="搜索全站内容" style="margin-top: 1rem;" />
+    <p id="meta" class="meta-line" aria-live="polite"></p>
+    <ul id="results" class="search-results"></ul>
+    <p id="empty" class="muted" style="text-align:center; padding: 2rem 0; display:none;">没有找到匹配内容</p>
+  </div>
+
+  <script is:inline>
+    (async () => {
+      const input = document.getElementById('q');
+      const meta = document.getElementById('meta');
+      const list = document.getElementById('results');
+      const empty = document.getElementById('empty');
+
+      let index = [];
+      try {
+        const res = await fetch('/search-index.json');
+        index = await res.json();
+      } catch {
+        meta.textContent = '搜索索引加载失败，请刷新重试。';
+        return;
+      }
+
+      const esc = (s) => s.replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const highlight = (text, q) => {
+        if (!q) return esc(text);
+        const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+        return esc(text).replace(re, (m) => `<mark>${m}</mark>`);
+      };
+
+      const render = () => {
+        const q = input.value.trim();
+        if (!q) {
+          list.innerHTML = '';
+          meta.textContent = `索引 ${index.length} 条 · 输入关键词开始搜索`;
+          empty.style.display = 'none';
+          return;
+        }
+        const lower = q.toLowerCase();
+        const hits = index.filter((e) =>
+          (e.title + ' ' + e.excerpt + ' ' + e.tag).toLowerCase().includes(lower),
+        );
+        meta.textContent = `${hits.length} 条结果 · 搜索「${q}」`;
+        empty.style.display = hits.length ? 'none' : 'block';
+        list.innerHTML = hits.slice(0, 50).map((e) => `
+          <li class="search-result">
+            <a href="${e.url}">
+              <strong>${highlight(e.title, q)}</strong>
+              <div class="meta">${esc(e.tag)} · ${highlight(e.excerpt, q)}</div>
+            </a>
+          </li>`).join('');
+      };
+      input.addEventListener('input', render);
+      render();
+    })();
+  </script>
+</BaseLayout>

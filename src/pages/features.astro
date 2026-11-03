@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+
+type Tile = {
+  glyph: string;
+  name: string;
+  desc: string;
+  href: string;
+  color: string;
+  state: 'live' | 'planned';
+};
+
+const tiles: Tile[] = [
+  { glyph: '⌂', name: '功能总览', desc: '全部板块导航', href: '/features', color: '#3a5d46', state: 'live' },
+  { glyph: '读', name: '读书笔记', desc: '52 条笔记全文', href: '/reading', color: '#6b5b24', state: 'live' },
+  { glyph: '文', name: '我的文档', desc: '教案与清单沉淀', href: '/docs', color: '#5a4632', state: 'planned' },
+  { glyph: '词', name: '日进一词', desc: '每天一枚成语', href: '/word', color: '#8a6d3b', state: 'live' },
+  { glyph: '藏', name: '藏书阁', desc: '55 本书 · 9 分类', href: '/books', color: '#33384a', state: 'live' },
+  { glyph: '事', name: '大事记', desc: '从 2015 到今天', href: '/milestones', color: '#7a3b2e', state: 'live' },
+  { glyph: '记', name: '我的日记本', desc: '私密内容，不公开', href: '/diary', color: '#4a3526', state: 'planned' },
+  { glyph: '账', name: '账本', desc: '本地收支小账本', href: '/ledger', color: '#1f5c3d', state: 'live' },
+  { glyph: '滩', name: '冲浪沙滩', desc: '收藏的网站链接', href: '/surfing', color: '#1d4e56', state: 'planned' },
+  { glyph: '网', name: '我的网站', desc: '本站与入口', href: '/sites', color: '#3d3f7a', state: 'live' },
+  { glyph: '作', name: '作品', desc: '个人工作台与项目', href: '/works', color: '#6e4a2a', state: 'live' },
+  { glyph: '搜', name: '全站搜索', desc: '页面与笔记一搜即达', href: '/search', color: '#4b4b4b', state: 'live' },
+  { glyph: '同', name: '数据同步', desc: '本地备份与恢复', href: '/sync', color: '#5c3a6e', state: 'live' },
+];
+
+const live = tiles.filter((t) => t.state === 'live').length;
+---
+
+<BaseLayout title={`功能总览 · ${SITE.title}`} description="homo 个人网站的全部功能：读书录、藏书阁、大事记、账本、搜索……一览无余。">
+  <div class="container" style="padding-top: 3rem;">
+    <p class="eyebrow">Features</p>
+    <h1 class="page-title">功能总览<span class="accent">.</span></h1>
+    <p class="muted">{tiles.length} 个板块 · {live} 个已上线。"规划中"的会逐步补上，先放个路标。</p>
+
+    <div class="tiles" style="margin-top: 1.6rem;">
+      {tiles.map((t) => (
+        <a class="tile" href={t.href} data-state={t.state} aria-label={t.name}>
+          <span class="badge">{t.state === 'live' ? '已上线' : '规划中'}</span>
+          <span class="glyph" style={`background:${t.color}`}>{t.glyph}</span>
+          <h3>{t.name}</h3>
+          <span class="desc">{t.desc}</span>
+        </a>
+      ))}
+    </div>
+
+    <p class="muted" style="font-size:0.8rem; margin-top:1.5rem;">
+      符号化的图标是我的个人小习惯；颜色没有别的意思。
+    </p>
+  </div>
+</BaseLayout>

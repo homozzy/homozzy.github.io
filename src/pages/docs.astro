@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+---
+
+<BaseLayout title={`我的文档 · ${SITE.title}`} description="教案与清单沉淀中。">
+  <div class="container-narrow" style="padding-top: 3rem;">
+    <p class="eyebrow">Docs</p>
+    <h1 class="page-title">我的文档<span class="accent">.</span></h1>
+    <div class="planned">
+      <div class="big">📝</div>
+      <h2>规划中</h2>
+      <p class="muted">想把教案、学习笔记和常用清单沉淀在这里。目前还没有上传。</p>
+      <p class="muted" style="margin-top:0.8rem; font-size:0.85rem;">先看 <a href="/reading" class="accent">读书录</a> 和 <a href="/blog" class="accent">博客</a>；功能入口见 <a href="/features" class="accent">功能总览</a>。</p>
+    </div>
+  </div>
+</BaseLayout>

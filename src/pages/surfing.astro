@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+---
+
+<BaseLayout title={`冲浪沙滩 · ${SITE.title}`} description="收藏的网站与链接，整理中。">
+  <div class="container-narrow" style="padding-top: 3rem;">
+    <p class="eyebrow">Surfing</p>
+    <h1 class="page-title">冲浪沙滩<span class="accent">.</span></h1>
+    <div class="planned">
+      <div class="big">🏄</div>
+      <h2>规划中</h2>
+      <p class="muted">想放收藏的网站和链接：少而精，顺手可点开。</p>
+      <p class="muted" style="margin-top:0.8rem; font-size:0.85rem;">整理好之前，先看 <a href="/features" class="accent">功能总览</a>。</p>
+    </div>
+  </div>
+</BaseLayout>

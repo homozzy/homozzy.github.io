@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+import readingNotes from '../data/reading-notes.json';
+
+const norm = (s: string) => (s || '').replace(/[《》\s"“”]/g, '').replace(/[－–—-]/g, '-').replace(/・/g, '·');
+const noteIdByBook = new Map<string, string>();
+for (const n of readingNotes as Array<{ id: string; book: string }>) {
+  noteIdByBook.set(norm(n.book), n.id);
+}
+const noteLink = (book: string) => {
+  const id = noteIdByBook.get(norm(book));
+  return id ? `/reading/#note-${id}` : null;
+};
+
+const CATS: Array<[string, string[]]> = [
+  ['历史 · 人文', ['大宋繁华·造极之世的表与里','历史中的大与小','粮食、运河与白银－从经济学角度看中国历史','航海、货币与贸易——从经济学角度看世界历史','历史的教训','有为-汉武帝的五十四年','失败者的春秋','战国歧途','巫蛊—中国文化的历史暗流','威斯特伐利亚和约','威斯特伐利亚条约','荒野上的大师','文化冷战与中央情报局','人类群星闪耀时','人类酷刑简史','三国前夜：士大夫政治与东汉皇权的崩解','祥瑞：王莽和他的时代','筚路维艰：中国社会主义路径的五次选择']],
+  ['文学 · 小说', ['白玫瑰与黑森林','第六病室','恶魔在华城','方一禾，快跑','活着','饥饿','冷血','皮囊','我是猫','鼠疫','神变','长安少年正当时','地球上的陌生人']],
+  ['心理 · 思维', ['友者生存','后真相','进化心理学','这才是心理学','乌合之众·大众心理学研究','自卑与超越','抑郁的力量']],
+  ['社科 · 观察', ['置身事内','论语与算盘','弱传播','智人之上','征服世界完全手册','在时代浪潮中勇进','中国政治的细节']],
+  ['科幻 · 想象', ['流浪地球','穹顶守望者','代码王座：六强AI黑客终极对决']],
+  ['自然 · 科学', ['物种起源','达尔文在路上看到了什么','寂静的春天']],
+  ['四时 · 随笔', ['春分书简：来自地球的平衡密码','四月书笺']],
+  ['军事 · 国际', ['海上军舰相遇规则']],
+  ['创作收录', ['稻田里的沉默']],
+];
+
+const totalBooks = CATS.reduce((sum, [, books]) => sum + books.length, 0);
+const noted = CATS.flatMap(([, books]) => books).filter((b) => noteLink(b)).length;
+---
+
+<BaseLayout title={`藏书阁 · ${SITE.title}`} description="十一年读过的 55 本（部）书，按分类收在这里。">
+  <div class="container" style="padding-top: 3rem;">
+    <p class="eyebrow">The Stacks</p>
+    <h1 class="page-title">藏书阁<span class="accent">.</span></h1>
+    <p class="lead" style="max-width:48ch;">十一年，{totalBooks} 本（部）书，九个分类。有笔记的书点进去就是全文。</p>
+
+    <div class="stats-grid" aria-label="藏书阁统计" style="margin-top: 1.2rem;">
+      <div class="mini-stat"><strong>55</strong><span>本（部）书</span></div>
+      <div class="mini-stat"><strong>9</strong><span>个分类</span></div>
+      <div class="mini-stat"><strong>{noted}</strong><span>本已写笔记</span></div>
+      <div class="mini-stat"><strong>6</strong><span>本补充书目</span></div>
+    </div>
+
+    {CATS.map(([cat, books]) => (
+      <section style="margin-top: 1.6rem;">
+        <h2 class="block-title" id={cat}>{cat} <span class="count">{books.length} 部</span></h2>
+        <div class="extra-grid">
+          {books.map((book) => {
+            const link = noteLink(book);
+            return link ? (
+              <a class="extra-item" href={link} style="text-decoration:none; color: inherit;">
+                <span class="extra-cat">笔记 ↗</span>
+                <span>《{book}》</span>
+              </a>
+            ) : (
+              <div class="extra-item">
+                <span class="extra-cat" style="color:var(--muted);">未写</span>
+                <span>《{book}》</span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    ))}
+
+    <h2 class="block-title" style="margin-top: 2rem;">补充书目 <span class="count">已读待笔记</span></h2>
+    <div class="extra-grid">
+      <div class="extra-item"><span class="extra-cat">经济史</span><span>《航海、货币与贸易——从经济学角度看世界历史》 波音</span></div>
+      <div class="extra-item"><span class="extra-cat">当代史</span><span>《筚路维艰：中国社会主义路径的五次选择》 萧冬连</span></div>
+      <div class="extra-item"><span class="extra-cat">秦汉史</span><span>《三国前夜：士大夫政治与东汉皇权的崩解》 张向荣</span></div>
+      <div class="extra-item"><span class="extra-cat">秦汉史</span><span>《祥瑞：王莽和他的时代》 张向荣</span></div>
+      <div class="extra-item"><span class="extra-cat">政治学</span><span>《中国政治的细节》 周鑫宇</span></div>
+      <div class="extra-item"><span class="extra-cat">影视</span><span>《乱》 黑泽明（影片）</span></div>
+    </div>
+
+    <p class="muted" style="font-size:0.8rem; margin-top: 1.5rem;">
+      ※ 未写笔记不代表不重要——有些书歇了很久才提得起笔。读完了会补上。
+    </p>
+  </div>
+</BaseLayout>

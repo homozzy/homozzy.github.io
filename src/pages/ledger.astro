@@ -1,0 +1,117 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+---
+
+<BaseLayout title={`账本 · ${SITE.title}`} description="本地收支小账本：数据只保存在本机浏览器。">
+  <div class="container-narrow" style="padding-top: 3rem;">
+    <p class="eyebrow">Ledger</p>
+    <h1 class="page-title">账本<span class="accent">.</span></h1>
+    <p class="muted">本地的小账本：数据只存在你这台浏览器（localStorage），不上传、不同步。换电脑/清缓存会丢——记得去<a href="/sync" class="accent">数据同步</a>导出备份。</p>
+
+    <form id="ledger-form" class="form-grid" style="margin-top: 1.4rem;">
+      <label class="field"><span class="label">日期</span><input class="input" id="f-date" type="date" required /></label>
+      <label class="field"><span class="label">类型</span>
+        <select class="input" id="f-type"><option value="expense">支出</option><option value="income">收入</option></select>
+      </label>
+      <label class="field"><span class="label">分类</span>
+        <select class="input" id="f-cat"></select>
+      </label>
+      <label class="field"><span class="label">金额（元）</span><input class="input" id="f-amount" type="number" min="0" step="0.01" placeholder="0.00" required /></label>
+      <label class="field" style="grid-column: 1 / -1;"><span class="label">备注</span><input class="input" id="f-note" type="text" placeholder="例：午饭" maxlength="60" /></label>
+      <div style="grid-column: 1 / -1;"><button class="btn" type="submit">＋ 记一笔</button></div>
+    </form>
+
+    <div style="display:flex; justify-content:space-between; align-items:end; gap:1rem; margin-top:1.5rem;">
+      <h2 class="block-title" style="margin:0;">流水 <span class="count" id="ledger-count"></span></h2>
+      <label class="field" style="min-width: 180px;"><span class="label">按月份筛选</span><select class="input" id="f-month"></select></label>
+    </div>
+
+    <div class="table-wrap"><table class="ledger">
+      <thead><tr><th>日期</th><th>分类</th><th>备注</th><th>金额</th><th></th></tr></thead>
+      <tbody id="ledger-body"></tbody>
+      <tfoot><tr><td colspan="3">本月合计</td><td colspan="2" id="ledger-sum"></td></tr></tfoot>
+    </table></div>
+    <p id="ledger-empty" class="muted" style="display:none; text-align:center; padding: 1.5rem 0;">还没有记录。记一笔开始。</p>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const KEY = 'ledger-entries-v1';
+      const CATS = {
+        expense: ['餐饮', '交通', '购物', '居家', '娱乐', '教育', '医疗', '其他'],
+        income: ['工资', '补贴', '其他'],
+      };
+      const $ = (id) => document.getElementById(id);
+      const today = () => new Date().toISOString().slice(0, 10);
+      const monthOf = (d) => d.slice(0, 7);
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
+      const save = (rows) => localStorage.setItem(KEY, JSON.stringify(rows));
+      const fmt = (n) => n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      const dateEl = $('f-date'); dateEl.value = today();
+      const typeEl = $('f-type'); const catEl = $('f-cat');
+      const fillCats = () => { catEl.innerHTML = CATS[typeEl.value].map(c => `<option>${c}</option>`).join(''); };
+      fillCats(); typeEl.addEventListener('change', fillCats);
+
+      const monthEl = $('f-month'); const bodyEl = $('ledger-body');
+      const sumEl = $('ledger-sum'); const countEl = $('ledger-count'); const emptyEl = $('ledger-empty');
+
+      const refreshMonths = (rows) => {
+        const months = [...new Set(rows.map(r => monthOf(r.date)))].sort().reverse();
+        const cur = monthEl.value;
+        monthEl.innerHTML = ['<option value="">全部月份</option>', ...months.map(m => `<option value="${m}">${m}</option>`)].join('');
+        if (months.includes(cur)) monthEl.value = cur;
+      };
+
+      const render = () => {
+        const rows = load();
+        refreshMonths(rows);
+        const m = monthEl.value;
+        const view = rows.filter(r => !m || monthOf(r.date) === m).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+        countEl.textContent = `${rows.length} 笔 · 当前显示 ${view.length} 笔`;
+        emptyEl.style.display = view.length ? 'none' : 'block';
+        let income = 0, expense = 0;
+        bodyEl.innerHTML = view.map(r => {
+          const sign = r.type === 'income' ? 1 : -1;
+          if (r.type === 'income') income += r.amount; else expense += r.amount;
+          return `<tr data-id="${r.id}">
+            <td>${r.date}</td>
+            <td>${r.cat}</td>
+            <td>${(r.note || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</td>
+            <td class="${r.type === 'income' ? 'ledger-income' : 'ledger-expense'}">${r.type === 'income' ? '+' : '-'}${fmt(r.amount)}</td>
+            <td><button class="btn btn-ghost btn-sm" data-del="${r.id}" type="button">删</button></td>
+          </tr>`;
+        }).join('');
+        sumEl.innerHTML = `<span class="ledger-income">+${fmt(income)}</span> / <span class="ledger-expense">-${fmt(expense)}</span> · 结余 <strong>${fmt(income - expense)}</strong>`;
+      };
+
+      document.getElementById('ledger-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const rows = load();
+        rows.push({
+          id: Date.now(),
+          date: dateEl.value,
+          type: typeEl.value,
+          cat: catEl.value,
+          amount: Number(document.getElementById('f-amount').value),
+          note: document.getElementById('f-note').value.trim(),
+        });
+        save(rows);
+        document.getElementById('f-amount').value = '';
+        document.getElementById('f-note').value = '';
+        render();
+      });
+
+      bodyEl.addEventListener('click', (e) => {
+        const id = e.target?.getAttribute?.('data-del');
+        if (!id) return;
+        const rows = load().filter(r => String(r.id) !== String(id));
+        save(rows);
+        render();
+      });
+      monthEl.addEventListener('change', render);
+      render();
+    })();
+  </script>
+</BaseLayout>

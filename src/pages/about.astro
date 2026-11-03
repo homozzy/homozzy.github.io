@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+---
+
+<BaseLayout title={`关于 · ${SITE.title}`} description="关于 homo：历史地理爱好者，高中地理教师，读书研思。">
+  <div class="container-narrow" style="padding-top: 3rem;">
+    <p class="eyebrow">About</p>
+    <h1 class="page-title">关于我</h1>
+
+    <p class="lead" style="font-size:1.1rem;">
+      我是 <strong>homo</strong>，一名历史地理爱好者。书斋、课堂与四季的天象，是我平日最常驻足的三个地方。
+    </p>
+
+    <p style="margin-top: 1rem;">
+      读书研思，记录文史、气象与技术的随想——这个站点既是我的随笔本，也是我的个人名片：
+      如果你恰好关心同样的问题，欢迎来信交流。
+    </p>
+
+    <hr class="rule" />
+
+    <h2 style="font-size:1.2rem; margin-bottom: 1.2rem;">经历</h2>
+    <ul class="timeline">
+      <li>
+        <span class="stage">Academic</span>
+        <h3>本科 · 地理学基础</h3>
+        <p class="muted">系统接受地理学训练（院校名：待补充）。在那几年里，我同时爱上了历史——大约是因为读地图，也离不开读时间。</p>
+      </li>
+      <li>
+        <span class="stage">Now</span>
+        <h3>高中地理教师</h3>
+        <p class="muted">在课堂上讲城乡、讲气候、讲人如何与这片土地相处；课堂之外，仍旧读书、写随笔、做些小工具。</p>
+      </li>
+      <li>
+        <span class="stage">Practice</span>
+        <h3>这个网站</h3>
+        <p class="muted">记录文史、气象与技术的随想，兼作个人名片与作品陈列。持续更新中。</p>
+      </li>
+    </ul>
+
+    <hr class="rule" />
+
+    <h2 style="font-size:1.2rem; margin-bottom: 0.8rem;">关键词</h2>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+      <span class="tag">高中地理教学</span>
+      <span class="tag">历史地理</span>
+      <span class="tag">节俗文化</span>
+      <span class="tag">气象观测</span>
+      <span class="tag">阅读与写作</span>
+      <span class="tag">个人知识管理</span>
+      <span class="tag">前端小工具</span>
+    </div>
+
+    <hr class="rule" />
+
+    <h2 style="font-size:1.2rem; margin-bottom: 0.8rem;">联系</h2>
+    <p class="muted">来信请写明来意，通常会在看到后的几天内回复。</p>
+    <p style="margin-top: 0.8rem;">
+      <a class="btn" href={`mailto:${SITE.email}`}>✉️ {SITE.email}</a>
+    </p>
+  </div>
+</BaseLayout>

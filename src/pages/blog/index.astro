@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../consts';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog'))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<BaseLayout title={`博客 · ${SITE.title}`} description="文史、气象与技术的随想，读书研思。">
+  <div class="container-narrow" style="padding-top: 3rem;">
+    <p class="eyebrow">Essays</p>
+    <h1 class="page-title">博客<span class="accent">.</span></h1>
+    <p class="muted">文史、气象与技术的随想。<a href="/rss.xml" class="accent" style="text-decoration:underline;text-underline-offset:3px;">RSS 订阅</a></p>
+
+    <ul class="post-list" style="margin-top: 1.5rem;">
+      {posts.map((post) => (
+        <li class="post-item">
+          <a href={`/blog/${post.id}/`}>
+            <h3>{post.data.title}</h3>
+            <p>{post.data.description}</p>
+          </a>
+          <div class="meta">
+            <time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time>
+            {post.data.tags.map((t) => <span class="tag">{t}</span>)}
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</BaseLayout>

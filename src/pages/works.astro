@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+---
+
+<BaseLayout title={`作品 · ${SITE.title}`} description="homo 的作品：个人工作台，以及后续的更多记录。">
+  <div class="container" style="padding-top: 3rem;">
+    <p class="eyebrow">Works</p>
+    <h1 class="page-title">作品</h1>
+    <p class="muted" style="max-width: 52ch;">做东西是为了把自己的生活收拾得更顺手。以下项目仍在打磨中，链接与截图会陆续补上。</p>
+
+    <div class="work-grid" style="margin-top: 1.6rem;">
+      <article class="work-card">
+        <span class="eyebrow">Personal Workbench</span>
+        <h3>个人工作台</h3>
+        <p class="muted">
+          自用的效率工作台：把读书清单、教学随手记、常用工具与进度收进同一个地方。
+          目前用于个人日常，不做公开演示。
+        </p>
+        <div style="display:flex; gap:0.45rem; flex-wrap:wrap;">
+          <span class="tag">效率工具</span>
+          <span class="tag">个人项目</span>
+          <span class="tag">前端</span>
+        </div>
+        <div class="placeholder">
+          TODO（给 homo 的提示）：补充 —— ① 技术栈 ② 仓库 / 演示链接 ③ 一张截图
+        </div>
+      </article>
+
+      <article class="work-card" style="align-items: center; justify-content: center; text-align: center; border-style: dashed; background: transparent;">
+        <p class="muted" style="font-size:0.95rem;">更多作品正在路上。</p>
+        <a class="btn btn-ghost" href="/blog">先去看看随笔 →</a>
+      </article>
+    </div>
+  </div>
+</BaseLayout>

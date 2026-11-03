@@ -44,7 +44,7 @@ tags: ["文史"]
 每次更新：
 
 ```powershell
-pwsh scripts/publish-gh-pages.ps1   # 构建 + 把 dist/ 打进 gh-pages 分支 + 推送
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/publish-gh-pages.ps1 2>&1 | Out-String
 ```
 
 Pages 通过网页端 Settings → Pages 或 API 配置为 `gh-pages` 分支根目录；发布后 1–2 分钟生效。

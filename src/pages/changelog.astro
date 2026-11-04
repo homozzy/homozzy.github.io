@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+
+const logs = [
+  {
+    version: 'v5',
+    date: '2026-11-04',
+    title: '极致打磨',
+    items: [
+      '纸纹背景 + Noto Serif SC 子集加载',
+      'Hero 统计条（55 本书 / 52 条笔记 / 9 分类）',
+      '首字下沉、装饰 hr、blockquote 样式',
+      '阅读进度条、回到顶部按钮',
+      '搜索：↑↓ 选择、Enter 打开、Esc 清空',
+      '账本：导出 CSV（Excel 可直开）、快速填入餐饮/交通/工资',
+      '打印样式：隐藏导航/页脚，正文链接展开网址',
+      '404 页面嵌入全站搜索',
+      '藏书阁：随机翻一本、分类色条',
+    ],
+  },
+  {
+    version: 'v4',
+    date: '2026-11-03',
+    title: '微博归档',
+    items: [
+      '抓取 1217 条微博，过滤转发/推广，保留 627 条原创',
+      '/weibo 按年份归档 + 搜索 + 图片直链',
+      '全站搜索索引增至 693 条',
+    ],
+  },
+  {
+    version: 'v3',
+    date: '2026-11-03',
+    title: '设计系统统一',
+    items: [
+      '统一内联 SVG 图标系统',
+      '功能宫格分组：读书写作 / 工具 / 站点 / 规划',
+      'skip-link、焦点环、reduced-motion',
+      '博客：约 X 分钟读完 + 上一篇/下一篇',
+      '页脚 colophon：Astro 7 · GitHub Pages · 不追踪访客',
+    ],
+  },
+  {
+    version: 'v2',
+    date: '2026-11-03',
+    title: '功能上线',
+    items: [
+      '功能总览 13 格',
+      '全站搜索（本地索引）',
+      '藏书阁 55 本书 / 9 分类',
+      '账本（本地 Storage）',
+      '大事记、日进一词、数据同步',
+    ],
+  },
+  {
+    version: 'v1',
+    date: '2026-11-03',
+    title: '个人网站上线',
+    items: [
+      '首页名片 + 关于 + 博客 + 读书录（52 条笔记）',
+      '亮/暗双模、RSS、sitemap、GitHub Pages 托管',
+    ],
+  },
+];
+---
+
+<BaseLayout title={`更新日志 · ${SITE.title}`} description="homo 个人网站的迭代记录。">
+  <div class="container-narrow" style="padding-top: 3rem;">
+    <p class="eyebrow">Changelog</p>
+    <h1 class="page-title">更新日志<span class="accent">.</span></h1>
+    <p class="muted">像软件一样迭代个人网站：每个版本写清楚改了什么。</p>
+
+    {logs.map((log) => (
+      <section style="margin-top: 1.5rem; border-left: 3px solid var(--line); padding-left: 1.1rem;">
+        <div style="display:flex; align-items:baseline; gap:0.8rem; flex-wrap:wrap;">
+          <span class="eyebrow" style="color:var(--accent);">{log.version}</span>
+          <time class="muted" style="font-family:ui-sans-serif, system-ui, sans-serif; font-size:0.8rem;">{log.date}</time>
+        </div>
+        <h2 style="font-size:1.15rem; margin:0.2rem 0 0.4rem;">{log.title}</h2>
+        <ul style="padding-left:1.1rem; color:var(--muted); font-size:0.9rem; line-height:1.8;">
+          {log.items.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+    ))}
+  </div>
+</BaseLayout>

@@ -8,9 +8,13 @@ import { SITE } from '../consts';
     <p class="eyebrow">404</p>
     <h1 class="page-title">这页纸是空白的——</h1>
     <p class="muted">你要找的页面不存在，或许已被我移进了别的册子。</p>
-    <div class="hero-actions" style="justify-content:center;">
+    <form action="/search" method="get" style="display:flex; gap:0.6rem; max-width: 420px; margin: 1.2rem auto 0;">
+      <input class="input" name="q" type="search" placeholder="搜索全站…" aria-label="搜索全站" />
+      <button class="btn" type="submit">搜索</button>
+    </form>
+    <div class="hero-actions" style="justify-content:center; margin-top:1rem;">
       <a class="btn" href="/">回到首页</a>
-      <a class="btn btn-ghost" href="/blog">去博客逛逛</a>
+      <a class="btn btn-ghost" href="/features">全部功能</a>
     </div>
   </div>
 </BaseLayout>

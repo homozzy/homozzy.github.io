@@ -43,6 +43,7 @@ const noted = CATS.flatMap(([, books]) => books).filter((b) => noteLink(b)).leng
       <div class="mini-stat"><strong>{noted}</strong><span>本已写笔记</span></div>
       <div class="mini-stat"><strong>6</strong><span>本补充书目</span></div>
     </div>
+    <button id="btn-random" class="btn btn-ghost" type="button" style="margin-top:0.6rem;">🎲 手气不错 · 随机翻一本</button>
 
     {CATS.map(([cat, books], i) => (
       <section class="book-cat-section" style={`--cat-color: ${PALETTE[i % PALETTE.length]}`}>
@@ -80,4 +81,16 @@ const noted = CATS.flatMap(([, books]) => books).filter((b) => noteLink(b)).leng
       ※ 未写笔记不代表不重要——有些书歇了很久才提得起笔。读完了会补上。
     </p>
   </div>
+
+  <script is:inline>
+    (() => {
+      const links = [...document.querySelectorAll('a.extra-item[href*="/reading/#note-"]')].map(a => a.getAttribute('href'));
+      const btn = document.getElementById('btn-random');
+      btn?.addEventListener('click', () => {
+        if (!links.length) return;
+        const href = links[Math.floor(Math.random() * links.length)];
+        if (href) window.location.href = href;
+      });
+    })();
+  </script>
 </BaseLayout>

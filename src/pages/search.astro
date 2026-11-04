@@ -86,6 +86,10 @@ import { SITE } from '../consts';
       let debounce;
       const rerender = () => { clearTimeout(debounce); debounce = setTimeout(render, 160); };
       input.addEventListener('input', rerender);
+
+      // 支持 /search?q=关键词 直达
+      const qParam = new URLSearchParams(location.search).get('q');
+      if (qParam) { input.value = qParam; render(); }
       render();
     })();
   </script>

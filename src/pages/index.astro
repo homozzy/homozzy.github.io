@@ -22,6 +22,12 @@ const fmt = (d: Date) =>
       <p class="lead">一名历史地理爱好者，读书研思，记录文史、气象与技术的随想。</p>
       <p class="sub">本科 · 现任高中地理教师 · 读书人 / 写字人 / 做小工具的人</p>
       <p class="recent">最近记录 · <a href={`/reading/#note-${latestNote.id}`}>《{latestNote.book}》</a> · {latestNote.date.replaceAll('-', '.')}</p>
+      <div class="hero-stats" aria-label="站内统计">
+        <div><strong>55</strong><span>本（部）书</span></div>
+        <div><strong>52</strong><span>条读书笔记</span></div>
+        <div><strong>9</strong><span>个书目分类</span></div>
+        <div><strong>1</strong><span>篇成稿随笔</span></div>
+      </div>
       <div class="hero-actions">
         <a class="btn" href="/blog">看博客 →</a>
         <a class="btn btn-ghost" href="/about">关于我</a>

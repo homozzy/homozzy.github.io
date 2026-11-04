@@ -532,7 +532,6 @@ main { min-height: 60vh; padding-bottom: 1rem; }
   padding: 1.2rem 0.8rem 1.1rem;
   transition: transform 0.15s, border-color 0.2s;
 }
-:root { }
 html[data-theme='dark'] .tile { background: var(--panel); }
 .tile:hover { transform: translateY(-3px); border-color: var(--accent-soft); }
 .tile .glyph {
@@ -782,3 +781,96 @@ html[data-theme='dark'] .btn-danger { border-color: #e0807d; color: #e0807d; }
   color: var(--muted);
 }
 .section-gap { margin-top: 1.6rem; }
+/* ========== 纸纹背景（SVG 噪点，不依赖请求） ========== */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  transition: opacity 0.3s;
+}
+html[data-theme='dark'] body::before { opacity: 0.06; }
+body > * { position: relative; z-index: 1; }
+
+/* ========== Hero 补充：语录条 ========== */
+.hero-stats {
+  display: flex;
+  gap: 1.4rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.hero-stats strong { display: block; font-size: 1.05rem; color: var(--ink); font-family: Georgia, serif; }
+
+/* ========== 文章排版：首字下沉 + 装饰 hr + blockquote ========== */
+.prose > p:first-of-type::first-letter {
+  float: left;
+  font-size: 3rem;
+  line-height: 0.85;
+  padding: 0.18rem 0.5rem 0 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+.prose blockquote {
+  margin: 1.4rem 0 1.4rem 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border-left: 3px solid var(--line);
+  color: var(--muted);
+  font-style: italic;
+}
+.prose hr {
+  border: none;
+  background: none;
+  text-align: center;
+  color: var(--line);
+  margin: 2rem 0;
+}
+.prose hr::before {
+  content: "· · ·";
+  letter-spacing: 0.8em;
+  font-size: 1.4rem;
+  color: var(--muted);
+}
+
+/* ========== 阅读进度条 ========== */
+.progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0%;
+  background: var(--accent);
+  z-index: 30;
+  transition: width 0.1s linear;
+}
+
+/* ========== 回到顶部 ========== */
+.back-top {
+  position: fixed;
+  right: 1.1rem;
+  bottom: 1.2rem;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 25;
+}
+.back-top.show { opacity: 1; pointer-events: auto; }
+.back-top:hover { transform: translateY(-2px); border-color: var(--accent); color: var(--accent); }
+
+/* ========== 搜索结果当前项 ========== */
+.search-result a.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }

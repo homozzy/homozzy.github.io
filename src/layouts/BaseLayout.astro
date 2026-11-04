@@ -17,6 +17,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&display=swap" rel="stylesheet" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -61,10 +64,28 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   </head>
   <body>
     <a class="skip-link" href="#main-content">跳到正文</a>
+    <div class="progress" id="scroll-progress" aria-hidden="true"></div>
+    <button class="back-top" id="back-top" type="button" aria-label="回到顶部" title="回到顶部">↑</button>
     <Nav />
     <main id="main-content">
       <slot />
     </main>
     <Footer />
+    <script is:inline>
+      (() => {
+        const progress = document.getElementById('scroll-progress');
+        const btn = document.getElementById('back-top');
+        const onScroll = () => {
+          const h = document.documentElement;
+          const max = h.scrollHeight - h.clientHeight;
+          const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+          if (progress) progress.style.width = pct + '%';
+          if (btn) btn.classList.toggle('show', h.scrollTop > 200);
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        btn?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      })();
+    </script>
   </body>
 </html>

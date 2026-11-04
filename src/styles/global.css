@@ -914,3 +914,28 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; b
   .note { break-inside: avoid; border: 1px solid #ddd; }
   .container, .container-narrow { width: 100%; margin: 0; }
 }
+/* ========== 写作编辑器 ========== */
+.write-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+  margin-top: 1.2rem;
+}
+@media (max-width: 900px) { .write-layout { grid-template-columns: 1fr; } }
+.write-form { display: grid; gap: 0.7rem; align-content: start; }
+.write-preview {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  min-height: 60vh;
+  position: sticky;
+  top: 4.5rem;
+  max-height: calc(100vh - 5.5rem);
+  overflow: auto;
+}
+.preview-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.6rem; }
+.write-preview-body { font-size: 0.95rem; line-height: 1.9; }
+.mono { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: 0.88rem; line-height: 1.7; }
+.write-preview.hidden { display: none; }
+.write-form.fullscreen { grid-column: 1 / -1; }

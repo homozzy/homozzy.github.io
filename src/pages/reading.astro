@@ -126,6 +126,7 @@ const fmtDate = (iso: string) => {
                   {n.url && (
                     <a href={n.url} target="_blank" rel="noopener noreferrer">微博原文 ↗</a>
                   )}
+                  <button class="copy-note" type="button">复制笔记</button>
                 </div>
               </details>
             );
@@ -172,6 +173,19 @@ const fmtDate = (iso: string) => {
           render();
         }),
       );
+
+      // 复制笔记：书名 + 正文
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.copy-note');
+        if (!btn) return;
+        const note = btn.closest('.note');
+        const title = note?.querySelector('.note-book')?.textContent?.trim() || '';
+        const text = note?.querySelector('.note-text')?.textContent?.trim() || '';
+        navigator.clipboard?.writeText(`${title}\n\n${text}`).then(() => {
+          btn.textContent = '已复制';
+          setTimeout(() => { btn.textContent = '复制笔记'; }, 1500);
+        });
+      });
     })();
   </script>
 </BaseLayout>

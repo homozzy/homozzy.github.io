@@ -1,54 +1,86 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
+import Icon from '../components/Icon.astro';
 
 type Tile = {
-  glyph: string;
+  icon: string;
   name: string;
   desc: string;
   href: string;
-  color: string;
   state: 'live' | 'planned';
 };
 
-const tiles: Tile[] = [
-  { glyph: '⌂', name: '功能总览', desc: '全部板块导航', href: '/features', color: '#3a5d46', state: 'live' },
-  { glyph: '读', name: '读书笔记', desc: '52 条笔记全文', href: '/reading', color: '#6b5b24', state: 'live' },
-  { glyph: '文', name: '我的文档', desc: '教案与清单沉淀', href: '/docs', color: '#5a4632', state: 'planned' },
-  { glyph: '词', name: '日进一词', desc: '每天一枚成语', href: '/word', color: '#8a6d3b', state: 'live' },
-  { glyph: '藏', name: '藏书阁', desc: '55 本书 · 9 分类', href: '/books', color: '#33384a', state: 'live' },
-  { glyph: '事', name: '大事记', desc: '从 2015 到今天', href: '/milestones', color: '#7a3b2e', state: 'live' },
-  { glyph: '记', name: '我的日记本', desc: '私密内容，不公开', href: '/diary', color: '#4a3526', state: 'planned' },
-  { glyph: '账', name: '账本', desc: '本地收支小账本', href: '/ledger', color: '#1f5c3d', state: 'live' },
-  { glyph: '滩', name: '冲浪沙滩', desc: '收藏的网站链接', href: '/surfing', color: '#1d4e56', state: 'planned' },
-  { glyph: '网', name: '我的网站', desc: '本站与入口', href: '/sites', color: '#3d3f7a', state: 'live' },
-  { glyph: '作', name: '作品', desc: '个人工作台与项目', href: '/works', color: '#6e4a2a', state: 'live' },
-  { glyph: '搜', name: '全站搜索', desc: '页面与笔记一搜即达', href: '/search', color: '#4b4b4b', state: 'live' },
-  { glyph: '同', name: '数据同步', desc: '本地备份与恢复', href: '/sync', color: '#5c3a6e', state: 'live' },
+const groups: Array<{ title: string; note: string; tiles: Tile[] }> = [
+  {
+    title: '读书与写作',
+    note: '长期在做的事',
+    tiles: [
+      { icon: 'book',  name: '读书笔记', desc: '52 条笔记全文', href: '/reading',   state: 'live' },
+      { icon: 'stack', name: '藏书阁',   desc: '55 本书 · 9 分类', href: '/books',    state: 'live' },
+      { icon: 'pen',   name: '博客',     desc: '文史与随想',     href: '/blog',      state: 'live' },
+      { icon: 'flag',  name: '大事记',   desc: '2015 至今的时间线', href: '/milestones', state: 'live' },
+    ],
+  },
+  {
+    title: '站内工具',
+    note: '存本机 · 不上传',
+    tiles: [
+      { icon: 'receipt', name: '账本',     desc: '收支流水＋月度汇总', href: '/ledger', state: 'live' },
+      { icon: 'word',    name: '日进一词', desc: '每天一枚成语',       href: '/word',   state: 'live' },
+      { icon: 'search',  name: '全站搜索', desc: '页面与笔记一搜即达', href: '/search', state: 'live' },
+      { icon: 'sync',    name: '数据同步', desc: '导出/导入备份',     href: '/sync',   state: 'live' },
+    ],
+  },
+  {
+    title: '站点与链接',
+    note: '关于这个站本身',
+    tiles: [
+      { icon: 'briefcase', name: '作品',   desc: '个人工作台',       href: '/works', state: 'live' },
+      { icon: 'globe',     name: '我的网站', desc: '本站与 GitHub 入口', href: '/sites', state: 'live' },
+      { icon: 'doc',       name: '我的文档', desc: '教案与清单',       href: '/docs',  state: 'planned' },
+      { icon: 'lock',      name: '我的日记本', desc: '私密 · 不公开',   href: '/diary', state: 'planned' },
+    ],
+  },
+  {
+    title: '规划中',
+    note: '有想法 · 没动手',
+    tiles: [
+      { icon: 'wave', name: '冲浪沙滩', desc: '收藏的网站链接', href: '/surfing', state: 'planned' },
+    ],
+  },
 ];
 
-const live = tiles.filter((t) => t.state === 'live').length;
+const liveCount = groups.flatMap(g => g.tiles).filter(t => t.state === 'live').length;
+const total = groups.flatMap(g => g.tiles).length;
 ---
 
 <BaseLayout title={`功能总览 · ${SITE.title}`} description="homo 个人网站的全部功能：读书录、藏书阁、大事记、账本、搜索……一览无余。">
   <div class="container" style="padding-top: 3rem;">
+    <a class="skip-link" href="#features-list">跳到功能清单</a>
     <p class="eyebrow">Features</p>
     <h1 class="page-title">功能总览<span class="accent">.</span></h1>
-    <p class="muted">{tiles.length} 个板块 · {live} 个已上线。"规划中"的会逐步补上，先放个路标。</p>
+    <p class="muted">{total} 个板块 · {liveCount} 个已上线。规划中的板块标虚线，看一眼标签即可知道状态。</p>
 
-    <div class="tiles" style="margin-top: 1.6rem;">
-      {tiles.map((t) => (
-        <a class="tile" href={t.href} data-state={t.state} aria-label={t.name}>
-          <span class="badge">{t.state === 'live' ? '已上线' : '规划中'}</span>
-          <span class="glyph" style={`background:${t.color}`}>{t.glyph}</span>
-          <h3>{t.name}</h3>
-          <span class="desc">{t.desc}</span>
-        </a>
+    <div id="features-list">
+      {groups.map(g => (
+        <section class="feature-group">
+          <header>
+            <h2>{g.title}</h2>
+            <p class="muted group-note">{g.note}</p>
+          </header>
+          <div class="tiles">
+            {g.tiles.map(t => (
+              <a class="tile" href={t.href} data-state={t.state} aria-describedby={`desc-${t.name}`}>
+                <span class="badge">{t.state === 'live' ? '已上线' : '规划'}</span>
+                <span class="tile-icon"><Icon name={t.icon} size={30} /></span>
+                <h3>{t.name}</h3>
+                <span class="desc" id={`desc-${t.name}`}>{t.desc}</span>
+              </a>
+            ))}
+          </div>
+        </section>
       ))}
     </div>
-
-    <p class="muted" style="font-size:0.8rem; margin-top:1.5rem;">
-      符号化的图标是我的个人小习惯；颜色没有别的意思。
-    </p>
   </div>
 </BaseLayout>

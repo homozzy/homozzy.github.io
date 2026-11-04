@@ -7,7 +7,7 @@ import { SITE } from '../consts';
   <div class="container-narrow" style="padding-top: 3rem;">
     <p class="eyebrow">Search</p>
     <h1 class="page-title">全站搜索<span class="accent">.</span></h1>
-    <p class="muted">覆盖全站页面、博客与 52 条读书笔记。结果在本地计算，不上传关键词。</p>
+    <p class="muted">覆盖全站页面、博客与 52 条读书笔记。结果在本地计算，不上传关键词。<span style="white-space:nowrap;">快捷键 <kbd>/</kbd> 聚焦，<kbd>Esc</kbd> 清空</span></p>
 
     <input id="q" class="input" type="search" placeholder="输入关键词，例如：重阳、活着、威斯特伐利亚…" autocomplete="off" aria-label="搜索全站内容" style="margin-top: 1rem;" />
     <p id="meta" class="meta-line" aria-live="polite"></p>
@@ -60,7 +60,22 @@ import { SITE } from '../consts';
             </a>
           </li>`).join('');
       };
-      input.addEventListener('input', render);
+      let debounce;
+      const rerender = () => { clearTimeout(debounce); debounce = setTimeout(render, 160); };
+      input.addEventListener('input', rerender);
+
+      // 快捷键：「/」聚焦搜索框，「Esc」清空并失焦
+      document.addEventListener('keydown', (e) => {
+        const tag = (document.activeElement?.tagName || '').toUpperCase();
+        if (e.key === '/' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+          e.preventDefault();
+          input.focus();
+        } else if (e.key === 'Escape' && document.activeElement === input) {
+          input.value = '';
+          render();
+          input.blur();
+        }
+      });
       render();
     })();
   </script>

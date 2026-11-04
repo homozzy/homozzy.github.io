@@ -82,6 +82,10 @@ const WORDS = [
       document.getElementById('w-prev')?.addEventListener('click', () => { offset--; render(); });
       document.getElementById('w-next')?.addEventListener('click', () => { offset++; render(); });
       document.getElementById('w-today')?.addEventListener('click', () => { offset = 0; render(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') { offset--; render(); }
+        else if (e.key === 'ArrowRight') { offset++; render(); }
+      });
       render();
     })();
   </script>

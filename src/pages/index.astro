@@ -2,7 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
 import { getCollection } from 'astro:content';
+import readingNotes from '../data/reading-notes.json';
 
+type Note = { id: string; date: string; book: string };
+const latestNote = (readingNotes as unknown as Note[]).reduce((a, b) => (a.date > b.date ? a : b));
 const posts = (await getCollection('blog'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 3);
@@ -18,6 +21,7 @@ const fmt = (d: Date) =>
       <h1>homo</h1>
       <p class="lead">一名历史地理爱好者，读书研思，记录文史、气象与技术的随想。</p>
       <p class="sub">本科 · 现任高中地理教师 · 读书人 / 写字人 / 做小工具的人</p>
+      <p class="recent">最近记录 · <a href={`/reading/#note-${latestNote.id}`}>《{latestNote.book}》</a> · {latestNote.date.replaceAll('-', '.')}</p>
       <div class="hero-actions">
         <a class="btn" href="/blog">看博客 →</a>
         <a class="btn btn-ghost" href="/about">关于我</a>

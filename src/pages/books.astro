@@ -25,6 +25,8 @@ const CATS: Array<[string, string[]]> = [
   ['创作收录', ['稻田里的沉默']],
 ];
 
+const PALETTE = ['#a63f2c','#3a5d46','#33384a','#6b5b24','#5b4a3a','#4a3526','#1d4e56','#5c3a6e','#37474f'];
+
 const totalBooks = CATS.reduce((sum, [, books]) => sum + books.length, 0);
 const noted = CATS.flatMap(([, books]) => books).filter((b) => noteLink(b)).length;
 ---
@@ -42,8 +44,8 @@ const noted = CATS.flatMap(([, books]) => books).filter((b) => noteLink(b)).leng
       <div class="mini-stat"><strong>6</strong><span>本补充书目</span></div>
     </div>
 
-    {CATS.map(([cat, books]) => (
-      <section style="margin-top: 1.6rem;">
+    {CATS.map(([cat, books], i) => (
+      <section class="book-cat-section" style={`--cat-color: ${PALETTE[i % PALETTE.length]}`}>
         <h2 class="block-title" id={cat}>{cat} <span class="count">{books.length} 部</span></h2>
         <div class="extra-grid">
           {books.map((book) => {

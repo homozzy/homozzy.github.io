@@ -19,12 +19,20 @@ import { SITE } from '../consts';
       </label>
       <label class="field"><span class="label">金额（元）</span><input class="input" id="f-amount" type="number" min="0" step="0.01" placeholder="0.00" required /></label>
       <label class="field" style="grid-column: 1 / -1;"><span class="label">备注</span><input class="input" id="f-note" type="text" placeholder="例：午饭" maxlength="60" /></label>
-      <div style="grid-column: 1 / -1;"><button class="btn" type="submit">＋ 记一笔</button></div>
+      <div style="grid-column: 1 / -1; display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+        <button class="btn" type="submit">＋ 记一笔</button>
+        <button class="btn btn-ghost btn-sm" type="button" id="quick-food">餐饮</button>
+        <button class="btn btn-ghost btn-sm" type="button" id="quick-taxi">交通</button>
+        <button class="btn btn-ghost btn-sm" type="button" id="quick-salary">工资</button>
+      </div>
     </form>
 
     <div style="display:flex; justify-content:space-between; align-items:end; gap:1rem; margin-top:1.5rem;">
       <h2 class="block-title" style="margin:0;">流水 <span class="count" id="ledger-count"></span></h2>
-      <label class="field" style="min-width: 180px;"><span class="label">按月份筛选</span><select class="input" id="f-month"></select></label>
+      <div style="display:flex; gap:0.6rem; align-items:end;">
+        <button id="btn-csv" class="btn btn-ghost btn-sm" type="button">导出 CSV</button>
+        <label class="field" style="min-width: 180px;"><span class="label">按月份筛选</span><select class="input" id="f-month"></select></label>
+      </div>
     </div>
 
     <div class="table-wrap"><table class="ledger">
@@ -101,6 +109,28 @@ import { SITE } from '../consts';
         document.getElementById('f-amount').value = '';
         document.getElementById('f-note').value = '';
         render();
+      });
+
+      // 快速填入：只选类型与分类，金额自己填
+      const quick = (type, cat) => { typeEl.value = type; fillCats(); catEl.value = cat; document.getElementById('f-amount').focus(); };
+      document.getElementById('quick-food')?.addEventListener('click', () => quick('expense', '餐饮'));
+      document.getElementById('quick-taxi')?.addEventListener('click', () => quick('expense', '交通'));
+      document.getElementById('quick-salary')?.addEventListener('click', () => quick('income', '工资'));
+
+      // 导出 CSV（带 BOM，Excel 可直接打开）
+      document.getElementById('btn-csv')?.addEventListener('click', () => {
+        const rows = load();
+        const csv = ['日期,类型,分类,备注,金额', ...rows.map(r =>
+          [r.date, r.type === 'income' ? '收入' : '支出', r.cat, (r.note || '').replace(/"/g, '""'), r.amount]
+            .map(v => `"${v}"`).join(',')
+        )].join('\r\n');
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+        const a = Object.assign(document.createElement('a'), {
+          href: URL.createObjectURL(blob),
+          download: `ledger-${new Date().toISOString().slice(0, 10)}.csv`,
+        });
+        a.click();
+        URL.revokeObjectURL(a.href);
       });
 
       bodyEl.addEventListener('click', (e) => {

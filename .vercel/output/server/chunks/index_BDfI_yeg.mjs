@@ -1,0 +1,27 @@
+import { t as __exportAll } from "./rolldown-runtime_D8jQpDG7.mjs";
+import { g as addAttribute, l as renderTemplate, r as renderComponent, u as maybeRenderHead } from "./server_D1UvjDKp.mjs";
+import "./compiler_DjWfn2QP.mjs";
+import { n as createComponent, t as $$BaseLayout } from "./BaseLayout_bPxPzud_.mjs";
+import { t as reading_notes_default } from "./reading-notes_DWznD7gc.mjs";
+import { t as getAllPosts } from "./sanity_BCx_MtNV.mjs";
+// src/pages/index.astro
+var pages_exports = /* @__PURE__ */ __exportAll({
+	default: () => $$Index,
+	file: () => $$file,
+	prerender: () => false,
+	url: () => ""
+});
+var $$Index = createComponent(async ($$result, $$props, $$slots) => {
+	const latestNote = reading_notes_default.reduce((a, b) => a.date > b.date ? a : b);
+	const posts = (await getAllPosts()).slice(0, 3);
+	const fmt = (d) => new Date(d).toLocaleDateString("zh-CN", {
+		year: "numeric",
+		month: "long",
+		day: "numeric"
+	});
+	return renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, {}, { "default": ($$result) => renderTemplate`${maybeRenderHead($$result)}<section class="container hero"><div><p class="eyebrow">History · Geography · Essays</p><h1>homo</h1><p class="lead">一名历史地理爱好者，读书研思，记录文史、气象与技术的随想。</p><p class="sub">本科 · 现任高中地理教师 · 读书人 / 写字人 / 做小工具的人</p><p class="recent">最近记录 · <a${addAttribute(`/reading/#note-${latestNote.id}`, "href")}>《${latestNote.book}》</a> · ${latestNote.date.replaceAll("-", ".")}</p><div class="hero-stats" aria-label="站内统计"><div><strong>55</strong><span>本（部）书</span></div><div><strong>52</strong><span>条读书笔记</span></div><div><strong>9</strong><span>个书目分类</span></div><div><strong>1</strong><span>篇成稿随笔</span></div></div><div class="hero-actions"><a class="btn" href="/blog">看博客 →</a><a class="btn btn-ghost" href="/about">关于我</a><a class="btn btn-ghost" href="/features">全部功能</a></div></div><div class="hero-deco" aria-hidden="true"><span class="vertical-text">读书研思</span><div class="seal">研<br>思</div></div></section><section class="container"><div class="section-head"><h2>最新文章</h2><a href="/blog">全部文章 <span aria-hidden="true">→</span></a></div><ul class="post-list">${posts.map((post) => renderTemplate`<li class="post-item"><a${addAttribute(`/blog/${post.slug.current}/`, "href")}><h3>${post.title}</h3><p>${post.description}</p></a><div class="meta"><time${addAttribute(new Date(post.pubDate).toISOString(), "datetime")}>${fmt(post.pubDate)}</time>${(post.tags ?? []).map((t) => renderTemplate`<span class="tag">${t}</span>`)}</div></li>`)}</ul></section><section class="container" style="margin-top: 2.5rem;"><div class="section-head"><h2>读书录</h2><a href="/reading">全部笔记 <span aria-hidden="true">→</span></a></div><a href="/reading" class="work-card" style="display:block; text-decoration:none;"><span class="eyebrow">Reading Journal · Weibo</span><h3 style="margin-top:0.3rem;">十一年微博读书笔记，原文全录</h3><p class="muted" style="margin-top:0.4rem;">从《物种起源》到《智人之上》，52 条笔记 / 55 本书，文史·科幻·心理与人性。</p></a></section><section class="container" style="margin-top: 2.5rem;"><div class="section-head"><h2>精选作品</h2><a href="/works">全部作品 <span aria-hidden="true">→</span></a></div><div class="work-grid"><article class="work-card"><span class="eyebrow">Personal Workbench</span><h3>个人工作台</h3><p class="muted">把读书、教学随手记和常用工具收在一起的自用工作台，细节待补充。</p><a href="/works" class="btn btn-ghost" style="align-self:flex-start; padding:0.4rem 0.9rem;">查看 →</a></article></div></section>` })}`;
+}, "D:/Documents/默认项目/homo-site/src/pages/index.astro", void 0);
+var $$file = "D:/Documents/默认项目/homo-site/src/pages/index.astro";
+// \0virtual:astro:page:src/pages/index@_@astro
+var page = () => pages_exports;
+export { page };

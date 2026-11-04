@@ -1,47 +1,43 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { SITE } from '../../consts';
-import { getCollection, render } from 'astro:content';
+import { getPostBySlug, getAllPosts } from '../../lib/sanity';
+import { marked } from 'marked';
 
-export async function getStaticPaths() {
-  const posts = await getCollection('blog');
-  return posts.map((post) => ({
-    params: { id: post.id },
-    props: { post },
-  }));
-}
+export const prerender = false;
 
-const { post } = Astro.props;
-const { Content } = await render(post);
-const allPosts = (await getCollection('blog')).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const idx = allPosts.findIndex((p) => p.id === post.id);
-const prev = idx >= 0 ? allPosts[idx + 1] : undefined;   // 上一篇（更早）
-const next = idx > 0 ? allPosts[idx - 1] : undefined;    // 下一篇（更新）
-const readingMinutes = Math.max(1, Math.ceil(((post as unknown as { body?: string }).body?.length ?? 600) / 400));
-const fmt = post.data.pubDate.toLocaleDateString('zh-CN', {
+const { id } = Astro.params;
+const post = await getPostBySlug(id!);
+if (!post) return Astro.redirect('/404');
+
+const allPosts = await getAllPosts();
+const idx = allPosts.findIndex((p) => p.slug.current === post.slug.current);
+const prev = idx >= 0 ? allPosts[idx + 1] : undefined;
+const next = idx > 0 ? allPosts[idx - 1] : undefined;
+const readingMinutes = Math.max(1, Math.ceil((post.body?.length ?? 600) / 400));
+const html = marked.parse(post.body ?? '', { gfm: true, breaks: true });
+const fmt = new Date(post.pubDate).toLocaleDateString('zh-CN', {
   year: 'numeric',
   month: 'long',
   day: 'numeric',
 });
 ---
 
-<BaseLayout title={`${post.data.title} · ${SITE.name}`} description={post.data.description}>
+<BaseLayout title={`${post.title} · ${SITE.name}`} description={post.description}>
   <div class="container-narrow" style="padding-top: 3rem;">
     <a href="/blog" class="muted" style="font-family: ui-sans-serif, system-ui, sans-serif; font-size:0.8rem;">← 返回博客</a>
-    <h1 class="page-title" style="margin-top:0.8rem;">{post.data.title}</h1>
+    <h1 class="page-title" style="margin-top:0.8rem;">{post.title}</h1>
     <div class="post-meta">
-      <time datetime={post.data.pubDate.toISOString()}>{fmt}</time>
+      <time datetime={new Date(post.pubDate).toISOString()}>{fmt}</time>
       <span class="muted">约 {readingMinutes} 分钟读完</span>
-      {post.data.tags.map((t) => <span class="tag">{t}</span>)}
+      {(post.tags ?? []).map((t) => <span class="tag">{t}</span>)}
     </div>
-    <article class="prose">
-      <Content />
-    </article>
+    <article class="prose" set:html={html} />
     <hr class="rule" />
     <p class="muted" style="font-size:0.85rem;">喜欢这篇？欢迎来信交流：<a class="accent" href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
     <nav class="post-nav" aria-label="文章导航">
-      {prev ? <a class="post-nav-item" href={`/blog/${prev.id}/`}><span class="pn-label">← 上一篇</span><span class="pn-title">{prev.data.title}</span></a> : <span class="post-nav-item empty"><span class="pn-label">← 上一篇</span><span class="pn-title">—</span></span>}
-      {next ? <a class="post-nav-item next" href={`/blog/${next.id}/`}><span class="pn-label">下一篇 →</span><span class="pn-title">{next.data.title}</span></a> : <span class="post-nav-item next empty"><span class="pn-label">下一篇 →</span><span class="pn-title">—</span></span>}
+      {prev ? <a class="post-nav-item" href={`/blog/${prev.slug.current}/`}><span class="pn-label">← 上一篇</span><span class="pn-title">{prev.title}</span></a> : <span class="post-nav-item empty"><span class="pn-label">← 上一篇</span><span class="pn-title">—</span></span>}
+      {next ? <a class="post-nav-item next" href={`/blog/${next.slug.current}/`}><span class="pn-label">下一篇 →</span><span class="pn-title">{next.title}</span></a> : <span class="post-nav-item next empty"><span class="pn-label">下一篇 →</span><span class="pn-title">—</span></span>}
     </nav>
   </div>
 </BaseLayout>

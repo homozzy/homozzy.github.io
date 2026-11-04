@@ -1,7 +1,9 @@
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
+import { getAllPosts } from '../lib/sanity';
 import readingNotes from '../data/reading-notes.json';
 import weiboPosts from '../data/weibo-posts.json';
+
+export const prerender = false;
 
 const stripTo = (s: string, n: number) => {
   const t = s.replace(/\s+/g, ' ').trim();
@@ -28,12 +30,12 @@ export const GET: APIRoute = async () => {
   ];
   for (const [title, url, excerpt] of pages) entries.push({ title, url, excerpt, tag: '页面' });
 
-  const posts = await getCollection('blog');
+  const posts = await getAllPosts();
   for (const p of posts) {
     entries.push({
-      title: p.data.title,
-      url: `/blog/${p.id}/`,
-      excerpt: p.data.description,
+      title: p.title,
+      url: `/blog/${p.slug.current}/`,
+      excerpt: p.description,
       tag: '博客',
     });
   }

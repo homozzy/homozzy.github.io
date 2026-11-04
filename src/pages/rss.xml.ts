@@ -1,22 +1,22 @@
 import rss from '@astrojs/rss';
-import { getCollection } from 'astro:content';
+import { getAllPosts } from '../lib/sanity';
 import { SITE } from '../consts';
 
+export const prerender = false;
+
 export async function GET(context: { site?: URL }) {
-  const posts = (await getCollection('blog')).sort(
-    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-  );
+  const posts = await getAllPosts();
 
   return rss({
     title: SITE.title,
     description: SITE.description,
     site: context.site ?? SITE.url,
     items: posts.map((p) => ({
-      title: p.data.title,
-      description: p.data.description,
-      pubDate: p.data.pubDate,
-      link: `/blog/${p.id}/`,
-      categories: p.data.tags,
+      title: p.title,
+      description: p.description,
+      pubDate: new Date(p.pubDate),
+      link: `/blog/${p.slug.current}/`,
+      categories: p.tags ?? [],
     })),
   });
 }

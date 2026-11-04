@@ -7,3 +7,7 @@ dist/
 # token ȱ workflow Ȩ�ޣ����ļ������ر���
 .github/workflows/
 
+
+.vercel/
+dist/
+

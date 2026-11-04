@@ -1,0 +1,142 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+import posts from '../data/weibo-posts.json';
+
+type Post = {
+  id: string;
+  mblogid: string;
+  created: string;
+  text: string;
+  source: string;
+  region: string;
+  reposts: number;
+  comments: number;
+  likes: number;
+  reads: number;
+  images: string[];
+};
+const list = (posts as Post[]).sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+
+// 按年份分组（倒序）
+const byYear = new Map<string, Post[]>();
+for (const p of list) {
+  const y = new Date(p.created).getFullYear().toString();
+  const arr = byYear.get(y) ?? [];
+  arr.push(p);
+  byYear.set(y, arr);
+}
+const years = [...byYear.keys()].sort((a, b) => Number(b) - Number(a));
+
+const fmtDate = (d: string) => {
+  const t = new Date(d);
+  return t.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+const total = list.length;
+---
+
+<BaseLayout title={`微博归档 · ${SITE.title}`} description="2015–2026 的原创微博，按年份归档，可搜索。">
+  <div class="container" style="padding-top: 3rem;">
+    <p class="eyebrow">Weibo Archive</p>
+    <h1 class="page-title">微博归档<span class="accent">.</span></h1>
+    <p class="lead" style="font-size:1.1rem; max-width:48ch;">
+      原创微博全文，按年份归档。转发和推广已过滤，只保留你亲笔写下的 627 条。
+    </p>
+
+    <div class="stats-grid" aria-label="统计">
+      <div class="mini-stat"><strong>{total}</strong><span>条原创微博</span></div>
+      <div class="mini-stat"><strong>{years.length}</strong><span>个年份</span></div>
+      <div class="mini-stat"><strong>627</strong><span>条公开可见</span></div>
+      <div class="mini-stat"><strong>87</strong><span>条含图片</span></div>
+    </div>
+    <p class="muted" style="font-size:0.82rem; margin-top:0.8rem;">
+      @homozzy · 图片直链（不下载到本站）· 转发/推广已排除 · 每条可跳回微博原帖。
+    </p>
+
+    <hr class="rule" />
+
+    <div class="reading-toolbar">
+      <input id="weibo-q" type="search" placeholder="搜索关键词…" autocomplete="off" aria-label="搜索微博正文" />
+      <div class="year-chips" role="group" aria-label="按年份筛选">
+        <button class="chip on" data-y="">全部</button>
+        {years.map((y) => <button class="chip" data-y={y}>{y}</button>)}
+      </div>
+    </div>
+    <p id="weibo-meta" class="meta-line" aria-live="polite">共 {total} 条微博</p>
+
+    {years.map((y) => (
+      <section class="year-group" data-year-group={y}>
+        <h3 class="year-head">{y} <span class="count">{byYear.get(y)!.length} 条</span></h3>
+        <div class="note-list">
+          {byYear.get(y)!.map((p) => (
+            <details
+              class="note"
+              id={`post-${p.id}`}
+              data-year={new Date(p.created).getFullYear()}
+              data-search={p.text.toLowerCase()}
+            >
+              <summary>
+                <span class="note-date">{fmtDate(p.created)}</span>
+                <span class="note-book">{p.text.length > 28 ? p.text.slice(0, 28) + '…' : p.text || '（图片 / 分享）'}</span>
+              </summary>
+              <div class="note-text">{p.text}</div>
+              {p.images.length > 0 && (
+                <div class="weibo-images">
+                  {p.images.map((src, i) => (
+                    <a href={src} target="_blank" rel="noopener noreferrer" aria-label={`第 ${i + 1} 张原图`}>
+                      <img src={src} alt={`微博配图 ${i + 1}`} loading="lazy" decoding="async" />
+                    </a>
+                  ))}
+                </div>
+              )}
+              <div class="note-foot">
+                <a href={`https://m.weibo.cn/status/${p.id}`} target="_blank" rel="noopener noreferrer">微博原帖 ↗</a>
+                <span class="muted" style="margin-left:0.8rem; font-size:0.75rem;">{p.source}{p.region ? ` · ${p.region}` : ''} · 转 {p.reposts} / 评 {p.comments} / 赞 {p.likes}</span>
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+    ))}
+    <p id="weibo-empty" class="muted" style="text-align:center; padding:2rem 0; display:none;">没有匹配的微博</p>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const input = document.getElementById('weibo-q');
+      const meta = document.getElementById('weibo-meta');
+      const empty = document.getElementById('weibo-empty');
+      const groups = document.querySelectorAll('.year-group');
+      const notes = document.querySelectorAll('.note');
+      const chips = document.querySelectorAll('.year-chips .chip');
+      let year = '';
+
+      const render = () => {
+        const q = (input.value || '').trim().toLowerCase();
+        let shown = 0;
+        notes.forEach((el) => {
+          const matchYear = !year || el.dataset.year === year;
+          const matchQ = !q || (el.dataset.search || '').includes(q);
+          const ok = matchYear && matchQ;
+          el.style.display = ok ? '' : 'none';
+          if (ok) shown++;
+        });
+        groups.forEach((g) => {
+          const visible = [...g.querySelectorAll('.note')].filter(n => n.style.display !== 'none').length;
+          g.style.display = visible ? '' : 'none';
+        });
+        meta.textContent = `共 ${shown} 条微博` + (year ? ` · ${year} 年` : '') + (q ? ` · 搜索「${q}」` : '');
+        empty.style.display = shown ? 'none' : 'block';
+      };
+
+      input?.addEventListener('input', render);
+      chips.forEach((chip) =>
+        chip.addEventListener('click', () => {
+          year = chip.dataset.y || '';
+          chips.forEach((c) => c.classList.toggle('on', c === chip));
+          render();
+        }),
+      );
+    })();
+  </script>
+</BaseLayout>

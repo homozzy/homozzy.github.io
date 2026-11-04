@@ -764,6 +764,22 @@ html[data-theme='dark'] .btn-danger { border-color: #e0807d; color: #e0807d; }
 .pn-title { font-size: 0.92rem; line-height: 1.5; }
 @media (max-width: 600px) { .post-nav { grid-template-columns: 1fr; } }
 
+/* ========== 微博归档图片 ========== */
+.weibo-images {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.weibo-images img {
+  max-width: 160px;
+  max-height: 160px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  object-fit: cover;
+  display: block;
+}
+
 /* ========== 页脚：更完整的 colophon ========== */
 .foot-grid { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; }
 .foot-brand { font-family: var(--serif, serif); font-size: 1rem; letter-spacing: 0.02em; }

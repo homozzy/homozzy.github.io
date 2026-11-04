@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import readingNotes from '../data/reading-notes.json';
+import weiboPosts from '../data/weibo-posts.json';
 
 const stripTo = (s: string, n: number) => {
   const t = s.replace(/\s+/g, ' ').trim();
@@ -15,6 +16,7 @@ export const GET: APIRoute = async () => {
     ['关于我', '/about', '本科学历，现任高中地理教师；历史地理爱好者，读书、写字。'],
     ['博客', '/blog', '文史、气象与技术的随想。'],
     ['读书录', '/reading', '2015 至今的微博读书笔记，52 条原文全文收录。'],
+    ['微博归档', '/weibo', '2015–2026 原创微博全文，按年份归档，可搜索。'],
     ['作品', '/works', '个人工作台等个人项目。'],
     ['功能总览', '/features', '本站全部功能板块一览。'],
     ['藏书阁', '/books', '55 本（部）书，9 个分类，链接到读书笔记。'],
@@ -42,6 +44,15 @@ export const GET: APIRoute = async () => {
       url: `/reading/#note-${n.id}`,
       excerpt: stripTo(n.text, 160),
       tag: '读书笔记',
+    });
+  }
+
+  for (const p of weiboPosts as Array<{ id: string; created: string; text: string }>) {
+    entries.push({
+      title: stripTo(p.text, 40) || '微博原帖',
+      url: `/weibo/#post-${p.id}`,
+      excerpt: stripTo(p.text, 160),
+      tag: '微博',
     });
   }
 

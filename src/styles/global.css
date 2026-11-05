@@ -1198,3 +1198,23 @@ html[data-theme='dark'] .card { box-shadow: 0 2px 5px rgba(0,0,0,0.35), inset 0 
 html[data-theme='dark'] .card:hover { border-color: rgba(255,255,255,0.14); box-shadow: 0 12px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08); }
 html[data-theme='dark'] .post-item { border-color: rgba(255,255,255,0.07); }
 html[data-theme='dark'] ::selection { background: var(--accent); color: #171512; }
+/* ========== 阅读热力图 ========== */
+.heat-section { margin-top: 0.2rem; }
+.heat-head { display:flex; justify-content:space-between; align-items:baseline; gap:1rem; margin: 1.2rem 0 0.3rem; flex-wrap:wrap; }
+.heat-legend { display:flex; align-items:center; gap:4px; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.72rem; color: var(--muted); }
+.heat-legend i { width: 12px; height: 12px; border-radius: 3px; display:inline-block; }
+.heatmap {
+  display: grid; gap: 3px;
+  min-width: 0;
+}
+.heat {
+  aspect-ratio: 1 / 1; border-radius: 3px; background: var(--line); transition: transform 0.15s;
+}
+.heat:hover { transform: scale(1.35); z-index: 1; }
+.heat-0 { background: var(--line); }
+.heat-1 { background: color-mix(in srgb, var(--accent) 25%, transparent); }
+.heat-2 { background: color-mix(in srgb, var(--accent) 55%, transparent); }
+.heat-3 { background: var(--accent); }
+@media (max-width: 720px) {
+  .heat-legend { display:none; }
+}

@@ -40,6 +40,35 @@ const extraBooks = [
   { cat: '影视', name: '《乱》 黑泽明（影片）' },
 ];
 
+// --- 阅读热力图 ---
+const dateCount = new Map<string, number>();
+for (const n of notes) dateCount.set(n.date, (dateCount.get(n.date) || 0) + 1);
+const heatYears = [...new Set(notes.map((n) => Number(n.year)))].sort((a, b) => b - a);
+
+type HeatCell = { date: string; count: number; level: 0 | 1 | 2 | 3 };
+const buildGrid = (y: number) => {
+  const first = new Date(y, 0, 1);
+  const offset = first.getDay();
+  const daysInYear = Math.floor((new Date(y, 11, 31).getTime() - first.getTime()) / 86400000) + 1;
+  const cols = Math.ceil((offset + daysInYear) / 7);
+  const grid: HeatCell[][] = Array.from({ length: 7 }, () =>
+    Array(cols).fill(null).map(() => ({ date: '', count: 0, level: 0 as const }))
+  );
+  const pad = (n: number) => String(n).padStart(2, '0');
+  for (let i = 0; i < daysInYear; i++) {
+    const d = new Date(y, 0, 1 + i);
+    const iso = `${y}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const c = dateCount.get(iso) ?? 0;
+    const level = (c === 0 ? 0 : c === 1 ? 1 : c < 4 ? 2 : 3) as 0 | 1 | 2 | 3;
+    const col = Math.floor((offset + i) / 7);
+    const row = (offset + i) % 7;
+    grid[row][col] = { date: iso, count: c, level };
+  }
+  return { grid, cols };
+};
+const heatData = new Map(heatYears.map((y) => [String(y), buildGrid(y)]));
+const latestHeatYear = String(heatYears[0]);
+
 const fmtDate = (iso: string) => {
   const [y, m, d] = iso.split('-').map(Number);
   return `${y} 年 ${m} 月 ${d} 日`;
@@ -64,6 +93,31 @@ const fmtDate = (iso: string) => {
     <p class="muted" style="font-size:0.82rem; margin-top:0.8rem;">
       整理自微博 @homozzy · 收录 51 条读书笔记 + 1 篇创作连载《稻田里的沉默》 · 金句摘录与原文链接保留自笔记原文。
     </p>
+
+    <section class="heat-section" aria-label="阅读热力图">
+      <div class="heat-head">
+        <h2 class="block-title" style="margin: 0 0 0.2rem;">阅读热力 <span class="count">按日染色 · {heatYears.length} 年</span></h2>
+        <div class="heat-legend" aria-hidden="true">少 <i class="heat heat-0"></i><i class="heat heat-1"></i><i class="heat heat-2"></i><i class="heat heat-3"></i> 多</div>
+      </div>
+      <div class="year-chips" id="heat-chips" style="margin-bottom:0.6rem;">
+        {heatYears.map((y) => <button class={`chip ${String(y) === latestHeatYear ? 'on' : ''}`} data-y={String(y)} type="button">{y}</button>)}
+      </div>
+      {heatYears.map((y) => {
+        const { grid, cols } = heatData.get(String(y))!;
+        return (
+          <div class="heatmap-year" data-year={String(y)} style={String(y) !== latestHeatYear ? 'display:none;' : ''}>
+            <div class="heatmap" style={`grid-template-columns: repeat(${cols}, 1fr);`}>
+              {grid.flatMap((row, r) =>
+                row.map((cell, c) => (
+                  <div key={`${r}-${c}`} class={`heat heat-${cell.level}`} title={cell.date ? `${cell.date} · ${cell.count} 条` : ''}></div>
+                ))
+              )}
+            </div>
+            <p class="meta-line" style="margin-top:0.4rem;">{y} 年 · {byYear.get(String(y))?.length ?? 0} 条笔记</p>
+          </div>
+        );
+      })}
+    </section>
 
     <hr class="rule" />
 
@@ -186,6 +240,19 @@ const fmtDate = (iso: string) => {
           setTimeout(() => { btn.textContent = '复制笔记'; }, 1500);
         });
       });
+    })();
+  </script>
+  <script is:inline>
+    (() => {
+      const chips = document.querySelectorAll('#heat-chips .chip');
+      const panels = document.querySelectorAll('.heatmap-year');
+      chips.forEach(chip =>
+        chip.addEventListener('click', () => {
+          const y = chip.dataset.y || '';
+          chips.forEach(c => c.classList.toggle('on', c === chip));
+          panels.forEach(p => { p.style.display = p.dataset.year === y ? '' : 'none'; });
+        }),
+      );
     })();
   </script>
 </BaseLayout>

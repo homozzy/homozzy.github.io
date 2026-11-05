@@ -8,28 +8,50 @@ export const prerender = false;
 const posts = await getAllPosts();
 const fmt = (d: string) =>
   new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+
+const byYear = new Map<number, typeof posts>();
+for (const p of posts) {
+  const y = new Date(p.pubDate).getFullYear();
+  const arr = byYear.get(y) ?? [];
+  arr.push(p);
+  byYear.set(y, arr);
+}
+const years = [...byYear.keys()].sort((a, b) => b - a);
+const total = posts.length;
 ---
 
 <BaseLayout title={`博客 · ${SITE.title}`} description="文史、气象与技术的随想，读书研思。">
   <div class="container-narrow" style="padding-top: 3rem;">
     <p class="eyebrow">Essays</p>
     <h1 class="page-title">博客<span class="accent">.</span></h1>
-    <p class="muted">文史、气象与技术的随想。<a href="/rss.xml" class="accent" style="text-decoration:underline;text-underline-offset:3px;">RSS 订阅</a> · <a href="/write" class="btn btn-ghost" style="padding:0.3rem 0.8rem; font-size:0.78rem; vertical-align:middle;">＋ 写新博客</a></p>
+    <p class="muted">文史、气象与技术的随想。<a href="/rss.xml" class="accent" style="text-decoration:underline;text-underline-offset:3px;">RSS 订阅</a> · <a href="/write" class="accent" style="text-decoration:underline;text-underline-offset:3px;">写新博客</a></p>
+    {years.length > 0 && (
+      <div class="year-chips" style="margin-top:0.8rem;">
+        {years.map(y => <a class="chip" href={`#year-${y}`}>{y} <span style="opacity:.6;">{byYear.get(y)!.length}</span></a>)}
+      </div>
+    )}
 
-    {posts.length === 0 && <p class="muted" style="margin-top:1.5rem;">暂无文章，去 Studio 发布第一篇。</p>}
-    <ul class="post-list" style="margin-top: 1.5rem;">
-      {posts.map((post) => (
-        <li class="post-item">
-          <a href={`/blog/${post.slug.current}/`}>
-            <h3>{post.title}</h3>
-            <p>{post.description}</p>
-          </a>
-          <div class="meta">
-            <time datetime={new Date(post.pubDate).toISOString()}>{fmt(post.pubDate)}</time>
-            {(post.tags ?? []).map((t) => <span class="tag">{t}</span>)}
-          </div>
-        </li>
-      ))}
-    </ul>
+    {posts.length === 0 && <p class="muted" style="margin-top:1.5rem;">暂无文章，去 <a class="accent" href="/write">写新博客</a>。</p>}
+
+    {years.map(y => (
+      <section class="year-group" id={`year-${y}`} style="margin-top:1.6rem;">
+        <h2 class="year-head">{y} <span class="count">{byYear.get(y)!.length} 篇</span></h2>
+        <ul class="post-list" style="margin-top: 0.8rem;">
+          {byYear.get(y)!.map((post) => (
+            <li class="post-item">
+              <a href={`/blog/${post.slug.current}/`}>
+                <h3>{post.title}</h3>
+                <p>{post.description}</p>
+              </a>
+              <div class="meta">
+                <time datetime={new Date(post.pubDate).toISOString()}>{fmt(post.pubDate)}</time>
+                {(post.tags ?? []).map((t) => <span class="tag">{t}</span>)}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+    <p class="muted" style="margin-top:1.2rem; font-size:0.8rem;">共 {total} 篇</p>
   </div>
 </BaseLayout>

@@ -3,7 +3,7 @@ import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 
 export default defineConfig({
-  site: 'https://homozzy.github.io',
+  site: 'https://homo-site-wine.vercel.app',
   output: 'static',
   adapter: vercel(),
   integrations: [sitemap()],

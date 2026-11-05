@@ -5,6 +5,8 @@ import ThemeToggle from './ThemeToggle.astro';
 const path = Astro.url.pathname;
 const is = (p: string) =>
   p === '/' ? path === '/' : path.startsWith(p);
+const active = (p: string) =>
+  is(p) ? { class: 'active', 'aria-current': 'page' as const } : { class: '', 'aria-current': undefined };
 ---
 
 <header class="site-header">
@@ -14,12 +16,11 @@ const is = (p: string) =>
       <small>读书研思</small>
     </a>
     <nav class="nav-links" aria-label="主导航">
-      <a href="/" class={is('/') ? 'active' : ''}>首页</a>
-      <a href="/features" class={is('/features') || is('/docs') || is('/diary') || is('/surfing') || is('/sites') || is('/word') || is('/books') || is('/milestones') || is('/ledger') || is('/sync') || is('/search') ? 'active' : ''}>功能</a>
-      <a href="/blog" class={is('/blog') ? 'active' : ''}>博客</a>
-      <a href="/reading" class={is('/reading') ? 'active' : ''}>读书录</a>
-      <a href="/weibo" class={is('/weibo') ? 'active' : ''}>微博</a>
-      <a href="/about" class={is('/about') ? 'active' : ''}>关于</a>
+      <a href="/" class={is('/') ? 'active' : ''} aria-current={is('/') ? 'page' : undefined}>首页</a>
+      <a href="/blog" class={is('/blog') ? 'active' : ''} aria-current={is('/blog') ? 'page' : undefined}>博客</a>
+      <a href="/reading" class={is('/reading') ? 'active' : ''} aria-current={is('/reading') ? 'page' : undefined}>读书录</a>
+      <a href="/features" class={is('/features') || is('/docs') || is('/diary') || is('/surfing') || is('/sites') || is('/word') || is('/books') || is('/milestones') || is('/ledger') || is('/sync') || is('/search') || is('/weibo') ? 'active' : ''} aria-current={(is('/features') || is('/docs') || is('/diary') || is('/surfing') || is('/sites') || is('/word') || is('/books') || is('/milestones') || is('/ledger') || is('/sync') || is('/search') || is('/weibo')) ? 'page' : undefined}>全部</a>
+      <a href="/about" class={is('/about') ? 'active' : ''} aria-current={is('/about') ? 'page' : undefined}>关于</a>
       <button id="btn-cmdk" class="icon-btn" type="button" aria-label="全站搜索（Ctrl/Cmd+K）" title="全站搜索（Ctrl/Cmd+K）">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.3-4.3"/></svg>
         <span class="cmdk-hint">⌘K</span>

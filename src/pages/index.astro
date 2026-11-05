@@ -51,7 +51,7 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       </section>
 
       <!-- 最新博客 -->
-      <section class="card card--dark card--xl" aria-label="最新博客">
+      <section class="card card--dark card--xl" data-href={`/blog/${latestPost?.slug.current ?? '}/`} aria-label="最新博客">
         <div class="card__head">
           <Icon name="pen" size={18} />
           <span class="card__title">最新博客</span>
@@ -69,7 +69,7 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       </section>
 
       <!-- 藏书阁 -->
-      <section class="card card card--md" aria-label="藏书阁">
+      <section class="card card--md card-link" data-href="/books" aria-label="藏书阁">
         <div class="card__head">
           <Icon name="stack" size={18} />
           <span class="card__title">藏书阁</span>
@@ -82,7 +82,7 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       </section>
 
       <!-- 大事记 sparkline -->
-      <section class="card card card--sm" aria-label="大事记">
+      <section class="card card--sm card-link" data-href="/milestones" aria-label="大事记">
         <div class="card__head">
           <Icon name="flag" size={18} />
           <span class="card__title">大事记</span>
@@ -95,7 +95,7 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       </section>
 
       <!-- 日进一词 -->
-      <section class="card card card--sm" aria-label="日进一词">
+      <section class="card card--sm card-link" data-href="/word" aria-label="日进一词">
         <div class="card__head">
           <Icon name="word" size={18} />
           <span class="card__title">日进一词</span>
@@ -109,7 +109,7 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       </section>
 
       <!-- 账本 -->
-      <section class="card card card--sm" aria-label="账本">
+      <section class="card card--sm card-link" data-href="/ledger" aria-label="账本">
         <div class="card__head">
           <Icon name="receipt" size={18} />
           <span class="card__title">账本</span>
@@ -121,7 +121,7 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       </section>
 
       <!-- 读书录 -->
-      <section class="card card--paper card--md" aria-label="最近在读">
+      <section class="card card--paper card--md card-link" data-href="/reading" aria-label="最近在读">
         <div class="card__head">
           <Icon name="book" size={18} />
           <span class="card__title">最近在读</span>
@@ -175,5 +175,27 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       });
     })();
   </script>
+  <script is:inline>
+    (() => {
+      // 整卡可点：data-href 委托；忽略内部可交互元素
+      document.addEventListener('click', (e) => {
+        const card = e.target.closest('[data-href]');
+        if (!card) return;
+        if (e.target.closest('a,button,input,select,textarea')) return;
+        const href = card.getAttribute('data-href');
+        if (href) window.location.href = href;
+      });
+      document.addEventListener('keydown', (e) => {
+        const card = e.target.closest('[data-href]');
+        if (!card) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          window.location.href = card.getAttribute('data-href');
+        }
+      });
+    })();
+  </script>
 </BaseLayout>
+
+
 

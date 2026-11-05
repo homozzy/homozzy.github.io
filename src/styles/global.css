@@ -79,8 +79,8 @@ a:hover { color: var(--accent); }
   position: sticky;
   top: 0;
   z-index: 20;
-  backdrop-filter: blur(10px);
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--bg) 93%, transparent);
   border-bottom: 1px solid var(--line);
 }
 
@@ -1121,3 +1121,6 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; b
 .card--cta .card__enter { border-color: rgba(250,246,238,0.35); }
 .card--cta .card__enter:hover { color: #fff; border-color: rgba(250,246,238,0.6); background: transparent; }
 .card--cta p { display: none; }
+/* 整卡可点 */
+.card-link { cursor: pointer; }
+.card-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: inherit; }

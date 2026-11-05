@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
 import readingNotes from '../data/reading-notes.json';
+import Bookshelf from '../components/Bookshelf.astro';
 
 const norm = (s: string) => (s || '').replace(/[《》\s"“”]/g, '').replace(/[－–—-]/g, '-').replace(/・/g, '·');
 const noteIdByBook = new Map<string, string>();
@@ -32,6 +33,9 @@ const noted = CATS.flatMap(([, books]) => books).filter((b) => noteLink(b)).leng
       <div class="mini-stat"><strong>6</strong><span>本补充书目</span></div>
     </div>
     <button id="btn-random" class="btn btn-ghost" type="button" style="margin-top:0.6rem;">🎲 手气不错 · 随机翻一本</button>
+
+    <h2 class="block-title" style="margin-top: 1.6rem;">书架掠影 <span class="count">按分类上架 · 点书脊进笔记</span></h2>
+    <Bookshelf />
 
     {CATS.map(([cat, books], i) => (
       <section class="book-cat-section" style={`--cat-color: ${PALETTE[i % PALETTE.length]}`}>

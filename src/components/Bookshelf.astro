@@ -1,0 +1,58 @@
+---
+import readingNotes from '../data/reading-notes.json';
+import { CATS, PALETTE } from '../data/books';
+
+type Note = { id: string; book: string };
+const norm = (s: string) => (s || '').replace(/[《》\s"“”]/g, '').replace(/[－–—-]/g, '-').replace(/・/g, '·');
+const noteIdByBook = new Map<string, string>();
+for (const n of readingNotes as Note[]) noteIdByBook.set(norm(n.book), n.id);
+const noteLink = (book: string) => {
+  const id = noteIdByBook.get(norm(book));
+  return id ? `/reading/#note-${id}` : null;
+};
+
+const SPINES = ['#6e2117','#2f4a5a','#a8843c','#4a5d3a','#5d3a63','#8f5a2b','#31435a','#93703a','#33554a','#704a24','#54386a'];
+const hash = (s: string) => {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = (h * 16777619) >>> 0;
+  }
+  return h >>> 0;
+};
+const truncate = (s: string, n: number) => (s.length > n ? s.slice(0, n) + '…' : s);
+const shelves = CATS.map(([cat, books], i) => ({
+  cat,
+  accent: PALETTE[i % PALETTE.length],
+  books: books.map((b) => ({
+    title: b,
+    href: noteLink(b),
+    color: SPINES[hash(b) % SPINES.length],
+    height: 96 + (hash(b + ':h') % 34),
+    width: 30 + (hash(b + ':w') % 16),
+  })),
+}));
+---
+<div class="bookshelf" aria-label="书架掠影">
+  {shelves.map((shelf) => (
+    <div class="shelf-row">
+      <span class="shelf-label" style={`--accent:${shelf.accent}`}>{shelf.cat}</span>
+      <div class="shelf" role="list">
+        {shelf.books.map((b) => (
+          b.href ? (
+            <a class="spine" role="listitem" href={b.href} title={b.title}
+               style={`--spine:${b.color}; height:${b.height}px; width:${b.width}px;`}>
+              <span class="spine-title">{truncate(b.title, 7)}</span>
+            </a>
+          ) : (
+            <span class="spine is-unlinked" role="listitem" title={`${b.title}（暂无笔记）`}
+                  style={`--spine:${b.color}; height:${b.height}px; width:${b.width}px;`}>
+              <span class="spine-title">{truncate(b.title, 7)}</span>
+            </span>
+          )
+        ))}
+      </div>
+    </div>
+  ))}
+  <p class="hint">※ 书脊高矮宽窄纯属视觉演绎；有笔记的书可点开 →</p>
+</div>

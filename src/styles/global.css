@@ -84,9 +84,10 @@ a:hover { color: var(--accent); }
   position: sticky;
   top: 0;
   z-index: 20;
-  backdrop-filter: blur(14px);
-  background: color-mix(in srgb, var(--bg) 93%, transparent);
+  backdrop-filter: none;
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 0 rgba(41,37,32,0.03);
 }
 
 .site-header .container {
@@ -970,7 +971,7 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; b
 }
 @media (max-width: 720px) { .cmdk-hint { display: none; } }
 /* ========== Bento 网格（首页） ========== */
-.bento-wrap { padding-top: 1.2rem; }
+.bento-wrap { padding-top: 1.6rem; }
 .bento {
   display: grid;
   grid-template-columns: repeat(12, 1fr);

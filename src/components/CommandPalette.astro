@@ -1,0 +1,145 @@
+---
+// 全局命令面板：Ctrl/⌘ K 唤起，输入即搜，↑↓ 选择，Enter 打开，Esc 关闭
+---
+
+<div id="cp-root" class="command-palette" aria-hidden="true">
+  <div class="cp-backdrop" data-close></div>
+  <div class="cp-panel" role="dialog" aria-modal="true" aria-label="全站搜索">
+    <div class="cp-input-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.3-4.3"/></svg>
+      <input id="cp-input" type="search" placeholder="搜索全站…页面 · 博客 · 读书笔记 · 微博 · 藏书" autocomplete="off" aria-label="搜索关键词" />
+      <kbd class="cp-kbd">Esc</kbd>
+    </div>
+    <ul id="cp-list" class="cp-list" role="listbox"></ul>
+    <div class="cp-foot"><span>Ctrl / ⌘ K 唤起</span><span>结果 <b id="cp-count">0</b></span></div>
+  </div>
+</div>
+
+<style>
+.command-palette {
+  position: fixed; inset: 0; z-index: 1000;
+  display: grid; place-items: start center;
+  padding-top: 14vh;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+.command-palette.on { opacity: 1; pointer-events: auto; }
+.cp-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(10, 12, 14, 0.55);
+  backdrop-filter: blur(2px);
+}
+.cp-panel {
+  position: relative;
+  width: min(680px, 94vw);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+  overflow: hidden;
+  transform: translateY(-8px);
+  transition: transform 0.22s cubic-bezier(.22,1,.36,1);
+}
+.command-palette.on .cp-panel { transform: none; }
+.cp-input-row {
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+}
+.cp-input-row svg { width: 1.15em; height: 1.15em; color: var(--muted); flex: none; }
+.cp-input-row input {
+  flex: 1; border: 0; outline: none; background: transparent;
+  font: inherit; font-size: 1.05rem; color: var(--ink);
+}
+.cp-input-row input::placeholder { color: var(--muted); }
+.cp-kbd {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.7rem; color: var(--muted);
+  border: 1px solid var(--line); border-bottom-width: 2px;
+  border-radius: 6px; padding: 0.1rem 0.4rem;
+}
+.cp-list { list-style: none; max-height: 52vh; overflow: auto; padding: 0.4rem; }
+.cp-item a {
+  display: flex; gap: 0.7rem; align-items: baseline;
+  padding: 0.55rem 0.7rem; border-radius: 9px; text-decoration: none; color: var(--ink);
+  transition: background 0.12s;
+}
+.cp-item a:hover, .cp-item a.active { background: var(--accent-soft); }
+.cp-item strong { font-weight: 600; }
+.cp-item em { font-style: normal; color: var(--muted); font-size: 0.78rem; margin-left: auto; flex: none; font-family: ui-sans-serif, system-ui, sans-serif; white-space: nowrap; }
+.cp-item mark { background: #f2e3a8; color: inherit; padding: 0 1px; border-radius: 2px; }
+.cp-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.5rem 1.1rem; border-top: 1px solid var(--line);
+  font-size: 0.72rem; color: var(--muted);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+.cp-foot b { color: var(--ink); }
+</style>
+
+<script is:inline>
+(() => {
+  const root = document.getElementById('cp-root');
+  if (!root) return;
+  const input = root.querySelector('#cp-input');
+  const list = root.querySelector('#cp-list');
+  const count = root.querySelector('#cp-count');
+  let index = null;
+  let loading = false;
+  let focusIdx = -1;
+  let results = [];
+  const highlight = (text, q) => {
+    const esc = (s) => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    if (!q) return esc(text);
+    const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    return esc(text).replace(re, m => `<mark>${m}</mark>`);
+  };
+  const setFocus = (i) => {
+    const items = [...list.querySelectorAll('a')];
+    if (!items.length) return;
+    focusIdx = (i + items.length) % items.length;
+    items.forEach((el, j) => el.classList.toggle('active', j === focusIdx));
+    items[focusIdx].scrollIntoView({ block: 'nearest' });
+  };
+  const open = () => {
+    root.classList.add('on');
+    document.body.style.overflow = 'hidden';
+    if (!index && !loading) {
+      loading = true;
+      fetch('/search-index.json').then(r => r.json()).then(d => { index = d; loading = false; }).catch(() => { loading = false; });
+    }
+    setTimeout(() => input.focus(), 10);
+  };
+  const close = () => {
+    root.classList.remove('on');
+    document.body.style.overflow = '';
+    focusIdx = -1;
+    results = [];
+    input.value = '';
+    list.innerHTML = '';
+    count.textContent = '0';
+  };
+  const render = () => {
+    const q = input.value.trim();
+    focusIdx = -1;
+    if (!q) { results = []; list.innerHTML = ''; count.textContent = '0'; return; }
+    if (!index) { list.innerHTML = '<li class="cp-item"><a href="#">载入索引中…</a></li>'; return; }
+    const lower = q.toLowerCase();
+    results = index.filter(e => (e.title + ' ' + e.excerpt + ' ' + e.tag).toLowerCase().includes(lower)).slice(0, 12);
+    count.textContent = String(results.length);
+    list.innerHTML = results.map((e, i) => `<li class="cp-item"><a href="${e.url}" data-idx="${i}"><strong>${highlight(e.title, q)}</strong><em>${e.tag} · ${highlight(e.excerpt, q)}</em></a></li>`).join('')
+      || '<li class="cp-item"><a href="#">没有匹配结果</a></li>';
+  };
+  document.addEventListener('keydown', (e) => {
+    const meta = e.metaKey || e.ctrlKey;
+    if (meta && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); root.classList.contains('on') ? close() : open(); return; }
+    if (e.key === 'Escape') { close(); return; }
+    if (!root.classList.contains('on')) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); setFocus(focusIdx + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setFocus(focusIdx - 1); }
+    else if (e.key === 'Enter' && focusIdx >= 0) { e.preventDefault(); list.querySelector(`a[data-idx="${focusIdx}"]`)?.click(); }
+  });
+  input.addEventListener('input', render);
+  root.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', close));
+})();
+</script>

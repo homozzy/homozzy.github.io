@@ -1,91 +1,178 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
+import Icon from '../components/Icon.astro';
 import readingNotes from '../data/reading-notes.json';
+import { CATS } from '../data/books';
+import { WORDS } from '../data/words';
 import { getAllPosts } from '../lib/sanity';
 
 export const prerender = false;
 
-type Note = { id: string; date: string; book: string };
-const latestNote = (readingNotes as unknown as Note[]).reduce((a, b) => (a.date > b.date ? a : b));
-const posts = (await getAllPosts()).slice(0, 3);
+const posts = await getAllPosts();
+const latestPost = posts[0] ?? null;
 
-const fmt = (d: string) =>
-  new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+type Note = { id: string; date: string; book: string; text: string };
+const latestNote = (readingNotes as Note[]).reduce((a, b) => (a.date > b.date ? a : b));
+const todayWord = WORDS[Math.floor(Date.now() / 86400000) % WORDS.length];
+
+const yearly: Record<number, number> = {};
+for (const n of readingNotes as Note[]) {
+  const y = new Date(n.date).getFullYear();
+  yearly[y] = (yearly[y] || 0) + 1;
+}
+const years = Object.keys(yearly).map(Number).sort((a, b) => a - b);
+const maxCount = Math.max(...Object.values(yearly), 1);
+const topCats = [...CATS].sort((a, b) => b[1].length - a[1].length).slice(0, 3);
+
+const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
+const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
 ---
 
 <BaseLayout>
-  <section class="container hero">
-    <div>
-      <p class="eyebrow">History · Geography · Essays</p>
-      <h1>homo</h1>
-      <p class="lead">一名历史地理爱好者，读书研思，记录文史、气象与技术的随想。</p>
-      <p class="sub">本科 · 现任高中地理教师 · 读书人 / 写字人 / 做小工具的人</p>
-      <p class="recent">最近记录 · <a href={`/reading/#note-${latestNote.id}`}>《{latestNote.book}》</a> · {latestNote.date.replaceAll('-', '.')}</p>
-      <div class="hero-stats" aria-label="站内统计">
-        <div><strong>55</strong><span>本（部）书</span></div>
-        <div><strong>52</strong><span>条读书笔记</span></div>
-        <div><strong>9</strong><span>个书目分类</span></div>
-        <div><strong>1</strong><span>篇成稿随笔</span></div>
-      </div>
-      <div class="hero-actions">
-        <a class="btn" href="/blog">看博客 →</a>
-        <a class="btn btn-ghost" href="/about">关于我</a>
-        <a class="btn btn-ghost" href="/features">全部功能</a>
-      </div>
-    </div>
+  <div class="container bento-wrap">
+    <div class="bento">
 
-    <div class="hero-deco" aria-hidden="true">
-      <span class="vertical-text">读书研思</span>
-      <div class="seal">研<br />思</div>
-    </div>
-  </section>
+      <!-- 名片 -->
+      <section class="card card--paper card--xl" aria-label="名片">
+        <div class="card__head">
+          <span class="seal">研</span>
+          <span class="card__title">HOMO · 读书研思</span>
+        </div>
+        <h1 class="name">homo</h1>
+        <p class="lead">一名历史地理爱好者，读书研思，记录文史、气象与技术的随想。</p>
+        <p class="sub">本科 · 现任高中地理教师 · 读书人 / 写字人 / 做小工具的人</p>
+        <p class="recent">最近记录 · <a href={`/reading/#note-${latestNote.id}`}>《{latestNote.book}》</a> · {latestNote.date.replaceAll('-', '.')}</p>
+        <div class="card__foot stats">
+          <span><b class="num">55</b> 本（部）书</span>
+          <span><b class="num">52</b> 条读书笔记</span>
+          <span><b class="num">9</b> 个书目分类</span>
+        </div>
+      </section>
 
-  <section class="container">
-    <div class="section-head">
-      <h2>最新文章</h2>
-      <a href="/blog">全部文章 <span aria-hidden="true">→</span></a>
-    </div>
-    <ul class="post-list">
-      {posts.map((post) => (
-        <li class="post-item">
-          <a href={`/blog/${post.slug.current}/`}>
-            <h3>{post.title}</h3>
-            <p>{post.description}</p>
+      <!-- 最新博客 -->
+      <section class="card card--ink card--xl" aria-label="最新博客">
+        <div class="card__head">
+          <Icon name="pen" size={18} />
+          <span class="card__title">最新博客</span>
+          <a class="card__enter" href="/blog">全部文章 ↗</a>
+        </div>
+        {latestPost ? (
+          <a class="latest-post" href={`/blog/${latestPost.slug.current}/`}>
+            <h2>{latestPost.title}</h2>
+            <p>{latestPost.description}</p>
+            <div class="meta"><time>{fmtFull(latestPost.pubDate)}</time>{(latestPost.tags ?? []).slice(0, 2).map(t => <span class="tag tag--ondark">{t}</span>)}</div>
           </a>
-          <div class="meta">
-            <time datetime={new Date(post.pubDate).toISOString()}>{fmt(post.pubDate)}</time>
-            {(post.tags ?? []).map((t) => <span class="tag">{t}</span>)}
-          </div>
-        </li>
-      ))}
-    </ul>
-  </section>
+        ) : (
+          <p class="muted" style="color:var(--fg2);">正在写第一篇。</p>
+        )}
+      </section>
 
-  <section class="container" style="margin-top: 2.5rem;">
-    <div class="section-head">
-      <h2>读书录</h2>
-      <a href="/reading">全部笔记 <span aria-hidden="true">→</span></a>
-    </div>
-    <a href="/reading" class="work-card" style="display:block; text-decoration:none;">
-      <span class="eyebrow">Reading Journal · Weibo</span>
-      <h3 style="margin-top:0.3rem;">十一年微博读书笔记，原文全录</h3>
-      <p class="muted" style="margin-top:0.4rem;">从《物种起源》到《智人之上》，52 条笔记 / 55 本书，文史·科幻·心理与人性。</p>
-    </a>
-  </section>
+      <!-- 藏书阁 -->
+      <section class="card card--green card--md" aria-label="藏书阁">
+        <div class="card__head">
+          <Icon name="stack" size={18} />
+          <span class="card__title">藏书阁</span>
+          <a class="card__enter" href="/books">全部分类 ↗</a>
+        </div>
+        <div class="big-line"><b class="num">55</b> <span>本（部）书 · 9 个分类</span></div>
+        <ul class="toplist">
+          {topCats.map(([cat, books]) => <li><span>{cat}</span><b class="num">{books.length}</b></li>)}
+        </ul>
+      </section>
 
-  <section class="container" style="margin-top: 2.5rem;">
-    <div class="section-head">
-      <h2>精选作品</h2>
-      <a href="/works">全部作品 <span aria-hidden="true">→</span></a>
+      <!-- 大事记 sparkline -->
+      <section class="card card--walnut card--sm" aria-label="大事记">
+        <div class="card__head">
+          <Icon name="flag" size={18} />
+          <span class="card__title">大事记</span>
+          <a class="card__enter" href="/milestones">全部 ↗</a>
+        </div>
+        <div class="spark" aria-hidden="true">
+          {years.map(y => <div class="spark-bar" style={`height:${((yearly[y] / maxCount) * 100).toFixed(1)}%`} title={`${y} · ${yearly[y]} 条`}></div>)}
+        </div>
+        <div class="spark-labels">{years.map(y => <span>{String(y).slice(2)}</span>)}</div>
+      </section>
+
+      <!-- 日进一词 -->
+      <section class="card card--gold card--sm" aria-label="日进一词">
+        <div class="card__head">
+          <Icon name="word" size={18} />
+          <span class="card__title">日进一词</span>
+          <a class="card__enter" href="/word">全部词条 ↗</a>
+        </div>
+        <div class="word-mini">
+          <span class="word">{todayWord.word}</span>
+          <span class="pinyin">{todayWord.pinyin}</span>
+          <span class="src">{todayWord.source}</span>
+        </div>
+      </section>
+
+      <!-- 账本 -->
+      <section class="card card--teal card--sm" aria-label="账本">
+        <div class="card__head">
+          <Icon name="receipt" size={18} />
+          <span class="card__title">账本</span>
+          <a class="card__enter" href="/ledger">打开 ↗</a>
+        </div>
+        <div class="ledger-mini" id="bento-ledger">
+          <span class="muted">载入中…</span>
+        </div>
+      </section>
+
+      <!-- 读书录 -->
+      <section class="card card--paper card--md" aria-label="最近在读">
+        <div class="card__head">
+          <Icon name="book" size={18} />
+          <span class="card__title">最近在读</span>
+          <a class="card__enter" href="/reading">全部笔记 ↗</a>
+        </div>
+        <blockquote class="excerpt"><span class="excerpt-src">《{latestNote.book}》· {fmt(latestNote.date)}</span>
+          <p>{latestNote.text.length > 110 ? latestNote.text.slice(0, 110) + '…' : latestNote.text}</p>
+        </blockquote>
+      </section>
+
+      <!-- 全站搜索 -->
+      <button id="btn-open-cp" class="card card--ink card--sm card--button" type="button" aria-label="打开全站搜索">
+        <div class="card__head"><Icon name="search" size={18} /><span class="card__title">全站搜索</span></div>
+        <div class="search-mini"><span class="glyph">⌘K</span><span>页面 · 博客 · 读书笔记 · 微博 · 藏书</span></div>
+      </button>
+
+      <!-- 功能总览 CTA -->
+      <a href="/features" class="card card--brick card--cta" aria-label="打开功能总览">
+        <div class="card__head"><Icon name="home" size={20} /><span class="card__title">功能总览</span><span class="card__enter">13 个板块 ↗</span></div>
+        <p>从读书到记账，从大事记到全站搜索——全部功能都在这里。</p>
+      </a>
     </div>
-    <div class="work-grid">
-      <article class="work-card">
-        <span class="eyebrow">Personal Workbench</span>
-        <h3>个人工作台</h3>
-        <p class="muted">把读书、教学随手记和常用工具收在一起的自用工作台，细节待补充。</p>
-        <a href="/works" class="btn btn-ghost" style="align-self:flex-start; padding:0.4rem 0.9rem;">查看 →</a>
-      </article>
-    </div>
-  </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const KEY = 'ledger-entries-v1';
+      const host = document.getElementById('bento-ledger');
+      const now = new Date();
+      const month = now.toISOString().slice(0, 7);
+      let rows = [];
+      try { rows = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch {}
+      const monthRows = rows.filter(r => (r.date || '').slice(0, 7) === month);
+      if (!monthRows.length) {
+        host.innerHTML = '<div class="placeholder-text"><b>本地账本</b><span>暂无本月记录 · <a href="/ledger">去记一笔</a></span></div>';
+        return;
+      }
+      let income = 0, expense = 0;
+      for (const r of monthRows) {
+        if (r.type === 'income') income += r.amount; else expense += r.amount;
+      }
+      const net = income - expense;
+      const fmt = n => n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      host.innerHTML = `
+        <div class="ledger-month">${month.replace('-', ' 年 ')} 月 · ${monthRows.length} 笔</div>
+        <div class="ledger-net ${net >= 0 ? 'pos' : 'neg'}">${net >= 0 ? '+' : '-'}${fmt(Math.abs(net))}</div>
+        <div class="ledger-sub">收 +${fmt(income)} · 支 −${fmt(expense)}</div>
+      `;
+      document.getElementById('btn-open-cp')?.addEventListener('click', () => {
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true }));
+      });
+    })();
+  </script>
 </BaseLayout>

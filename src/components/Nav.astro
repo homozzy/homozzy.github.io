@@ -20,7 +20,17 @@ const is = (p: string) =>
       <a href="/reading" class={is('/reading') ? 'active' : ''}>读书录</a>
       <a href="/weibo" class={is('/weibo') ? 'active' : ''}>微博</a>
       <a href="/about" class={is('/about') ? 'active' : ''}>关于</a>
+      <button id="btn-cmdk" class="icon-btn" type="button" aria-label="全站搜索（Ctrl/Cmd+K）" title="全站搜索（Ctrl/Cmd+K）">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.3-4.3"/></svg>
+        <span class="cmdk-hint">⌘K</span>
+      </button>
       <ThemeToggle />
     </nav>
   </div>
 </header>
+<script is:inline>
+  (() => {
+    const btn = document.getElementById('btn-cmdk');
+    btn?.addEventListener('click', () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true })));
+  })();
+</script>

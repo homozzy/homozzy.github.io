@@ -51,7 +51,7 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       </section>
 
       <!-- 最新博客 -->
-      <section class="card card--dark card--xl" data-href={`/blog/${latestPost?.slug.current ?? '}/`} aria-label="最新博客">
+      <section class="card card--dark card--xl card-link" data-href={latestPost ? `/blog/${latestPost.slug.current}/` : '/blog'} aria-label="最新博客">
         <div class="card__head">
           <Icon name="pen" size={18} />
           <span class="card__title">最新博客</span>

@@ -18,6 +18,14 @@ for (const p of posts) {
 }
 const years = [...byYear.keys()].sort((a, b) => b - a);
 const total = posts.length;
+
+const tagCount = new Map<string, number>();
+for (const p of posts) {
+  for (const t of p.tags ?? []) tagCount.set(t, (tagCount.get(t) ?? 0) + 1);
+}
+const allTags = [...tagCount.entries()].sort((a, b) => b[1] - a[1]);
+const wordCount = (s: string | undefined) => (s ?? '').replace(/\s/g, '').length;
+const readingMinutes = (s: string | undefined) => Math.max(1, Math.ceil(wordCount(s) / 400));
 ---
 
 <BaseLayout title={`博客 · ${SITE.title}`} description="文史、气象与技术的随想，读书研思。">
@@ -30,6 +38,12 @@ const total = posts.length;
         {years.map(y => <a class="chip" href={`#year-${y}`}>{y} <span style="opacity:.6;">{byYear.get(y)!.length}</span></a>)}
       </div>
     )}
+    {allTags.length > 0 && (
+      <div class="year-chips" id="tag-chips" style="margin-top:0.5rem;" aria-label="按标签筛选">
+        <button class="chip on" data-tag="">全部 <span style="opacity:.6;">{total}</span></button>
+        {allTags.map(([tag, count]) => <button class="chip" data-tag={tag}>#{tag} <span style="opacity:.6;">{count}</span></button>)}
+      </div>
+    )}
 
     {posts.length === 0 && <p class="muted" style="margin-top:1.5rem;">暂无文章，去 <a class="accent" href="/write">写新博客</a>。</p>}
 
@@ -38,13 +52,14 @@ const total = posts.length;
         <h2 class="year-head">{y} <span class="count">{byYear.get(y)!.length} 篇</span></h2>
         <ul class="post-list" style="margin-top: 0.8rem;">
           {byYear.get(y)!.map((post) => (
-            <li class="post-item">
+            <li class="post-item" data-tags={(post.tags ?? []).join(' ')}>
               <a href={`/blog/${post.slug.current}/`}>
                 <h3>{post.title}</h3>
                 <p>{post.description}</p>
               </a>
               <div class="meta">
                 <time datetime={new Date(post.pubDate).toISOString()}>{fmt(post.pubDate)}</time>
+                <span class="muted" style="font-size:0.72rem;">约 {readingMinutes(post.body)} 分钟 · {wordCount(post.body)} 字</span>
                 {(post.tags ?? []).map((t) => <span class="tag">{t}</span>)}
               </div>
             </li>
@@ -52,6 +67,30 @@ const total = posts.length;
         </ul>
       </section>
     ))}
-    <p class="muted" style="margin-top:1.2rem; font-size:0.8rem;">共 {total} 篇</p>
+    <p id="blog-count" class="muted" style="margin-top:1.2rem; font-size:0.8rem;">共 {total} 篇</p>
+
+    <script is:inline>
+      (() => {
+        const chips = document.querySelectorAll('#tag-chips .chip');
+        const items = document.querySelectorAll('.post-item');
+        const groups = document.querySelectorAll('.year-group');
+        const countLine = document.getElementById('blog-count');
+        const render = (tag) => {
+          let shown = 0;
+          items.forEach(el => {
+            const ok = !tag || (el.dataset.tags || '').split(' ').filter(Boolean).includes(tag);
+            el.style.display = ok ? '' : 'none';
+            if (ok) shown++;
+          });
+          groups.forEach(g => {
+            const visible = [...g.querySelectorAll('.post-item')].filter(n => n.style.display !== 'none').length;
+            g.style.display = visible ? '' : 'none';
+          });
+          countLine.textContent = tag ? `共 ${shown} 篇 · #${tag}` : `共 ${shown} 篇`;
+          chips.forEach(c => c.classList.toggle('on', c.dataset.tag === tag));
+        };
+        chips.forEach(chip => chip.addEventListener('click', () => render(chip.dataset.tag || '')));
+      })();
+    </script>
   </div>
 </BaseLayout>

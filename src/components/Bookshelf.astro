@@ -11,7 +11,6 @@ const noteLink = (book: string) => {
   return id ? `/reading/#note-${id}` : null;
 };
 
-const SPINES = ['#6e2117','#2f4a5a','#a8843c','#4a5d3a','#5d3a63','#8f5a2b','#31435a','#93703a','#33554a','#704a24','#54386a'];
 const hash = (s: string) => {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < s.length; i++) {
@@ -27,7 +26,7 @@ const shelves = CATS.map(([cat, books], i) => ({
   books: books.map((b) => ({
     title: b,
     href: noteLink(b),
-    color: SPINES[hash(b) % SPINES.length],
+    mix: 30 + (hash(b + ':m') % 55),
     height: 96 + (hash(b + ':h') % 34),
     width: 30 + (hash(b + ':w') % 16),
   })),
@@ -35,18 +34,18 @@ const shelves = CATS.map(([cat, books], i) => ({
 ---
 <div class="bookshelf" aria-label="书架掠影">
   {shelves.map((shelf) => (
-    <div class="shelf-row">
-      <span class="shelf-label" style={`--accent:${shelf.accent}`}>{shelf.cat}</span>
+    <div class="shelf-row" style={`--accent:${shelf.accent}`}>
+      <span class="shelf-label">{shelf.cat}</span>
       <div class="shelf" role="list">
         {shelf.books.map((b) => (
           b.href ? (
             <a class="spine" role="listitem" href={b.href} title={b.title}
-               style={`--spine:${b.color}; height:${b.height}px; width:${b.width}px;`}>
+               style={`--mix:${b.mix}%; height:${b.height}px; width:${b.width}px;`}>
               <span class="spine-title">{truncate(b.title, 7)}</span>
             </a>
           ) : (
             <span class="spine is-unlinked" role="listitem" title={`${b.title}（暂无笔记）`}
-                  style={`--spine:${b.color}; height:${b.height}px; width:${b.width}px;`}>
+                  style={`--mix:${b.mix}%; height:${b.height}px; width:${b.width}px;`}>
               <span class="spine-title">{truncate(b.title, 7)}</span>
             </span>
           )

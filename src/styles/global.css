@@ -1225,7 +1225,7 @@ html[data-theme='dark'] ::selection { background: var(--accent); color: #171512;
   font-family: ui-sans-serif, system-ui, sans-serif;
   font-size: 0.68rem; letter-spacing: 0.1em;
   color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
   border-radius: 8px;
   padding: 0.55rem 0.6rem;
   display: flex; align-items: center; justify-content: center;
@@ -1247,7 +1247,7 @@ html[data-theme='dark'] ::selection { background: var(--accent); color: #171512;
 .spine {
   flex: none;
   writing-mode: vertical-rl;
-  background: var(--spine);
+  background: color-mix(in srgb, var(--accent) var(--mix), #171512);
   color: #f2e7cf;
   border-radius: 2px 2px 0 0;
   display: flex; align-items: flex-start; justify-content: center;
@@ -1256,7 +1256,8 @@ html[data-theme='dark'] ::selection { background: var(--accent); color: #171512;
   letter-spacing: 0.12em;
   line-height: 1.05;
   text-decoration: none;
-  box-shadow: inset -1px 0 2px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(255,255,255,0.1);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.28);
+  box-shadow: inset -1px 0 2px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.09);
   position: relative;
   transition: transform 0.18s ease, filter 0.18s ease;
 }

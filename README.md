@@ -18,9 +18,11 @@
 $env:PATH = "D:\Temp\opencode\node-v22.23.4;$env:PATH"
 
 npm install      # 依赖已装好，可跳过
-npm run dev      # 开发预览 http://localhost:4321
+npm run dev      # 开发预览 http://localhost:4321（切 Vercel 后仅作静态页预览）
 npm run build    # 产出静态站点到 dist/
 npm run preview  # 本地预览构建产物
+# 切 Vercel 后预览静态产物：
+# cd D:\Temp\opencode\homo-site-ascii-test && npx http-server dist\client -p 4322
 ```
 
 ## 写新博客
@@ -58,7 +60,7 @@ Pages 通过网页端 Settings → Pages 或 API 配置为 `gh-pages` 分支根�
 - [ ] 作品页补充：个人工作台的技术栈 / 链接 / 截图（src/pages/works.astro）
 - [ ] 首篇文章发布前过一遍（src/content/blog/chongyang.md）
 
-## 功能板块（2026-11 更新）
+## 功能板块（Vercel 自动部署验证）（2026-11 更新）
 
 - 微博归档：627 条原创微博全文，按年份归档，带搜索、图片直链（转发/推广已排除）
 - /weibo 与全站搜索联动（tag: 微博）
@@ -80,5 +82,7 @@ src/
   content/      Markdown 文章
   consts.ts     全站文案（邮箱、一句话介绍等，改这里）
 ```
+
+
 
 

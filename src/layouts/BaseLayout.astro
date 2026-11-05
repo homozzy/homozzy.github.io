@@ -4,6 +4,7 @@ import { SITE } from '../consts';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import CommandPalette from '../components/CommandPalette.astro';
+import BottomNav from '../components/BottomNav.astro';
 
 interface Props {
   title?: string;
@@ -69,6 +70,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <button class="back-top" id="back-top" type="button" aria-label="回到顶部" title="回到顶部">↑</button>
     <Nav />
     <CommandPalette />
+    <BottomNav />
     <main id="main-content">
       <slot />
     </main>

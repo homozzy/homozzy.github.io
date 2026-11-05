@@ -1,0 +1,25 @@
+---
+import Icon from './Icon.astro';
+const path = Astro.url.pathname;
+const is = (p: string) => (p === '/' ? path === '/' : path.startsWith(p));
+const active = (p: string) => is(p) ? 'active' : '';
+---
+
+<nav class="bottom-nav" aria-label="底部导航">
+  <a href="/" class={active('/')} aria-current={is('/') ? 'page' : undefined}>
+    <Icon name="home" size={20} />
+    <span>首页</span>
+  </a>
+  <a href="/blog" class={active('/blog')} aria-current={is('/blog') ? 'page' : undefined}>
+    <Icon name="pen" size={20} />
+    <span>博客</span>
+  </a>
+  <a href="/reading" class={active('/reading')} aria-current={is('/reading') ? 'page' : undefined}>
+    <Icon name="book" size={20} />
+    <span>读书录</span>
+  </a>
+  <a href="/features" class={active('/features') || active('/search') ? 'active' : ''} aria-current={is('/features') || is('/search') ? 'page' : undefined}>
+    <Icon name="stack" size={20} />
+    <span>全部</span>
+  </a>
+</nav>

@@ -939,3 +939,17 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; b
 .mono { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: 0.88rem; line-height: 1.7; }
 .write-preview.hidden { display: none; }
 .write-form.fullscreen { grid-column: 1 / -1; }
+/* ========== 站内写作 ========== */
+.write-auth { display: flex; gap: 0.6rem; align-items: center; margin: 1rem 0 0.2rem; flex-wrap: wrap; }
+.write-auth .input { flex: 1 1 220px; }
+.write-list { align-content: start; }
+#post-list { list-style: none; display: grid; gap: 0.4rem; max-height: 70vh; overflow: auto; padding-right: 0.2rem; }
+.post-item-btn {
+  width: 100%; text-align: left; display: flex; flex-direction: column; gap: 0.2rem;
+  padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink); cursor: pointer; font: inherit;
+  transition: border-color 0.2s, background 0.2s;
+}
+.post-item-btn span { font-size: 0.72rem; color: var(--muted); font-family: ui-sans-serif, system-ui, sans-serif; }
+.post-item-btn:hover { border-color: var(--accent); }
+.post-item-btn.active { border-color: var(--accent); background: var(--accent-soft); }

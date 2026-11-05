@@ -3,45 +3,45 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
 ---
 
-<BaseLayout title={`写新博客 · ${SITE.title}`} description="直接在网站里写文章，支持草稿保存、预览、导出与提交到 GitHub。">
+<BaseLayout title={`写新博客 · ${SITE.title}`} description="直接在网站里写文章、保存、发布。">
   <div class="container" style="padding-top: 2.5rem;">
     <p class="eyebrow">Write</p>
     <h1 class="page-title">写新博客<span class="accent">.</span></h1>
-    <p class="muted">草稿自动保存在本机浏览器。写完后导出 .md，或粘贴 token 直接提交到仓库。</p>
+    <p class="muted">直接在本站写，点发布立即生效。密钥只保存在你的浏览器。</p>
+
+    <div class="write-auth">
+      <input id="w-key" class="input" type="password" placeholder="我的写作密钥" autocomplete="off" />
+      <button id="btn-load" class="btn btn-ghost" type="button">加载文章</button>
+      <span id="w-auth-status" class="meta-line" aria-live="polite" style="margin:0;"></span>
+    </div>
 
     <div class="write-layout">
-      <!-- 左栏：表单 -->
-      <section class="write-form" aria-label="编辑器">
-        <label class="field"><span class="label">标题</span><input id="w-title" class="input" type="text" placeholder="文章标题" autocomplete="off" /></label>
-
-        <div class="form-grid">
-          <label class="field"><span class="label">文件名（英文/拼音，不填自动生成）</span><input id="w-slug" class="input" type="text" placeholder="cyang-yuanxilai" autocomplete="off" /></label>
-          <label class="field"><span class="label">发布日期</span><input id="w-date" class="input" type="date" /></label>
-        </div>
-
-        <label class="field"><span class="label">摘要（列表/搜索会显示）</span><input id="w-desc" class="input" type="text" placeholder="一句话说清这篇写什么" autocomplete="off" /></label>
-        <label class="field"><span class="label">标签，逗号分隔</span><input id="w-tags" class="input" type="text" placeholder="文史, 随想" autocomplete="off" /></label>
-
-        <label class="field" style="margin-top: 0.3rem;"><span class="label">正文（Markdown）</span>
-          <textarea id="w-body" class="input mono" rows="18" placeholder="开始写……\n\n## 小节\n\n正文段落。" spellcheck="false"></textarea>
-        </label>
-
-        <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.6rem;">
-          <button class="btn btn-ghost" id="btn-clear" type="button">清空草稿</button>
-          <button class="btn btn-ghost" id="btn-export" type="button">⬇ 导出 .md</button>
-          <button class="btn btn-ghost" id="btn-preview-toggle" type="button">预览 ⇄ 编辑</button>
-        </div>
-
-        <hr class="rule" style="margin: 1rem 0;" />
-        <h2 style="font-size:1.05rem; margin-bottom:0.6rem;">发布到 GitHub</h2>
-        <p class="muted" style="font-size:0.82rem; margin-bottom:0.6rem;">粘贴 <strong>fine-grained PAT</strong>。权限只需 <code>contents: write</code>（或仓库的 classic <code>repo</code> 范围）。不会发送给任何第三方，仅用于本次提交。</p>
-        <p class="muted" style="font-size:0.78rem; margin-bottom:0.6rem;">提交后：若已开启 GitHub Actions 自动部署，稍等 1–2 分钟生效；否则把文件名告诉我，我来构建发布。</p>
-        <label class="field"><span class="label">GitHub Token（password）</span><input id="w-token" class="input" type="password" placeholder="github_pat_xxx" autocomplete="off" /></label>
-        <button class="btn" id="btn-publish" type="button" style="margin-top:0.4rem;">⬆ 提交到仓库</button>
-        <p id="w-status" class="meta-line" aria-live="polite" style="margin-top:0.6rem;"></p>
+      <section class="write-list" aria-label="文章列表">
+        <button id="btn-new" class="btn" type="button" style="width:100%; margin-bottom:0.6rem;">＋ 新建文章</button>
+        <ul id="post-list"></ul>
       </section>
 
-      <!-- 右栏：预览 -->
+      <section class="write-form" aria-label="编辑器">
+        <div class="form-grid">
+          <label class="field"><span class="label">标题</span><input id="w-title" class="input" type="text" placeholder="文章标题" autocomplete="off" /></label>
+          <label class="field"><span class="label">日期</span><input id="w-date" class="input" type="date" /></label>
+        </div>
+        <div class="form-grid">
+          <label class="field"><span class="label">文件名（slug，可留空）</span><input id="w-slug" class="input" type="text" placeholder="cyang-yuanxilai" autocomplete="off" /></label>
+          <label class="field"><span class="label">标签，逗号分隔</span><input id="w-tags" class="input" type="text" placeholder="文史, 随想" autocomplete="off" /></label>
+        </div>
+        <label class="field"><span class="label">摘要</span><input id="w-desc" class="input" type="text" placeholder="一句话说清这篇写什么" autocomplete="off" /></label>
+        <label class="field"><span class="label">正文（Markdown）</span>
+          <textarea id="w-body" class="input mono" rows="14" placeholder="开始写……&#10;&#10;## 小节&#10;&#10;正文段落。" spellcheck="false"></textarea>
+        </label>
+
+        <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.4rem;">
+          <button id="btn-save" class="btn" type="button">发布</button>
+          <button id="btn-delete" class="btn-danger btn-sm" type="button">删除</button>
+          <span id="w-status" class="meta-line" aria-live="polite" style="margin:0;"></span>
+        </div>
+      </section>
+
       <section class="write-preview" aria-label="预览">
         <div class="preview-head">
           <span class="eyebrow">Preview</span>
@@ -56,125 +56,135 @@ import { SITE } from '../consts';
     import { marked } from 'marked';
 
     const $ = (id) => document.getElementById(id);
-    const title = $('w-title');
-    const slug = $('w-slug');
-    const desc = $('w-desc');
-    const date = $('w-date');
-    const tags = $('w-tags');
-    const body = $('w-body');
+    const keyEl = $('w-key');
+    const authStatus = $('w-auth-status');
+    const postList = $('post-list');
+    const titleEl = $('w-title');
+    const dateEl = $('w-date');
+    const slugEl = $('w-slug');
+    const tagsEl = $('w-tags');
+    const descEl = $('w-desc');
+    const bodyEl = $('w-body');
     const preview = $('preview-body');
-    const status = $('w-status');
     const wordcount = $('preview-wordcount');
-    const previewSection = document.querySelector('.write-preview');
-    const formSection = document.querySelector('.write-form');
-    const STORAGE_KEY = 'write-draft-v1';
+    const status = $('w-status');
+    const STORAGE_KEY = 'write-key';
+    let selectedId = null;
+    let posts = [];
 
-    // --- draft autosave ---
-    const saveDraft = () => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        title: title.value, slug: slug.value, desc: desc.value,
-        date: date.value, tags: tags.value, body: body.value,
-      }));
+    // basic elements
+    dateEl.value = new Date().toISOString().slice(0, 10);
+
+    const getKey = () => localStorage.getItem(STORAGE_KEY) || '';
+    const setKey = (k) => localStorage.setItem(STORAGE_KEY, k);
+    const clearForm = () => {
+      selectedId = null;
+      [titleEl, slugEl, tagsEl, descEl, bodyEl].forEach(el => (el.value = ''));
+      dateEl.value = new Date().toISOString().slice(0, 10);
+      renderPreview();
     };
-    const loadDraft = () => {
+    const fillForm = (p) => {
+      selectedId = p._id;
+      titleEl.value = p.title;
+      slugEl.value = p.slug?.current ?? '';
+      dateEl.value = p.pubDate ? p.pubDate.slice(0, 10) : new Date().toISOString().slice(0, 10);
+      tagsEl.value = (p.tags ?? []).join(', ');
+      descEl.value = p.description ?? '';
+      bodyEl.value = p.body ?? '';
+      renderPreview();
+    };
+
+    const apiFetch = async (url, opts = {}) => {
+      const res = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), 'x-write-key': getKey() } });
+      if (res.status === 401) throw new Error('密钥错误或未设置');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '请求失败');
+      return data;
+    };
+
+    const loadPosts = async () => {
+      const k = getKey();
+      if (!k) { authStatus.textContent = '先输入密钥。'; return; }
       try {
-        const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-        title.value = d.title ?? '';
-        slug.value = d.slug ?? '';
-        desc.value = d.desc ?? '';
-        date.value = d.date || new Date().toISOString().slice(0, 10);
-        tags.value = d.tags ?? '';
-        body.value = d.body ?? '';
-      } catch {
-        date.value = new Date().toISOString().slice(0, 10);
+        posts = await apiFetch('/api/posts');
+        renderList();
+        authStatus.textContent = `已加载 ${posts.length} 篇文章`;
+      } catch (err) {
+        authStatus.textContent = err.message;
       }
     };
 
-    // --- build markdown ---
-    const buildMarkdown = () => {
-      const t = title.value.trim();
-      const d = desc.value.trim();
-      const tagList = tags.value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
-      const tagStr = tagList.length ? `[${tagList.map(t => `"${t}"`).join(', ')}]` : '[]';
-      const escape = (s) => s.replace(/"/g, '\\"');
-      return `---\ntitle: "${escape(t)}"\ndescription: "${escape(d)}"\npubDate: ${date.value}\ntags: ${tagStr}\n---\n\n${body.value}`;
+    const renderList = () => {
+      postList.innerHTML = posts.map(p => `<li><button class="post-item-btn ${p._id === selectedId ? 'active' : ''}" data-id="${p._id}" type="button"><strong>${p.title}</strong><span>${p.pubDate ? p.pubDate.slice(0, 10) : ''}</span></button></li>`).join('')
+        || '<li class="muted" style="padding:0.5rem;">暂无文章</li>';
     };
 
-    // --- preview ---
     const renderPreview = () => {
-      preview.innerHTML = marked.parse(body.value || '*（暂无内容）*', { breaks: true, gfm: true });
-      const chars = (body.value || '').replace(/\s/g, '').length;
-      wordcount.textContent = `${chars} 字`;
+      preview.innerHTML = marked.parse(bodyEl.value || '*（暂无内容）*', { breaks: true, gfm: true });
+      wordcount.textContent = `${(bodyEl.value || '').replace(/\s/g, '').length} 字`;
     };
 
-    // --- export .md ---
-    const download = (name, text) => {
-      const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
-      const a = Object.assign(document.createElement('a'), {
-        href: URL.createObjectURL(blob),
-        download: name,
-      });
-      a.click();
-      URL.revokeObjectURL(a.href);
-    };
+    // events
+    $('btn-load')?.addEventListener('click', () => {
+      const k = keyEl.value.trim();
+      if (k) setKey(k);
+      loadPosts();
+    });
+    $('btn-new')?.addEventListener('click', clearForm);
+    [titleEl, slugEl, tagsEl, descEl, dateEl, bodyEl].forEach(el => el.addEventListener('input', renderPreview));
 
-    // --- publish to GitHub ---
-    const publish = async () => {
-      const token = $('w-token').value.trim();
-      if (!token) { status.textContent = '先粘贴 token。'; return; }
-      if (!title.value.trim()) { status.textContent = '标题不能为空。'; return; }
-      const slugValue = (slug.value.trim() || `post-${Date.now()}`).replace(/[^a-z0-9-]/gi, '-').toLowerCase();
-      const path = `src/content/blog/${slugValue}.md`;
-      const md = buildMarkdown();
-      status.textContent = '提交中…';
+    postList.addEventListener('click', (e) => {
+      const btn = e.target?.closest?.('.post-item-btn');
+      if (!btn) return;
+      const p = posts.find(x => x._id === btn.dataset.id);
+      if (p) fillForm(p);
+    });
+
+    $('btn-save')?.addEventListener('click', async () => {
+      const title = titleEl.value.trim();
+      if (!title) { status.textContent = '标题不能为空'; return; }
+      status.textContent = '保存中…';
       try {
-        // 先看看文件存不存在（决定是否带 sha 覆盖）
-        const getRes = await fetch(`https://api.github.com/repos/homozzy/homozzy.github.io/contents/${path}`, {
-          headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
-        });
-        let sha;
-        if (getRes.ok) sha = (await getRes.json()).sha;
-        const putRes = await fetch(`https://api.github.com/repos/homozzy/homozzy.github.io/contents/${path}`, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/vnd.github+json',
-            'Content-Type': 'application/json',
-          },
+        const saved = await apiFetch('/api/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: `blog: ${title.value.trim()}`,
-            content: btoa(unescape(encodeURIComponent(md))),
-            ...(sha ? { sha } : {}),
+            _id: selectedId ?? undefined,
+            title,
+            slug: slugEl.value.trim() || undefined,
+            description: descEl.value.trim(),
+            pubDate: dateEl.value,
+            tags: tagsEl.value.split(/[,，]/).map(s => s.trim()).filter(Boolean),
+            body: bodyEl.value,
           }),
         });
-        const json = await putRes.json();
-        if (!putRes.ok) throw new Error(json.message || 'GitHub 拒绝了这次提交。');
-        status.innerHTML = `已提交：<a class="accent" href="${json.commit?.html_url}" target="_blank" rel="noopener">查看 commit ↗</a> · 稍等 1–2 分钟网站更新`;
+        status.textContent = `已发布 ✓`;
+        await loadPosts();
+        fillForm(saved);
       } catch (err) {
-        status.textContent = '提交失败：' + (err.message || String(err));
+        status.textContent = err.message;
       }
-    };
+    });
 
-    // --- wire up ---
-    loadDraft();
-    renderPreview();
-    [title, slug, desc, date, tags, body].forEach(el => el.addEventListener('input', () => { saveDraft(); renderPreview(); }));
-    $('btn-clear')?.addEventListener('click', () => {
-      if (confirm('确定清空当前草稿？')) {
-        [title, slug, desc, tags, body].forEach(el => el.value = '');
-        date.value = new Date().toISOString().slice(0, 10);
-        localStorage.removeItem(STORAGE_KEY);
-        renderPreview();
+    $('btn-delete')?.addEventListener('click', async () => {
+      if (!selectedId) { status.textContent = '还没选择文章'; return; }
+      if (!confirm('确定删除这篇？')) return;
+      status.textContent = '删除中…';
+      try {
+        await apiFetch(`/api/posts?id=${selectedId}`, { method: 'DELETE' });
+        status.textContent = '已删除';
+        clearForm();
+        await loadPosts();
+      } catch (err) {
+        status.textContent = err.message;
       }
     });
-    $('btn-export')?.addEventListener('click', () => {
-      const slugValue = (slug.value.trim() || `post-${Date.now()}`).replace(/[^a-z0-9-]/gi, '-').toLowerCase();
-      download(`${slugValue}.md`, buildMarkdown());
-    });
-    $('btn-publish')?.addEventListener('click', publish);
-    $('btn-preview-toggle')?.addEventListener('click', () => {
-      previewSection.classList.toggle('hidden');
-      formSection.classList.toggle('fullscreen');
-    });
+
+    // init
+    if (getKey()) {
+      keyEl.value = getKey();
+      loadPosts();
+    }
+    renderPreview();
   </script>
 </BaseLayout>

@@ -1,10 +1,7 @@
 ﻿---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
-import Icon from '../components/Icon.astro';
 import readingNotes from '../data/reading-notes.json';
-import { CATS } from '../data/books';
-import { WORDS } from '../data/words';
 import { getAllPosts } from '../lib/sanity';
 
 export const prerender = false;
@@ -14,188 +11,62 @@ const latestPost = posts[0] ?? null;
 
 type Note = { id: string; date: string; book: string; text: string };
 const latestNote = (readingNotes as Note[]).reduce((a, b) => (a.date > b.date ? a : b));
-const todayWord = WORDS[Math.floor(Date.now() / 86400000) % WORDS.length];
-
-const yearly: Record<number, number> = {};
-for (const n of readingNotes as Note[]) {
-  const y = new Date(n.date).getFullYear();
-  yearly[y] = (yearly[y] || 0) + 1;
-}
-const years = Object.keys(yearly).map(Number).sort((a, b) => a - b);
-const maxCount = Math.max(...Object.values(yearly), 1);
-const topCats = [...CATS].sort((a, b) => b[1].length - a[1].length).slice(0, 3);
-
-const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
-const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
 ---
 
 <BaseLayout>
-  <div class="container bento-wrap">
-    <div class="bento">
+  <div class="container">
 
-      <!-- 名片 -->
-      <section class="card card--paper card--xl" aria-label="名片">
-        <div class="card__head">
-          <span class="seal">研</span>
-          <span class="card__title">HOMO · 读书研思</span>
+    <section class="cover">
+      <div class="cover-main">
+        <p class="eyebrow">History · Geography · Essays</p>
+        <h1 class="cover-name">homo</h1>
+        <p class="cover-tagline">一名历史地理爱好者，<br />读书研思，记录文史、气象与技术的随想。</p>
+        <p class="cover-sub">本科 · 现任高中地理教师 · 读书人 / 写字人 / 做小工具的人</p>
+        <div class="cover-actions">
+          <a class="btn" href="/blog">看博客 →</a>
+          <a class="text-link" href="/about">关于我</a>
         </div>
-        <h1 class="name">homo</h1>
-        <p class="lead">一名历史地理爱好者，读书研思，记录文史、气象与技术的随想。</p>
-        <p class="sub">本科 · 现任高中地理教师 · 读书人 / 写字人 / 做小工具的人</p>
-        <p class="recent">最近记录 · <a href={`/reading/#note-${latestNote.id}`}>《{latestNote.book}》</a> · {latestNote.date.replaceAll('-', '.')}</p>
-        <div class="card__foot stats">
-          <span><b class="num">55</b> 本（部）书</span>
-          <span><b class="num">52</b> 条读书笔记</span>
-          <span><b class="num">9</b> 个书目分类</span>
-        </div>
-      </section>
+      </div>
 
-      <!-- 最新博客 -->
-      <section class="card card--dark card--xl card-link" data-href={latestPost ? `/blog/${latestPost.slug.current}/` : '/blog'} aria-label="最新博客">
-        <div class="card__head">
-          <Icon name="pen" size={18} />
-          <span class="card__title">最新博客</span>
-          <a class="card__enter" href="/blog">全部文章 ↗</a>
-        </div>
-        {latestPost ? (
-          <a class="latest-post" href={`/blog/${latestPost.slug.current}/`}>
-            <h2>{latestPost.title}</h2>
-            <p>{latestPost.description}</p>
-            <div class="meta"><time>{fmtFull(latestPost.pubDate)}</time>{(latestPost.tags ?? []).slice(0, 2).map(t => <span class="tag tag--ondark">{t}</span>)}</div>
-          </a>
-        ) : (
-          <p class="muted" style="color:var(--fg2);">正在写第一篇。</p>
-        )}
-      </section>
+      <div class="cover-deco" aria-hidden="true">
+        <span class="cover-vertical">读书研思</span>
+        <div class="seal seal--cover">研<br />思</div>
+      </div>
+    </section>
 
-      <!-- 藏书阁 -->
-      <section class="card card--md card-link" data-href="/books" aria-label="藏书阁">
-        <div class="card__head">
-          <Icon name="stack" size={18} />
-          <span class="card__title">藏书阁</span>
-          <a class="card__enter" href="/books">全部分类 ↗</a>
-        </div>
-        <div class="big-line"><b class="num">55</b> <span>本（部）书 · 9 个分类</span></div>
-        <ul class="toplist">
-          {topCats.map(([cat, books]) => <li><span>{cat}</span><b class="num">{books.length}</b></li>)}
-        </ul>
-      </section>
+    <hr class="rule rule--cover" />
 
-      <!-- 大事记 sparkline -->
-      <section class="card card--sm card-link" data-href="/milestones" aria-label="大事记">
-        <div class="card__head">
-          <Icon name="flag" size={18} />
-          <span class="card__title">大事记</span>
-          <a class="card__enter" href="/milestones">全部 ↗</a>
-        </div>
-        <div class="spark" aria-hidden="true">
-          {years.map(y => <div class="spark-bar" style={`height:${((yearly[y] / maxCount) * 100).toFixed(1)}%`} title={`${y} · ${yearly[y]} 条`}></div>)}
-        </div>
-        <div class="spark-labels">{years.map(y => <span>{String(y).slice(2)}</span>)}</div>
-      </section>
-
-      <!-- 日进一词 -->
-      <section class="card card--sm card-link" data-href="/word" aria-label="日进一词">
-        <div class="card__head">
-          <Icon name="word" size={18} />
-          <span class="card__title">日进一词</span>
-          <a class="card__enter" href="/word">全部词条 ↗</a>
-        </div>
-        <div class="word-mini">
-          <span class="word">{todayWord.word}</span>
-          <span class="pinyin">{todayWord.pinyin}</span>
-          <span class="src">{todayWord.source}</span>
-        </div>
-      </section>
-
-      <!-- 账本 -->
-      <section class="card card--sm card-link" data-href="/ledger" aria-label="账本">
-        <div class="card__head">
-          <Icon name="receipt" size={18} />
-          <span class="card__title">账本</span>
-          <a class="card__enter" href="/ledger">打开 ↗</a>
-        </div>
-        <div class="ledger-mini" id="bento-ledger">
-          <span class="muted">载入中…</span>
-        </div>
-      </section>
-
-      <!-- 读书录 -->
-      <section class="card card--paper card--md card-link" data-href="/reading" aria-label="最近在读">
-        <div class="card__head">
-          <Icon name="book" size={18} />
-          <span class="card__title">最近在读</span>
-          <a class="card__enter" href="/reading">全部笔记 ↗</a>
-        </div>
-        <blockquote class="excerpt"><span class="excerpt-src">《{latestNote.book}》· {fmt(latestNote.date)}</span>
-          <p>{latestNote.text.length > 110 ? latestNote.text.slice(0, 110) + '…' : latestNote.text}</p>
-        </blockquote>
-      </section>
-
-      <!-- 全站搜索 -->
-      <button id="btn-open-cp" class="card card--dark card--sm card--button" type="button" aria-label="打开全站搜索">
-        <div class="card__head"><Icon name="search" size={18} /><span class="card__title">全站搜索</span></div>
-        <div class="search-mini"><span class="glyph">⌘K</span><span>页面 · 博客 · 读书笔记 · 微博 · 藏书</span></div>
-      </button>
-
-      <!-- 功能总览 CTA -->
-      <a href="/features" class="card card--cta card--cta" aria-label="打开功能总览">
-        <div class="card__head"><Icon name="home" size={20} /><span class="card__title">功能总览</span><span class="card__enter">13 个板块 ↗</span></div>
-        <p>从读书到记账，从大事记到全站搜索——全部功能都在这里。</p>
+    <section class="cover-toc" aria-label="目录">
+      <a href="/blog" class="toc-item">
+        <span class="toc-label">Blog</span>
+        <span class="toc-body">
+          {latestPost ? (
+            <>
+              <strong>{latestPost.title}</strong>
+              <span class="toc-meta">{fmt(latestPost.pubDate)}</span>
+            </>
+          ) : (
+            <strong>正在写第一篇……</strong>
+          )}
+        </span>
       </a>
-    </div>
+
+      <a href="/reading" class="toc-item">
+        <span class="toc-label">Reading</span>
+        <span class="toc-body">
+          <strong>最近在读《{latestNote.book}》</strong>
+          <span class="toc-meta">{fmt(latestNote.date)} · {latestNote.book.length > 16 ? '节选两句' : ''}</span>
+        </span>
+      </a>
+
+      <a href="/features" class="toc-item">
+        <span class="toc-label">Archive</span>
+        <span class="toc-body">
+          <strong>全部功能与旧档</strong>
+          <span class="toc-meta">读书录 · 微博归档 · 藏书阁 · 大事记</span>
+        </span>
+      </a>
+    </section>
   </div>
-
-  <script is:inline>
-    (() => {
-      const KEY = 'ledger-entries-v1';
-      const host = document.getElementById('bento-ledger');
-      const now = new Date();
-      const month = now.toISOString().slice(0, 7);
-      let rows = [];
-      try { rows = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch {}
-      const monthRows = rows.filter(r => (r.date || '').slice(0, 7) === month);
-      if (!monthRows.length) {
-        host.innerHTML = '<div class="placeholder-text"><b>本地账本</b><span>暂无本月记录 · <a href="/ledger">去记一笔</a></span></div>';
-        return;
-      }
-      let income = 0, expense = 0;
-      for (const r of monthRows) {
-        if (r.type === 'income') income += r.amount; else expense += r.amount;
-      }
-      const net = income - expense;
-      const fmt = n => n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      host.innerHTML = `
-        <div class="ledger-month">${month.replace('-', ' 年 ')} 月 · ${monthRows.length} 笔</div>
-        <div class="ledger-net ${net >= 0 ? 'pos' : 'neg'}">${net >= 0 ? '+' : '-'}${fmt(Math.abs(net))}</div>
-        <div class="ledger-sub">收 +${fmt(income)} · 支 −${fmt(expense)}</div>
-      `;
-      document.getElementById('btn-open-cp')?.addEventListener('click', () => {
-        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true }));
-      });
-    })();
-  </script>
-  <script is:inline>
-    (() => {
-      // 整卡可点：data-href 委托；忽略内部可交互元素
-      document.addEventListener('click', (e) => {
-        const card = e.target.closest('[data-href]');
-        if (!card) return;
-        if (e.target.closest('a,button,input,select,textarea')) return;
-        const href = card.getAttribute('data-href');
-        if (href) window.location.href = href;
-      });
-      document.addEventListener('keydown', (e) => {
-        const card = e.target.closest('[data-href]');
-        if (!card) return;
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          window.location.href = card.getAttribute('data-href');
-        }
-      });
-    })();
-  </script>
 </BaseLayout>
-
-
-

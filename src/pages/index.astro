@@ -1,4 +1,4 @@
----
+﻿---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
 import Icon from '../components/Icon.astro';
@@ -51,7 +51,7 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       </section>
 
       <!-- 最新博客 -->
-      <section class="card card--ink card--xl" aria-label="最新博客">
+      <section class="card card--dark card--xl" aria-label="最新博客">
         <div class="card__head">
           <Icon name="pen" size={18} />
           <span class="card__title">最新博客</span>
@@ -69,7 +69,7 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       </section>
 
       <!-- 藏书阁 -->
-      <section class="card card--green card--md" aria-label="藏书阁">
+      <section class="card card card--md" aria-label="藏书阁">
         <div class="card__head">
           <Icon name="stack" size={18} />
           <span class="card__title">藏书阁</span>
@@ -82,7 +82,7 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       </section>
 
       <!-- 大事记 sparkline -->
-      <section class="card card--walnut card--sm" aria-label="大事记">
+      <section class="card card card--sm" aria-label="大事记">
         <div class="card__head">
           <Icon name="flag" size={18} />
           <span class="card__title">大事记</span>
@@ -95,7 +95,7 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       </section>
 
       <!-- 日进一词 -->
-      <section class="card card--gold card--sm" aria-label="日进一词">
+      <section class="card card card--sm" aria-label="日进一词">
         <div class="card__head">
           <Icon name="word" size={18} />
           <span class="card__title">日进一词</span>
@@ -109,7 +109,7 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       </section>
 
       <!-- 账本 -->
-      <section class="card card--teal card--sm" aria-label="账本">
+      <section class="card card card--sm" aria-label="账本">
         <div class="card__head">
           <Icon name="receipt" size={18} />
           <span class="card__title">账本</span>
@@ -133,13 +133,13 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
       </section>
 
       <!-- 全站搜索 -->
-      <button id="btn-open-cp" class="card card--ink card--sm card--button" type="button" aria-label="打开全站搜索">
+      <button id="btn-open-cp" class="card card--dark card--sm card--button" type="button" aria-label="打开全站搜索">
         <div class="card__head"><Icon name="search" size={18} /><span class="card__title">全站搜索</span></div>
         <div class="search-mini"><span class="glyph">⌘K</span><span>页面 · 博客 · 读书笔记 · 微博 · 藏书</span></div>
       </button>
 
       <!-- 功能总览 CTA -->
-      <a href="/features" class="card card--brick card--cta" aria-label="打开功能总览">
+      <a href="/features" class="card card--cta card--cta" aria-label="打开功能总览">
         <div class="card__head"><Icon name="home" size={20} /><span class="card__title">功能总览</span><span class="card__enter">13 个板块 ↗</span></div>
         <p>从读书到记账，从大事记到全站搜索——全部功能都在这里。</p>
       </a>
@@ -176,3 +176,4 @@ const fmtFull = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: '
     })();
   </script>
 </BaseLayout>
+

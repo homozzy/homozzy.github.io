@@ -1066,3 +1066,58 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; b
 .search-mini span:last-child { font-size: 0.78rem; opacity: 0.78; }
 
 .card--cta p { margin-top: auto; font-size: 0.88rem; opacity: 0.9; }
+/* ========== 杂志风覆盖（更审美） ========== */
+.card {
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 1px 2px rgba(41,37,32,0.05), inset 0 1px 0 rgba(255,255,255,0.6);
+  transition: transform 0.25s cubic-bezier(.22,1,.36,1), box-shadow 0.25s cubic-bezier(.22,1,.36,1), border-color 0.25s;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(41,37,32,0.08), inset 0 1px 0 rgba(255,255,255,0.7); border-color: rgba(41,37,32,0.18); }
+.card__head { gap: 0.5rem; opacity: 0.78; }
+.card__title { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+.card__enter { border-color: var(--line); color: var(--muted); opacity: 1; background: rgba(0,0,0,0.02); }
+.card__enter:hover { color: var(--accent); border-color: var(--accent); background: transparent; }
+.card--paper { background: #f5efe3; }
+.card--dark {
+  background: #2b2f35;
+  color: #efe9dc;
+  border-color: rgba(255,255,255,0.08);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.card--dark:hover { border-color: rgba(255,255,255,0.18); box-shadow: 0 10px 26px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12); }
+.card--dark .card__title, .card--dark .card__enter { color: rgba(239,233,220,0.75); }
+.card--dark .card__enter:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
+.latest-post p { color: #d8d2c4; }
+.tag--ondark { border-color: rgba(239,233,220,0.25); color: rgba(239,233,220,0.9); }
+.big-line, .toplist li { color: var(--muted); }
+.big-line .num { color: var(--accent); }
+.toplist { border-top-color: var(--line); }
+.toplist li b { color: var(--ink); font-weight: 400; }
+.spark-bar { background: rgba(166,63,44,0.35); }
+.spark-bar:hover { background: rgba(166,63,44,0.7); }
+.spark-labels { color: var(--muted); }
+.ledger-month, .ledger-sub { color: var(--muted); }
+.ledger-net.pos { color: #3a5d46; }
+.ledger-net.neg { color: #a63f2c; }
+.placeholder-text b { color: var(--ink); }
+.placeholder-text a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+.placeholder-text a:hover { border-bottom-color: var(--accent); }
+
+/* 功能总览腰带：从大红块改成细长签名条 */
+.card--cta {
+  grid-row: span 1;
+  min-height: 56px;
+  flex-direction: row; align-items: center; justify-content: space-between;
+  background: var(--accent);
+  color: #faf6ee;
+  border-color: rgba(0,0,0,0.12);
+  padding: 0.85rem 1.1rem;
+}
+.card--cta .card__title, .card--cta .card__enter { color: #faf6ee; opacity: 0.85; }
+.card--cta .card__enter { border-color: rgba(250,246,238,0.35); }
+.card--cta .card__enter:hover { color: #fff; border-color: rgba(250,246,238,0.6); background: transparent; }
+.card--cta p { display: none; }

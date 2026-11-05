@@ -37,6 +37,23 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
 
     <hr class="rule rule--cover" />
 
+    <section class="issue-row" aria-label="本期导读">
+      <div class="issue-note">
+        <p class="eyebrow">Editor's Note · 编者按</p>
+        <p class="issue-text">读书最大的好处，不是“知道得多”，而是“想得深”。这个站点既是随笔集，也是我的坐标：记录我教过的每一堂地理课、每一本认真翻过的书，以及每一段在课堂之外继续发生的思考。</p>
+        <p class="issue-sub">55 本书 · 52 条笔记 · 627 条微博原帖 · 持续更新</p>
+      </div>
+
+      {latestPost && (
+        <a class="issue-featured" href={`/blog/${latestPost.slug.current}/`}>
+          <p class="eyebrow">Featured · 精选</p>
+          <blockquote>「哪有什么“黄金时代”，从来都是勇毅者以自己的名字开创的纪元。」</blockquote>
+          <p class="issue-featured-title">{latestPost.title}</p>
+          <span class="issue-featured-meta">{fmt(latestPost.pubDate)}</span>
+        </a>
+      )}
+    </section>
+
     <section class="cover-toc" aria-label="目录">
       <a href="/blog" class="toc-item">
         <span class="toc-label">Blog</span>

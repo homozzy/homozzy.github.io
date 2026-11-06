@@ -1,1 +1,26 @@
-<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>homo · 读书研思</title><description>一名历史地理爱好者，读书研思，记录文史、气象与技术的随想。</description><link>https://homozzy.github.io/</link><item><title>重阳文化刍议：敬老思亲的古今共鸣</title><link>https://homozzy.github.io/blog/chongyang/</link><guid isPermaLink="true">https://homozzy.github.io/blog/chongyang/</guid><description>从桓景登高避灾，到王维佳节思亲；从佩茱萸、饮菊酒，到敬老祝寿。重阳文化在历史演进中不断丰富，历久弥新。</description><pubDate>Tue, 03 Nov 2026 00:00:00 GMT</pubDate><category>文史</category><category>节俗</category><category>随想</category></item></channel></rss>
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>homo · 读书研思</title><description>一名历史地理爱好者，读书研思，记录文史、气象与技术的随想。</description><link>https://homozzy.github.io/</link><item><title>建站手记 #01：这个站是怎么长出来的</title><link>https://homozzy.github.io/blog/build-notes-01/</link><guid isPermaLink="true">https://homozzy.github.io/blog/build-notes-01/</guid><description>从零到可以直接写文章的完整记录：技术栈、数据来源、踩坑。</description><pubDate>Thu, 05 Nov 2026 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;这个站点是 2026 年 10 月开始做的。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;背景&lt;/strong&gt;：读者和我的联系一直是在微博上发“今日推书”，但那里太吵了。我想要一个安静的地方，把读书笔记、课堂随笔、为数不多但写得认真的文章都沉淀下来。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;第一步：静态站点&lt;/strong&gt;。我用 Astro 7 做了个静态主题，内容用 Markdown 写在仓库里。线上用 GitHub Pages 托管。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;第二件事：把微博读书笔记导进来&lt;/strong&gt;。我写了一个脚本，从微博导出了 52 条原创笔记和 627 条微博原文，按年份归档到这个站。跳过转发和推广，只留原创。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;第三件事：能自己写&lt;/strong&gt;。之前改文章要让 AI 改 Astro 文件；后来换成了 Sanity CMS，写完直接发布；再后来发现手机访问 Vercel 不稳，我就把主站搬回了 GitHub Pages，并用 GitHub Actions 自动构建部署。现在用 /write 页面就能在站内直接写。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;设计&lt;/strong&gt;：米纸底色、砖红印章“研思”、衬线字。读起来像翻一本旧书，而不是刷一个页面。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;数据&lt;/strong&gt;：51 条读书笔记来自微博 @homozzy（含《稻田里的沉默》第一部），55 本书按分类整理，6 个年份，627 条微博原文。站里没有统计脚本、没有 cookie、没有第三方追踪。&lt;/p&gt;
+&lt;p&gt;以后大概还会继续长。会长什么样，我也还不知道，但它应该一直像一本书，而不是像一个仪表盘。&lt;/p&gt;
+</content:encoded><category>技术</category><category>随想</category></item><item><title>重阳文化刍议：敬老思亲的古今共鸣</title><link>https://homozzy.github.io/blog/chongyang/</link><guid isPermaLink="true">https://homozzy.github.io/blog/chongyang/</guid><description>从桓景登高避灾，到王维佳节思亲；从佩茱萸、饮菊酒，到敬老祝寿。重阳文化在历史演进中不断丰富，历久弥新。</description><pubDate>Tue, 03 Nov 2026 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;从桓景登高避灾，到王维佳节思亲；从佩茱萸、饮菊酒，到敬老祝寿。重阳文化在历史演进中不断丰富，历久弥新。曹丕赠菊、王维思乡，让敬老思亲的传统愈加深厚。虽然重阳文化的内涵随时代而变，但人们对美好生活的祈盼始终未变。&lt;/p&gt;
+&lt;h2&gt;一、从桓景到王维：避灾之俗如何成了敬老之节&lt;/h2&gt;
+&lt;p&gt;重阳的起点，是祈福禳灾；重阳的归宿，却是敬老与思亲。那穿越千年的茱萸香与菊花酒，把一场与&amp;quot;灾&amp;quot;的周旋，一点点酿成了与&amp;quot;爱&amp;quot;的共处——这是节日何以历久弥新的真正秘密。&lt;/p&gt;
+&lt;h2&gt;二、历史的厚重：课本之外的情感共鸣&lt;/h2&gt;
+&lt;p&gt;历史的厚重，不只是让课本多了几页需要记忆的知识点，更在时间沉淀中留下了古今相通的情感共鸣。&lt;/p&gt;
+&lt;p&gt;当我们在课堂上讲起&amp;quot;独在异乡为异客，每逢佳节倍思亲&amp;quot;，学生记下的或许是一行诗句；年岁渐长之后才明白，那句子底下压着的，是每一个中国人骨子里都懂得的牵挂。&lt;/p&gt;
+&lt;h2&gt;三、平凡的午后：情感不靠隆重的仪式&lt;/h2&gt;
+&lt;p&gt;情感的传递，不只靠言语和隆重的节日仪式，更在每一个平凡的午后，与家人静静相处。一个动作、一个眼神、一句简单问候，都流淌着我们最深沉的情感。&lt;/p&gt;
+&lt;h2&gt;四、遥望同一片星空：未变的是联结&lt;/h2&gt;
+&lt;p&gt;我们未必总在同一座城市生活，但遥望同一片星空，这份与家人的情感联结，便沿着无形的思念延伸，从未断绝。&lt;/p&gt;
+&lt;p&gt;重阳文化的内涵随时代而变，可人们对美好生活的祈盼始终未变——这大概就是传统节日最动人的地方：它换了衣裳，却从未换过心意。&lt;/p&gt;
+</content:encoded><category>文史</category><category>节俗</category><category>随想</category></item><item><title>为什么要给读书笔记安个家</title><link>https://homozzy.github.io/blog/why-reading-notes/</link><guid isPermaLink="true">https://homozzy.github.io/blog/why-reading-notes/</guid><description>十一年、55 本书、52 条笔记——这些思考如果只躺在微博里，会被时间埋掉。</description><pubDate>Mon, 02 Nov 2026 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;从 2015 年到今天，我断断续续在微博上写了一些读书笔记。&lt;/p&gt;
+&lt;p&gt;为什么？因为我是一名高中地理教师。课堂上我要求学生“把地图读成故事”，可我自己的读书笔记其实一直是散落的。&lt;/p&gt;
+&lt;p&gt;十一年来，我收在微博里的有 52 条——春秋战国、大宋繁华、契诃夫、威斯特伐利亚体系；也有心理学里那个“自卑”和“乌合”；也有刘慈欣的故事、契诃夫的六号病室。读完之后认真写下的感受，比“读过哪些书”更重要——因为感受才推得动人。&lt;/p&gt;
+&lt;p&gt;这个站点就是给这些笔记安的家。&lt;/p&gt;
+&lt;p&gt;之所以要安个家，是因为它们正在消失。微博的时间线会淹没、会删除、会上涨的流量把“旧”推到看不见的地方。我想要一个安静的架子，把书一本本摆上去，随时抽出来再读一遍。&lt;/p&gt;
+&lt;p&gt;52 条不是终点，是开始。以后大概还会继续写下去——新读到的、重新翻过的、以及那些在课堂上想到的东西。&lt;/p&gt;
+</content:encoded><category>读书</category><category>随想</category></item></channel></rss>

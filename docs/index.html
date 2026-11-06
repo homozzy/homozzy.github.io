@@ -1,0 +1,115 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&display=swap" rel="stylesheet"><title>我的文档 · homo · 读书研思</title><meta name="description" content="教案与清单沉淀中。"><link rel="canonical" href="https://homozzy.github.io/docs/"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="application/rss+xml" title="homo · 读书研思" href="/rss.xml"><meta name="theme-color" content="#faf8f5" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#171512" media="(prefers-color-scheme: dark)"><meta property="og:title" content="我的文档 · homo · 读书研思"><meta property="og:description" content="教案与清单沉淀中。"><meta property="og:type" content="website"><meta property="og:url" content="https://homozzy.github.io/docs/"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://homozzy.github.io/og-cover.svg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:site_name" content="homo · 读书研思"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="我的文档 · homo · 读书研思"><meta name="twitter:description" content="教案与清单沉淀中。"><meta name="twitter:image" content="https://homozzy.github.io/og-cover.svg"><meta name="generator" content="Astro v7.4.5"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"homo","url":"https://homozzy.github.io/","email":"1191615708@qq.com","jobTitle":"高中地理教师","description":"一名历史地理爱好者，读书研思，记录文史、气象与技术的随想。","sameAs":["https://github.com/homozzy"]}</script><script>
+      // 防止主题闪烁：尽早应用保存的主题，否则跟随系统
+      (() => {
+        const saved = localStorage.getItem('theme');
+        const dark = saved
+          ? saved === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.CpTwmBs6.css"></head><body><a class="skip-link" href="#main-content">跳到正文</a><div class="progress" id="scroll-progress" aria-hidden="true"></div><button class="back-top" id="back-top" type="button" aria-label="回到顶部" title="回到顶部">↑</button><header class="site-header"><div class="container"><a class="brand" href="/">homo<span class="accent">.</span><small>读书研思</small></a><nav class="nav-links" aria-label="主导航"><a href="/" class>首页</a><a href="/blog" class>博客</a><a href="/reading" class>读书录</a><a href="/features" class="active" aria-current="page">全部</a><a href="/about" class>关于</a><button id="btn-cmdk" class="icon-btn" type="button" aria-label="全站搜索（Ctrl/Cmd+K）" title="全站搜索（Ctrl/Cmd+K）"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4.3-4.3"></path></svg><span class="cmdk-hint">⌘K</span></button><button id="theme-toggle" class="icon-btn" type="button" aria-label="切换亮 / 暗主题" title="切换亮 / 暗主题"><!-- 月亮：亮色模式下显示（点击切暗） --><svg id="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg><!-- 太阳：暗色模式下显示（点击切亮） --><svg id="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="display:none"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M19.4 4.6l-1.8 1.8M6.4 17.6l-1.8 1.8"></path></svg></button><script>
+  (() => {
+    const btn = document.getElementById('theme-toggle');
+    const moon = document.getElementById('icon-moon');
+    const sun = document.getElementById('icon-sun');
+
+    const sync = () => {
+      const dark = document.documentElement.dataset.theme === 'dark';
+      moon.style.display = dark ? 'none' : 'block';
+      sun.style.display = dark ? 'block' : 'none';
+    };
+    sync();
+
+    btn?.addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      sync();
+    });
+  })();
+</script></nav></div></header><script>
+  (() => {
+    const btn = document.getElementById('btn-cmdk');
+    btn?.addEventListener('click', () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true })));
+  })();
+</script><div id="cp-root" class="command-palette" aria-hidden="true" data-astro-cid-oqgw6c2e><div class="cp-backdrop" data-close data-astro-cid-oqgw6c2e></div><div class="cp-panel" role="dialog" aria-modal="true" aria-label="全站搜索" data-astro-cid-oqgw6c2e><div class="cp-input-row" data-astro-cid-oqgw6c2e><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-astro-cid-oqgw6c2e><circle cx="11" cy="11" r="7" data-astro-cid-oqgw6c2e></circle><path d="m20 20-4.3-4.3" data-astro-cid-oqgw6c2e></path></svg><input id="cp-input" type="search" placeholder="搜索全站…页面 · 博客 · 读书笔记 · 微博 · 藏书" autocomplete="off" aria-label="搜索关键词" data-astro-cid-oqgw6c2e><kbd class="cp-kbd" data-astro-cid-oqgw6c2e>Esc</kbd></div><ul id="cp-list" class="cp-list" role="listbox" data-astro-cid-oqgw6c2e></ul><div class="cp-foot" data-astro-cid-oqgw6c2e><span data-astro-cid-oqgw6c2e>Ctrl / ⌘ K 唤起</span><span data-astro-cid-oqgw6c2e>结果 <b id="cp-count" data-astro-cid-oqgw6c2e>0</b></span></div></div></div><script>
+(() => {
+  const root = document.getElementById('cp-root');
+  if (!root) return;
+  const input = root.querySelector('#cp-input');
+  const list = root.querySelector('#cp-list');
+  const count = root.querySelector('#cp-count');
+  let index = null;
+  let loading = false;
+  let focusIdx = -1;
+  let results = [];
+  const highlight = (text, q) => {
+    const esc = (s) => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    if (!q) return esc(text);
+    const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    return esc(text).replace(re, m => `<mark>${m}</mark>`);
+  };
+  const setFocus = (i) => {
+    const items = [...list.querySelectorAll('a')];
+    if (!items.length) return;
+    focusIdx = (i + items.length) % items.length;
+    items.forEach((el, j) => el.classList.toggle('active', j === focusIdx));
+    items[focusIdx].scrollIntoView({ block: 'nearest' });
+  };
+  const open = () => {
+    root.classList.add('on');
+    document.body.style.overflow = 'hidden';
+    if (!index && !loading) {
+      loading = true;
+      fetch('/search-index.json').then(r => r.json()).then(d => { index = d; loading = false; }).catch(() => { loading = false; });
+    }
+    setTimeout(() => input.focus(), 10);
+  };
+  const close = () => {
+    root.classList.remove('on');
+    document.body.style.overflow = '';
+    focusIdx = -1;
+    results = [];
+    input.value = '';
+    list.innerHTML = '';
+    count.textContent = '0';
+  };
+  const render = () => {
+    const q = input.value.trim();
+    focusIdx = -1;
+    if (!q) { results = []; list.innerHTML = ''; count.textContent = '0'; return; }
+    if (!index) { list.innerHTML = '<li class="cp-item"><a href="#">载入索引中…</a></li>'; return; }
+    const lower = q.toLowerCase();
+    results = index.filter(e => (e.title + ' ' + e.excerpt + ' ' + e.tag).toLowerCase().includes(lower)).slice(0, 12);
+    count.textContent = String(results.length);
+    list.innerHTML = results.map((e, i) => `<li class="cp-item"><a href="${e.url}" data-idx="${i}"><strong>${highlight(e.title, q)}</strong><em>${e.tag} · ${highlight(e.excerpt, q)}</em></a></li>`).join('')
+      || '<li class="cp-item"><a href="#">没有匹配结果</a></li>';
+  };
+  document.addEventListener('keydown', (e) => {
+    const meta = e.metaKey || e.ctrlKey;
+    if (meta && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); root.classList.contains('on') ? close() : open(); return; }
+    if (e.key === 'Escape') { close(); return; }
+    if (!root.classList.contains('on')) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); setFocus(focusIdx + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setFocus(focusIdx - 1); }
+    else if (e.key === 'Enter' && focusIdx >= 0) { e.preventDefault(); list.querySelector(`a[data-idx="${focusIdx}"]`)?.click(); }
+  });
+  input.addEventListener('input', render);
+  root.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', close));
+})();
+</script><nav class="bottom-nav" aria-label="底部导航"><a href="/" class><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 4l8 7.5"/><path d="M6.5 9.5V20h11V9.5"/><path d="M10.5 20v-5h3v5"/></svg><span>首页</span></a><a href="/blog" class><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4.5 19 9 8.5 19.5l-5 1 1-5L14.5 4.5Z"/><path d="M12.5 6.5 17 11"/></svg><span>博客</span></a><a href="/reading" class><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15H7.5A2.5 2.5 0 0 0 5 20.5Z"/><path d="M9 7h6M9 11h4"/></svg><span>读书录</span></a><a href="/features" class><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>全部</span></a></nav><main id="main-content"><div class="container-narrow" style="padding-top: 3rem;"><p class="eyebrow">Docs</p><h1 class="page-title">我的文档<span class="accent">.</span></h1><div class="planned"><div class="big">📝</div><h2>规划中</h2><p class="muted">想把教案、学习笔记和常用清单沉淀在这里。目前还没有上传。</p><p class="muted" style="margin-top:0.8rem; font-size:0.85rem;">先看 <a href="/reading" class="accent">读书录</a> 和 <a href="/blog" class="accent">博客</a>；功能入口见 <a href="/features" class="accent">功能总览</a>。</p></div></div></main><footer class="site-footer"><div class="container"><div class="foot-grid"><div><div class="foot-brand">homo<span class="accent"> · </span>读书研思</div><p class="foot-note">以文字记录，以行走丈量。</p></div><nav class="foot-links" aria-label="页脚导航"><a href="/about">关于</a><a href="/blog">博客</a><a href="/reading">读书录</a><a href="/features">功能</a><a href="mailto:1191615708@qq.com">邮箱</a><a href="/rss.xml">RSS</a><a href="https://github.com/homozzy" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav></div><div class="foot-meta"><span>© 2026 homo · 保留所有文章权利（除注明转载/摘录）</span><span>Astro 7 · GitHub Pages · 不追踪访客</span></div></div></footer><script>
+      (() => {
+        const progress = document.getElementById('scroll-progress');
+        const btn = document.getElementById('back-top');
+        const onScroll = () => {
+          const h = document.documentElement;
+          const max = h.scrollHeight - h.clientHeight;
+          const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+          if (progress) progress.style.width = pct + '%';
+          if (btn) btn.classList.toggle('show', h.scrollTop > 200);
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        btn?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      })();
+    </script></body></html>

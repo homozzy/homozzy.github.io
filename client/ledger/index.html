@@ -1,0 +1,145 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&display=swap" rel="stylesheet"><title>账本 · homo · 读书研思</title><meta name="description" content="本地收支小账本：数据只保存在本机浏览器。"><link rel="canonical" href="https://homozzy.github.io/ledger/"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="application/rss+xml" title="homo · 读书研思" href="/rss.xml"><meta name="theme-color" content="#faf8f5" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#171512" media="(prefers-color-scheme: dark)"><meta property="og:title" content="账本 · homo · 读书研思"><meta property="og:description" content="本地收支小账本：数据只保存在本机浏览器。"><meta property="og:type" content="website"><meta property="og:url" content="https://homozzy.github.io/ledger/"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://homozzy.github.io/og-cover.svg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:site_name" content="homo · 读书研思"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="账本 · homo · 读书研思"><meta name="twitter:description" content="本地收支小账本：数据只保存在本机浏览器。"><meta name="twitter:image" content="https://homozzy.github.io/og-cover.svg"><meta name="generator" content="Astro v7.4.5"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"homo","url":"https://homozzy.github.io/","email":"1191615708@qq.com","jobTitle":"高中地理教师","description":"一名历史地理爱好者，读书研思，记录文史、气象与技术的随想。","sameAs":["https://github.com/homozzy"]}</script><script>
+      // 防止主题闪烁：尽早应用保存的主题，否则跟随系统
+      (() => {
+        const saved = localStorage.getItem('theme');
+        const dark = saved
+          ? saved === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Bm0feM8Z.css"></head><body><a class="skip-link" href="#main-content">跳到正文</a><div class="progress" id="scroll-progress" aria-hidden="true"></div><button class="back-top" id="back-top" type="button" aria-label="回到顶部" title="回到顶部">↑</button><header class="site-header"><div class="container"><a class="brand" href="/">homo<span class="accent">.</span><small>读书研思</small></a><nav class="nav-links" aria-label="主导航"><a href="/" class>首页</a><a href="/features" class="active">功能</a><a href="/blog" class>博客</a><a href="/reading" class>读书录</a><a href="/weibo" class>微博</a><a href="/about" class>关于</a><button id="theme-toggle" class="icon-btn" type="button" aria-label="切换亮 / 暗主题" title="切换亮 / 暗主题"><!-- 月亮：亮色模式下显示（点击切暗） --><svg id="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg><!-- 太阳：暗色模式下显示（点击切亮） --><svg id="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="display:none"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M19.4 4.6l-1.8 1.8M6.4 17.6l-1.8 1.8"></path></svg></button><script>
+  (() => {
+    const btn = document.getElementById('theme-toggle');
+    const moon = document.getElementById('icon-moon');
+    const sun = document.getElementById('icon-sun');
+
+    const sync = () => {
+      const dark = document.documentElement.dataset.theme === 'dark';
+      moon.style.display = dark ? 'none' : 'block';
+      sun.style.display = dark ? 'block' : 'none';
+    };
+    sync();
+
+    btn?.addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      sync();
+    });
+  })();
+</script></nav></div></header><main id="main-content"><div class="container-narrow" style="padding-top: 3rem;"><p class="eyebrow">Ledger</p><h1 class="page-title">账本<span class="accent">.</span></h1><p class="muted">本地的小账本：数据只存在你这台浏览器（localStorage），不上传、不同步。换电脑/清缓存会丢——记得去<a href="/sync" class="accent">数据同步</a>导出备份。</p><form id="ledger-form" class="form-grid" style="margin-top: 1.4rem;"><label class="field"><span class="label">日期</span><input class="input" id="f-date" type="date" required></label><label class="field"><span class="label">类型</span><select class="input" id="f-type"><option value="expense">支出</option><option value="income">收入</option></select></label><label class="field"><span class="label">分类</span><select class="input" id="f-cat"></select></label><label class="field"><span class="label">金额（元）</span><input class="input" id="f-amount" type="number" min="0" step="0.01" placeholder="0.00" required></label><label class="field" style="grid-column: 1 / -1;"><span class="label">备注</span><input class="input" id="f-note" type="text" placeholder="例：午饭" maxlength="60"></label><div style="grid-column: 1 / -1; display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;"><button class="btn" type="submit">＋ 记一笔</button><button class="btn btn-ghost btn-sm" type="button" id="quick-food">餐饮</button><button class="btn btn-ghost btn-sm" type="button" id="quick-taxi">交通</button><button class="btn btn-ghost btn-sm" type="button" id="quick-salary">工资</button></div></form><div style="display:flex; justify-content:space-between; align-items:end; gap:1rem; margin-top:1.5rem;"><h2 class="block-title" style="margin:0;">流水 <span class="count" id="ledger-count"></span></h2><div style="display:flex; gap:0.6rem; align-items:end;"><button id="btn-csv" class="btn btn-ghost btn-sm" type="button">导出 CSV</button><label class="field" style="min-width: 180px;"><span class="label">按月份筛选</span><select class="input" id="f-month"></select></label></div></div><div class="table-wrap"><table class="ledger"><thead><tr><th>日期</th><th>分类</th><th>备注</th><th>金额</th><th></th></tr></thead><tbody id="ledger-body"></tbody><tfoot><tr><td colspan="3">本月合计</td><td colspan="2" id="ledger-sum"></td></tr></tfoot></table></div><p id="ledger-empty" class="muted" style="display:none; text-align:center; padding: 1.5rem 0;">还没有记录。记一笔开始。</p></div><script>
+    (() => {
+      const KEY = 'ledger-entries-v1';
+      const CATS = {
+        expense: ['餐饮', '交通', '购物', '居家', '娱乐', '教育', '医疗', '其他'],
+        income: ['工资', '补贴', '其他'],
+      };
+      const $ = (id) => document.getElementById(id);
+      const today = () => new Date().toISOString().slice(0, 10);
+      const monthOf = (d) => d.slice(0, 7);
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
+      const save = (rows) => localStorage.setItem(KEY, JSON.stringify(rows));
+      const fmt = (n) => n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      const dateEl = $('f-date'); dateEl.value = today();
+      const typeEl = $('f-type'); const catEl = $('f-cat');
+      const fillCats = () => { catEl.innerHTML = CATS[typeEl.value].map(c => `<option>${c}</option>`).join(''); };
+      fillCats(); typeEl.addEventListener('change', fillCats);
+
+      const monthEl = $('f-month'); const bodyEl = $('ledger-body');
+      const sumEl = $('ledger-sum'); const countEl = $('ledger-count'); const emptyEl = $('ledger-empty');
+
+      const refreshMonths = (rows) => {
+        const months = [...new Set(rows.map(r => monthOf(r.date)))].sort().reverse();
+        const cur = monthEl.value;
+        monthEl.innerHTML = ['<option value="">全部月份</option>', ...months.map(m => `<option value="${m}">${m}</option>`)].join('');
+        if (months.includes(cur)) monthEl.value = cur;
+      };
+
+      const render = () => {
+        const rows = load();
+        refreshMonths(rows);
+        const m = monthEl.value;
+        const view = rows.filter(r => !m || monthOf(r.date) === m).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+        countEl.textContent = `${rows.length} 笔 · 当前显示 ${view.length} 笔`;
+        emptyEl.style.display = view.length ? 'none' : 'block';
+        let income = 0, expense = 0;
+        bodyEl.innerHTML = view.map(r => {
+          const sign = r.type === 'income' ? 1 : -1;
+          if (r.type === 'income') income += r.amount; else expense += r.amount;
+          return `<tr data-id="${r.id}">
+            <td>${r.date}</td>
+            <td>${r.cat}</td>
+            <td>${(r.note || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</td>
+            <td class="${r.type === 'income' ? 'ledger-income' : 'ledger-expense'}">${r.type === 'income' ? '+' : '-'}${fmt(r.amount)}</td>
+            <td><button class="btn btn-ghost btn-sm" data-del="${r.id}" type="button">删</button></td>
+          </tr>`;
+        }).join('');
+        sumEl.innerHTML = `<span class="ledger-income">+${fmt(income)}</span> / <span class="ledger-expense">-${fmt(expense)}</span> · 结余 <strong>${fmt(income - expense)}</strong>`;
+      };
+
+      document.getElementById('ledger-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const rows = load();
+        rows.push({
+          id: Date.now(),
+          date: dateEl.value,
+          type: typeEl.value,
+          cat: catEl.value,
+          amount: Number(document.getElementById('f-amount').value),
+          note: document.getElementById('f-note').value.trim(),
+        });
+        save(rows);
+        document.getElementById('f-amount').value = '';
+        document.getElementById('f-note').value = '';
+        render();
+      });
+
+      // 快速填入：只选类型与分类，金额自己填
+      const quick = (type, cat) => { typeEl.value = type; fillCats(); catEl.value = cat; document.getElementById('f-amount').focus(); };
+      document.getElementById('quick-food')?.addEventListener('click', () => quick('expense', '餐饮'));
+      document.getElementById('quick-taxi')?.addEventListener('click', () => quick('expense', '交通'));
+      document.getElementById('quick-salary')?.addEventListener('click', () => quick('income', '工资'));
+
+      // 导出 CSV（带 BOM，Excel 可直接打开）
+      document.getElementById('btn-csv')?.addEventListener('click', () => {
+        const rows = load();
+        const csv = ['日期,类型,分类,备注,金额', ...rows.map(r =>
+          [r.date, r.type === 'income' ? '收入' : '支出', r.cat, (r.note || '').replace(/"/g, '""'), r.amount]
+            .map(v => `"${v}"`).join(',')
+        )].join('\r\n');
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+        const a = Object.assign(document.createElement('a'), {
+          href: URL.createObjectURL(blob),
+          download: `ledger-${new Date().toISOString().slice(0, 10)}.csv`,
+        });
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+
+      bodyEl.addEventListener('click', (e) => {
+        const id = e.target?.getAttribute?.('data-del');
+        if (!id) return;
+        const rows = load().filter(r => String(r.id) !== String(id));
+        save(rows);
+        render();
+      });
+      monthEl.addEventListener('change', render);
+      render();
+    })();
+  </script></main><footer class="site-footer"><div class="container"><div class="foot-grid"><div><div class="foot-brand">homo<span class="accent"> · </span>读书研思</div><p class="foot-note">以文字记录，以行走丈量。</p></div><nav class="foot-links" aria-label="页脚导航"><a href="/about">关于</a><a href="/blog">博客</a><a href="/reading">读书录</a><a href="/features">功能</a><a href="mailto:1191615708@qq.com">邮箱</a><a href="/rss.xml">RSS</a><a href="https://github.com/homozzy" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav></div><div class="foot-meta"><span>© 2026 homo · 保留所有文章权利（除注明转载/摘录）</span><span>Astro 7 · GitHub Pages · 不追踪访客</span></div></div></footer><script>
+      (() => {
+        const progress = document.getElementById('scroll-progress');
+        const btn = document.getElementById('back-top');
+        const onScroll = () => {
+          const h = document.documentElement;
+          const max = h.scrollHeight - h.clientHeight;
+          const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+          if (progress) progress.style.width = pct + '%';
+          if (btn) btn.classList.toggle('show', h.scrollTop > 200);
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        btn?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      })();
+    </script></body></html>

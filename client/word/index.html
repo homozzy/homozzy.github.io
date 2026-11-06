@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&display=swap" rel="stylesheet"><title>日进一词 · homo · 读书研思</title><meta name="description" content="每天一枚成语，附释义与出处。"><link rel="canonical" href="https://homozzy.github.io/word/"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="application/rss+xml" title="homo · 读书研思" href="/rss.xml"><meta name="theme-color" content="#faf8f5" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#171512" media="(prefers-color-scheme: dark)"><meta property="og:title" content="日进一词 · homo · 读书研思"><meta property="og:description" content="每天一枚成语，附释义与出处。"><meta property="og:type" content="website"><meta property="og:url" content="https://homozzy.github.io/word/"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://homozzy.github.io/og-cover.svg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:site_name" content="homo · 读书研思"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="日进一词 · homo · 读书研思"><meta name="twitter:description" content="每天一枚成语，附释义与出处。"><meta name="twitter:image" content="https://homozzy.github.io/og-cover.svg"><meta name="generator" content="Astro v7.4.5"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"homo","url":"https://homozzy.github.io/","email":"1191615708@qq.com","jobTitle":"高中地理教师","description":"一名历史地理爱好者，读书研思，记录文史、气象与技术的随想。","sameAs":["https://github.com/homozzy"]}</script><script>
+      // 防止主题闪烁：尽早应用保存的主题，否则跟随系统
+      (() => {
+        const saved = localStorage.getItem('theme');
+        const dark = saved
+          ? saved === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Bm0feM8Z.css"></head><body><a class="skip-link" href="#main-content">跳到正文</a><div class="progress" id="scroll-progress" aria-hidden="true"></div><button class="back-top" id="back-top" type="button" aria-label="回到顶部" title="回到顶部">↑</button><header class="site-header"><div class="container"><a class="brand" href="/">homo<span class="accent">.</span><small>读书研思</small></a><nav class="nav-links" aria-label="主导航"><a href="/" class>首页</a><a href="/features" class="active">功能</a><a href="/blog" class>博客</a><a href="/reading" class>读书录</a><a href="/weibo" class>微博</a><a href="/about" class>关于</a><button id="theme-toggle" class="icon-btn" type="button" aria-label="切换亮 / 暗主题" title="切换亮 / 暗主题"><!-- 月亮：亮色模式下显示（点击切暗） --><svg id="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg><!-- 太阳：暗色模式下显示（点击切亮） --><svg id="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="display:none"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M19.4 4.6l-1.8 1.8M6.4 17.6l-1.8 1.8"></path></svg></button><script>
+  (() => {
+    const btn = document.getElementById('theme-toggle');
+    const moon = document.getElementById('icon-moon');
+    const sun = document.getElementById('icon-sun');
+
+    const sync = () => {
+      const dark = document.documentElement.dataset.theme === 'dark';
+      moon.style.display = dark ? 'none' : 'block';
+      sun.style.display = dark ? 'block' : 'none';
+    };
+    sync();
+
+    btn?.addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      sync();
+    });
+  })();
+</script></nav></div></header><main id="main-content"><div class="container-narrow" style="padding-top: 3rem;"><p class="eyebrow">One Word a Day</p><h1 class="page-title">日进一词<span class="accent">.</span></h1><p class="muted">每天一枚成语。同一天看到的是同一枚；明天，下一枚。</p><div class="word-display" style="margin-top: 1.4rem;"><div class="word" id="w-word"></div><div class="pinyin" id="w-pinyin"></div><p class="meaning" id="w-meaning"></p><p class="source" id="w-source"></p><p class="source" id="w-index" style="margin-top:0.3rem;"></p></div><div class="word-nav"><button class="btn btn-ghost btn-sm" id="w-prev" type="button">← 上一枚</button><button class="btn btn-ghost btn-sm" id="w-today" type="button">回到今天</button><button class="btn btn-ghost btn-sm" id="w-next" type="button">下一枚 →</button></div></div><script type="application/json" id="word-data">[{"word":"见微知著","pinyin":"jiàn wēi zhī zhù","meaning":"看到微小的苗头，就知道它的发展趋向。","source":"《韩非子·说林上》"},{"word":"闻鸡起舞","pinyin":"wén jī qǐ wǔ","meaning":"听到鸡叫就起来舞剑——比喻有志者抓紧时间刻苦自励。","source":"《晋书·祖逖传》"},{"word":"饮冰茹檗","pinyin":"yǐn bīng rú bò","meaning":"喝冷水吃黄檗，形容生活清苦，或心怀忧愤。","source":"《庄子·让王》"},{"word":"枕戈待旦","pinyin":"zhěn gē dài dàn","meaning":"枕着兵器等待天亮——形容时刻准备战斗。","source":"《晋书·刘琨传》"},{"word":"曲突徙薪","pinyin":"qū tū xǐ xīn","meaning":"把烟囱改弯、把柴火挪开——比喻防患于未然。","source":"《汉书·霍光传》"},{"word":"筚路蓝缕","pinyin":"bì lù lán lǚ","meaning":"驾着柴车、穿着破衣去开辟山林——形容创业艰苦。","source":"《左传·宣公十二年》"},{"word":"厚积薄发","pinyin":"hòu jī bó fā","meaning":"积累深厚，慢慢释放——比喻平时积累，关键时刻方能从容释放。","source":"《读书》（苏轼意）"},{"word":"登高望远","pinyin":"dēng gāo wàng yuăn","meaning":"登上高处看得远——比喻站得高、看得远。","source":"《荀子·劝学》"},{"word":"博学而笃志","pinyin":"bó xué ér dǔ zhì","meaning":"广博学习，坚守志向，诚实求问，深思明辨。","source":"《论语·子张》"},{"word":"学而时习之","pinyin":"xué ér shí xí zhī","meaning":"学习了并按时温习，不也很愉快吗。","source":"《论语·学而》"},{"word":"温故知新","pinyin":"wēn gù zhī xīn","meaning":"温习旧知识，获得新理解——可以做老师了。","source":"《论语·为政》"},{"word":"知行合一","pinyin":"zhī xíng hé yī","meaning":"知是行的开端，行是知的完成。","source":"王阳明 《传习录》"},{"word":"静观其变","pinyin":"jìng guān qí biàn","meaning":"静静观察事态的变化，不急于表态。","source":"成语"},{"word":"水到渠成","pinyin":"shuǐ dào qú chéng","meaning":"水流到了，沟渠自然形成——条件成熟了，事情自然成功。","source":"《景德传灯录》"},{"word":"积土成山","pinyin":"jī tǔ chéng shān","meaning":"堆积泥土成了高山——比喻积少成多，积小成大。","source":"《荀子·劝学》"},{"word":"月满则亏","pinyin":"yuè mǎn zé kuī","meaning":"月亮圆满时就开始亏缺——比喻盛极必衰。","source":"《国语·越语》"},{"word":"居安思危","pinyin":"jū ān sī wēi","meaning":"处在安全的环境，想到可能出现的危险。","source":"《左传·襄公十一年》"},{"word":"苟日新","pinyin":"gǒu rì xīn","meaning":"如果能天天除旧更新，那真是日日更新了。","source":"《礼记·大学》"},{"word":"不患寡而患不均","pinyin":"bù huàn guǎ ér huàn bù jūn","meaning":"不担心少，而担心不均匀。","source":"《论语·季氏》"},{"word":"己所不欲","pinyin":"jǐ suǒ bù yù","meaning":"自己不想要的，不要强加给别人。","source":"《论语·卫灵公》"},{"word":"君子和而不同","pinyin":"jūn zǐ hé ér bù tóng","meaning":"君子和谐相处而意见不必相同，小人同流合污而没有真正的和谐。","source":"《论语·子路》"},{"word":"学然后知不足","pinyin":"xué rán hòu zhī bù zú","meaning":"学习之后才知道自己的不足。","source":"《礼记·学记》"},{"word":"纸上得来终觉浅","pinyin":"zhǐ shàng dé lái zhōng jué qiǎn","meaning":"从书本上得到的终究浅薄——要真正理解须亲身实践。","source":"陆游《冬夜读书示子聿》"},{"word":"耳濡目染","pinyin":"ěr rú mù rǎn","meaning":"耳朵经常听到、眼睛经常看到，无形中受到影响。","source":"韩愈《清河郡公房公墓碣铭》"},{"word":"独学而无友","pinyin":"dú xué ér wú yǒu","meaning":"独自学习而没有朋友切磋，就会见识短浅。","source":"《礼记·学记》"},{"word":"不积跬步","pinyin":"bù jī kuǐ bù","meaning":"不积累半步一步，无法走到千里。","source":"《荀子·劝学》"},{"word":"尽信书不如无书","pinyin":"jìn xìn shū bù rú wú shū","meaning":"完全相信书不如没有书——读书要独立思考。","source":"《孟子·尽心下》"},{"word":"满招损","pinyin":"mǎn zhāo sǔn","meaning":"自满会招来损失，谦虚会带来益处。","source":"《尚书·大禹谟》"},{"word":"穷则独善其身","pinyin":"qióng zé dú shàn qí shēn","meaning":"困窘时独自修养好自身，显达时惠及天下。","source":"《孟子·尽心上》"},{"word":"是非之心","pinyin":"shì fēi zhī xīn","meaning":"能辨别是非的心——也叫作智之端。","source":"《孟子·公孙丑上》"}]</script><script>
+    (() => {
+      const WORDS = JSON.parse(document.getElementById('word-data').textContent);
+      const dayIndex = () => Math.floor(Date.now() / 86400000);
+      let offset = 0;
+      const el = {
+        word: document.getElementById('w-word'),
+        pinyin: document.getElementById('w-pinyin'),
+        meaning: document.getElementById('w-meaning'),
+        source: document.getElementById('w-source'),
+        index: document.getElementById('w-index'),
+      };
+      const render = () => {
+        const i = ((dayIndex() + offset) % WORDS.length + WORDS.length) % WORDS.length;
+        const w = WORDS[i];
+        el.word.textContent = w.word;
+        el.pinyin.textContent = w.pinyin;
+        el.meaning.textContent = w.meaning;
+        el.source.textContent = w.source;
+        el.index.textContent = `第 ${i + 1} / ${WORDS.length} 枚 · ${offset === 0 ? '今天' : offset > 0 ? `后 ${offset} 天` : `前 ${-offset} 天`}`;
+      };
+      document.getElementById('w-prev')?.addEventListener('click', () => { offset--; render(); });
+      document.getElementById('w-next')?.addEventListener('click', () => { offset++; render(); });
+      document.getElementById('w-today')?.addEventListener('click', () => { offset = 0; render(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') { offset--; render(); }
+        else if (e.key === 'ArrowRight') { offset++; render(); }
+      });
+      render();
+    })();
+  </script></main><footer class="site-footer"><div class="container"><div class="foot-grid"><div><div class="foot-brand">homo<span class="accent"> · </span>读书研思</div><p class="foot-note">以文字记录，以行走丈量。</p></div><nav class="foot-links" aria-label="页脚导航"><a href="/about">关于</a><a href="/blog">博客</a><a href="/reading">读书录</a><a href="/features">功能</a><a href="mailto:1191615708@qq.com">邮箱</a><a href="/rss.xml">RSS</a><a href="https://github.com/homozzy" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav></div><div class="foot-meta"><span>© 2026 homo · 保留所有文章权利（除注明转载/摘录）</span><span>Astro 7 · GitHub Pages · 不追踪访客</span></div></div></footer><script>
+      (() => {
+        const progress = document.getElementById('scroll-progress');
+        const btn = document.getElementById('back-top');
+        const onScroll = () => {
+          const h = document.documentElement;
+          const max = h.scrollHeight - h.clientHeight;
+          const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+          if (progress) progress.style.width = pct + '%';
+          if (btn) btn.classList.toggle('show', h.scrollTop > 200);
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        btn?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      })();
+    </script></body></html>

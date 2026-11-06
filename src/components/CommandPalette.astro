@@ -2,7 +2,7 @@
 // 全局命令面板：Ctrl/⌘ K 唤起，输入即搜，↑↓ 选择，Enter 打开，Esc 关闭
 ---
 
-<div id="cp-root" class="command-palette" aria-hidden="true">
+<div id="cp-root" class="command-palette" inert>
   <div class="cp-backdrop" data-close></div>
   <div class="cp-panel" role="dialog" aria-modal="true" aria-label="全站搜索">
     <div class="cp-input-row">
@@ -103,6 +103,7 @@
   };
   const open = () => {
     root.classList.add('on');
+    root.inert = false;
     document.body.style.overflow = 'hidden';
     if (!index && !loading) {
       loading = true;
@@ -112,6 +113,7 @@
   };
   const close = () => {
     root.classList.remove('on');
+    root.inert = true;
     document.body.style.overflow = '';
     focusIdx = -1;
     results = [];

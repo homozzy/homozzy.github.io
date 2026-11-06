@@ -7,5 +7,5 @@ export const MILESTONES: Milestone[] = [
   { id: 'ms-2024', year: '2024', title: '井喷之年 · 31 条', body: '从《活着》到《恶魔在华城》，从《置身事内》到《鼠疫》——一年里写下 31 条笔记，覆盖 30 本书，历史、文学、心理、政经、科幻、自然，全都在内。' },
   { id: 'ms-2025', year: '2025', title: '笔耕不辍', body: '7 条笔记：《春分书简》《弱传播》《历史的教训》等，记录仍在继续。' },
   { id: 'ms-2026', year: '2026', title: '创作连载《稻田里的沉默》', body: '第一部：《田埂上的老人》（2026.05.23）。一篇以华城案件为背景的连载，仍在写。' },
-  { id: 'ms-site', year: '2026 · 11', title: 'homo-site-wine.vercel.app 上线', body: '个人网站建立：首页名片、博客、读书录（52 条全文）、藏书阁、大事记、账本与全站搜索；随后迁移到 Vercel + Sanity。' },
+  { id: 'ms-site', year: '2026 · 11', title: 'homozzy.github.io 上线', body: '个人网站建立：首页名片、博客、读书录（52 条全文）、藏书阁、大事记、账本与全站搜索；初始迁移至 Vercel + Sanity，后迁至 GitHub Pages + Actions 自动部署。' },
 ];

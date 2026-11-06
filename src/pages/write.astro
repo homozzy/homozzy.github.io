@@ -3,15 +3,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
 ---
 
-<BaseLayout title={`写新博客 · ${SITE.title}`} description="直接在网站里写文章、保存、发布。">
+<BaseLayout title={`写新博客 · ${SITE.title}`} description="直接在网站里写文章，提交到 GitHub 仓库，自动触发构建。">
   <div class="container" style="padding-top: 2.5rem;">
     <p class="eyebrow">Write</p>
     <h1 class="page-title">写新博客<span class="accent">.</span></h1>
-    <p class="muted">直接在本站写，点发布立即生效。密钥只保存在你的浏览器。</p>
+    <p class="muted">草稿自动保存在本机浏览器。<strong>发布到仓库</strong>后 1–2 分钟自动上线（由 GitHub Actions 构建）。</p>
 
     <div class="write-auth">
-      <input id="w-key" class="input" type="password" placeholder="我的写作密钥" autocomplete="off" />
-      <button id="btn-load" class="btn btn-ghost" type="button">加载文章</button>
+      <input id="w-pat" class="input" type="password" placeholder="GitHub PAT（fine-grained，只给 contents write 权限）" autocomplete="off" />
+      <button id="btn-load" class="btn btn-ghost" type="button">读取文章列表</button>
       <span id="w-auth-status" class="meta-line" aria-live="polite" style="margin:0;"></span>
     </div>
 
@@ -27,7 +27,7 @@ import { SITE } from '../consts';
           <label class="field"><span class="label">日期</span><input id="w-date" class="input" type="date" /></label>
         </div>
         <div class="form-grid">
-          <label class="field"><span class="label">文件名（slug，可留空）</span><input id="w-slug" class="input" type="text" placeholder="cyang-yuanxilai" autocomplete="off" /></label>
+          <label class="field"><span class="label">文件名（英文/拼音；不填自动生成）</span><input id="w-slug" class="input" type="text" placeholder="my-first-post" autocomplete="off" /></label>
           <label class="field"><span class="label">标签，逗号分隔</span><input id="w-tags" class="input" type="text" placeholder="文史, 随想" autocomplete="off" /></label>
         </div>
         <label class="field"><span class="label">摘要</span><input id="w-desc" class="input" type="text" placeholder="一句话说清这篇写什么" autocomplete="off" /></label>
@@ -37,7 +37,7 @@ import { SITE } from '../consts';
 
         <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.4rem;">
           <button id="btn-save" class="btn" type="button">发布</button>
-          <button id="btn-delete" class="btn-danger btn-sm" type="button">删除</button>
+          <button id="btn-export" class="btn btn-ghost" type="button">⬇ 导出 .md</button>
           <span id="w-status" class="meta-line" aria-live="polite" style="margin:0;"></span>
         </div>
       </section>
@@ -56,7 +56,7 @@ import { SITE } from '../consts';
     import { marked } from 'marked';
 
     const $ = (id) => document.getElementById(id);
-    const keyEl = $('w-key');
+    const patEl = $('w-pat');
     const authStatus = $('w-auth-status');
     const postList = $('post-list');
     const titleEl = $('w-title');
@@ -68,55 +68,27 @@ import { SITE } from '../consts';
     const preview = $('preview-body');
     const wordcount = $('preview-wordcount');
     const status = $('w-status');
-    const STORAGE_KEY = 'write-key';
-    let selectedId = null;
-    let posts = [];
+    const DRAFT_KEY = 'write-draft-v2';
+    const PAT_KEY = 'gh-pat';
+    const REPO = 'homozzy/homozzy.github.io';
+    const DIR = 'src/content/blog';
 
-    // basic elements
     dateEl.value = new Date().toISOString().slice(0, 10);
 
-    const getKey = () => localStorage.getItem(STORAGE_KEY) || '';
-    const setKey = (k) => localStorage.setItem(STORAGE_KEY, k);
-    const clearForm = () => {
-      selectedId = null;
-      [titleEl, slugEl, tagsEl, descEl, bodyEl].forEach(el => (el.value = ''));
-      dateEl.value = new Date().toISOString().slice(0, 10);
-      renderPreview();
-    };
-    const fillForm = (p) => {
-      selectedId = p._id;
-      titleEl.value = p.title;
-      slugEl.value = p.slug?.current ?? '';
-      dateEl.value = p.pubDate ? p.pubDate.slice(0, 10) : new Date().toISOString().slice(0, 10);
-      tagsEl.value = (p.tags ?? []).join(', ');
-      descEl.value = p.description ?? '';
-      bodyEl.value = p.body ?? '';
-      renderPreview();
-    };
-
-    const apiFetch = async (url, opts = {}) => {
-      const res = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), 'x-write-key': getKey() } });
-      if (res.status === 401) throw new Error('密钥错误或未设置');
+    const getPAT = () => localStorage.getItem(PAT_KEY) || '';
+    const api = async (url, opts = {}) => {
+      const res = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), Authorization: `Bearer ${getPAT()}`, Accept: 'application/vnd.github+json' } });
+      if (res.status === 401) throw new Error('PAT 无效或已过期');
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '请求失败');
+      if (!res.ok) throw new Error(data.message || '请求失败');
       return data;
     };
 
-    const loadPosts = async () => {
-      const k = getKey();
-      if (!k) { authStatus.textContent = '先输入密钥。'; return; }
-      try {
-        posts = await apiFetch('/api/posts');
-        renderList();
-        authStatus.textContent = `已加载 ${posts.length} 篇文章`;
-      } catch (err) {
-        authStatus.textContent = err.message;
-      }
-    };
-
-    const renderList = () => {
-      postList.innerHTML = posts.map(p => `<li><button class="post-item-btn ${p._id === selectedId ? 'active' : ''}" data-id="${p._id}" type="button"><strong>${p.title}</strong><span>${p.pubDate ? p.pubDate.slice(0, 10) : ''}</span></button></li>`).join('')
-        || '<li class="muted" style="padding:0.5rem;">暂无文章</li>';
+    const buildMarkdown = () => {
+      const t = titleEl.value.trim();
+      const d = descEl.value.trim();
+      const tagStr = tagsEl.value.split(/[,，]/).map(s => s.trim()).filter(Boolean).map(t => `"${t}"`).join(', ');
+      return `---\ntitle: "${t.replace(/"/g, '\\"')}"\ndescription: "${d.replace(/"/g, '\\"')}"\npubDate: ${dateEl.value}\ntags: [${tagStr}]\n---\n\n${bodyEl.value}`;
     };
 
     const renderPreview = () => {
@@ -124,67 +96,111 @@ import { SITE } from '../consts';
       wordcount.textContent = `${(bodyEl.value || '').replace(/\s/g, '').length} 字`;
     };
 
-    // events
-    $('btn-load')?.addEventListener('click', () => {
-      const k = keyEl.value.trim();
-      if (k) setKey(k);
-      loadPosts();
-    });
-    $('btn-new')?.addEventListener('click', clearForm);
-    [titleEl, slugEl, tagsEl, descEl, dateEl, bodyEl].forEach(el => el.addEventListener('input', renderPreview));
+    const download = (name, text) => {
+      const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+      const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: name });
+      a.click();
+      URL.revokeObjectURL(a.href);
+    };
 
-    postList.addEventListener('click', (e) => {
+    const loadList = async () => {
+      const pat = getPAT();
+      if (!pat) { authStatus.textContent = '先粘贴 PAT。'; return; }
+      try {
+        const items = await api(`https://api.github.com/repos/${REPO}/contents/${DIR}`);
+        postList.innerHTML = items
+          .filter(i => i.name.endsWith('.md'))
+          .map(i => `<li><button class="post-item-btn" data-name="${i.name}" type="button"><strong>${i.name.replace(/\.md$/, '')}</strong></button></li>`)
+          .join('') || '<li class="muted" style="padding:0.5rem;">暂无文章</li>';
+        authStatus.textContent = `已读取 ${items.filter(i => i.name.endsWith('.md')).length} 篇`;
+      } catch (err) {
+        authStatus.textContent = err.message;
+      }
+    };
+
+    postList.addEventListener('click', async (e) => {
       const btn = e.target?.closest?.('.post-item-btn');
       if (!btn) return;
-      const p = posts.find(x => x._id === btn.dataset.id);
-      if (p) fillForm(p);
+      try {
+        const item = await api(`https://api.github.com/repos/${REPO}/contents/${DIR}/${btn.dataset.name}`);
+        const raw = decodeURIComponent(escape(atob(item.content)));
+        const m = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+        if (!m) { status.textContent = '文件格式无法解析'; return; }
+        const fm = m[1], body = m[2];
+        const pick = (k) => (fm.split('\n').find(l => l.startsWith(k + ':')) || '').slice(k.length + 1).trim().replace(/^"|"$/g, '');
+        const pickArray = (k) => {
+          const line = fm.split('\n').find(l => l.startsWith(k + ':')) || '';
+          const r = line.slice(k.length + 1).trim().match(/^\[(.*)\]$/);
+          if (!r) return [];
+          return r[1].split(',').map(s => s.trim().replace(/^"|"$/g, '')).filter(Boolean);
+        };
+        titleEl.value = pick('title');
+        descEl.value = pick('description');
+        dateEl.value = pick('pubDate').slice(0, 10);
+        tagsEl.value = pickArray('tags').join(', ');
+        bodyEl.value = body;
+        slugEl.value = btn.dataset.name.replace(/\.md$/, '');
+        renderPreview();
+        status.textContent = '已载入';
+      } catch (err) {
+        status.textContent = err.message;
+      }
     });
 
+    $('btn-load')?.addEventListener('click', () => {
+      const pat = patEl.value.trim();
+      if (pat) localStorage.setItem(PAT_KEY, pat);
+      loadList();
+    });
+    $('btn-new')?.addEventListener('click', () => {
+      [titleEl, slugEl, tagsEl, descEl, bodyEl].forEach(el => (el.value = ''));
+      dateEl.value = new Date().toISOString().slice(0, 10);
+      renderPreview();
+    });
+    [titleEl, slugEl, tagsEl, descEl, dateEl, bodyEl].forEach(el => el.addEventListener('input', renderPreview));
+    $('btn-export')?.addEventListener('click', () => {
+      const slug = (slugEl.value.trim() || `post-${Date.now()}`).replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+      download(`${slug}.md`, buildMarkdown());
+    });
     $('btn-save')?.addEventListener('click', async () => {
       const title = titleEl.value.trim();
       if (!title) { status.textContent = '标题不能为空'; return; }
-      status.textContent = '保存中…';
+      const slug = (slugEl.value.trim() || `post-${Date.now()}`).replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+      const path = `${DIR}/${slug}.md`;
+      const md = buildMarkdown();
+      status.textContent = '提交到 GitHub…';
       try {
-        const saved = await apiFetch('/api/posts', {
-          method: 'POST',
+        // 先看存不存在，决定是否带 sha 覆盖
+        let sha;
+        try { const cur = await api(`https://api.github.com/repos/${REPO}/contents/${path}`); sha = cur.sha; } catch {}
+        const res = await api(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+          method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            _id: selectedId ?? undefined,
-            title,
-            slug: slugEl.value.trim() || undefined,
-            description: descEl.value.trim(),
-            pubDate: dateEl.value,
-            tags: tagsEl.value.split(/[,，]/).map(s => s.trim()).filter(Boolean),
-            body: bodyEl.value,
-          }),
+          body: JSON.stringify({ message: `blog: ${title}`, content: btoa(unescape(encodeURIComponent(md))), ...(sha ? { sha } : {}) }),
         });
-        status.textContent = `已发布 ✓`;
-        await loadPosts();
-        fillForm(saved);
+        status.innerHTML = `已提交 <a class="accent" href="${res.commit?.html_url}" target="_blank" rel="noopener">${res.commit?.sha?.slice(0, 7)}</a> · 1–2 分钟后自动上线`;
+        await loadList();
       } catch (err) {
         status.textContent = err.message;
       }
     });
 
-    $('btn-delete')?.addEventListener('click', async () => {
-      if (!selectedId) { status.textContent = '还没选择文章'; return; }
-      if (!confirm('确定删除这篇？')) return;
-      status.textContent = '删除中…';
-      try {
-        await apiFetch(`/api/posts?id=${selectedId}`, { method: 'DELETE' });
-        status.textContent = '已删除';
-        clearForm();
-        await loadPosts();
-      } catch (err) {
-        status.textContent = err.message;
-      }
-    });
-
-    // init
-    if (getKey()) {
-      keyEl.value = getKey();
-      loadPosts();
-    }
+    // draft autosave
+    const saveDraft = () => {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        title: titleEl.value, slug: slugEl.value, desc: descEl.value,
+        date: dateEl.value, tags: tagsEl.value, body: bodyEl.value,
+      }));
+    };
+    [titleEl, slugEl, tagsEl, descEl, dateEl, bodyEl].forEach(el => el.addEventListener('input', saveDraft));
+    try {
+      const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+      titleEl.value = d.title ?? ''; slugEl.value = d.slug ?? '';
+      tagsEl.value = d.tags ?? ''; descEl.value = d.desc ?? '';
+      dateEl.value = d.date || new Date().toISOString().slice(0, 10);
+      bodyEl.value = d.body ?? '';
+    } catch {}
     renderPreview();
+    if (getPAT()) { patEl.value = getPAT(); loadList(); }
   </script>
 </BaseLayout>

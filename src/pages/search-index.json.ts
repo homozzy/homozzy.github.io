@@ -1,9 +1,7 @@
-import type { APIRoute } from 'astro';
+﻿import type { APIRoute } from 'astro';
 import { getAllPosts } from '../lib/sanity';
 import readingNotes from '../data/reading-notes.json';
 import weiboPosts from '../data/weibo-posts.json';
-
-export const prerender = false;
 
 const stripTo = (s: string, n: number) => {
   const t = s.replace(/\s+/g, ' ').trim();
@@ -62,3 +60,4 @@ export const GET: APIRoute = async () => {
     headers: { 'Content-Type': 'application/json; charset=utf-8' },
   });
 };
+

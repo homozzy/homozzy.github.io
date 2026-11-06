@@ -1,14 +1,15 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { SITE } from '../../consts';
-import { getPostBySlug, getAllPosts } from '../../lib/sanity';
+import { getAllPosts } from '../../lib/sanity';
 import { marked } from 'marked';
 
-export const prerender = false;
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+  return posts.map((post) => ({ params: { id: post.slug.current }, props: { post } }));
+}
 
-const { id } = Astro.params;
-const post = await getPostBySlug(id!);
-if (!post) return Astro.redirect('/404');
+const { post } = Astro.props;
 
 const allPosts = await getAllPosts();
 const idx = allPosts.findIndex((p) => p.slug.current === post.slug.current);

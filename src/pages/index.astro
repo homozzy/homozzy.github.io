@@ -4,8 +4,6 @@ import { SITE } from '../consts';
 import readingNotes from '../data/reading-notes.json';
 import { getAllPosts } from '../lib/sanity';
 
-export const prerender = false;
-
 const posts = await getAllPosts();
 const latestPost = posts[0] ?? null;
 
@@ -87,3 +85,4 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
     </section>
   </div>
 </BaseLayout>
+

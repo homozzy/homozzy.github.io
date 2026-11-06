@@ -1,9 +1,7 @@
----
+﻿---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { SITE } from '../../consts';
 import { getAllPosts } from '../../lib/sanity';
-
-export const prerender = false;
 
 const posts = await getAllPosts();
 const fmt = (d: string) =>
@@ -94,3 +92,4 @@ const readingMinutes = (s: string | undefined) => Math.max(1, Math.ceil(wordCoun
     </script>
   </div>
 </BaseLayout>
+

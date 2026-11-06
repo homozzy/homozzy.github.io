@@ -1,8 +1,6 @@
-import rss from '@astrojs/rss';
+﻿import rss from '@astrojs/rss';
 import { getAllPosts } from '../lib/sanity';
 import { SITE } from '../consts';
-
-export const prerender = false;
 
 export async function GET(context: { site?: URL }) {
   const posts = await getAllPosts();
@@ -20,3 +18,4 @@ export async function GET(context: { site?: URL }) {
     })),
   });
 }
+

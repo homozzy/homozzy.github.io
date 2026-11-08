@@ -3,119 +3,124 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
 ---
 
-<BaseLayout title={`写新博客 · ${SITE.title}`} description="直接在网站里写文章，提交到 GitHub 仓库，自动触发构建。">
-  <div class="container" style="padding-top: 2.5rem;">
+<BaseLayout title={`写一篇 · ${SITE.title}`} description="一句话发布：第一行是标题，其余全是正文，点发布 1–2 分钟后自动上线。">
+  <div class="container-narrow" style="padding-top: 2.5rem;">
     <p class="eyebrow">Write</p>
-    <h1 class="page-title">写新博客<span class="accent">.</span></h1>
-    <p class="muted">草稿自动保存在本机浏览器。<strong>发布到仓库</strong>后 1–2 分钟自动上线（由 GitHub Actions 构建）。</p>
+    <h1 class="page-title">写一篇<span class="accent">.</span></h1>
+    <p class="muted">规则很简单：<strong>第一行是标题，其余全是正文</strong>。草稿自动存本机。发布后 1–2 分钟自动上线。</p>
 
-    <div class="write-auth">
-      <input id="w-pat" class="input" type="password" placeholder="GitHub PAT（fine-grained，只给 contents write 权限）" autocomplete="off" />
-      <button id="btn-load" class="btn btn-ghost" type="button">读取文章列表</button>
-      <span id="w-auth-status" class="meta-line" aria-live="polite" style="margin:0;"></span>
+    <div id="pat-block" class="write-auth" style="display:none;">
+      <input id="w-pat" class="input" type="password" placeholder="GitHub PAT（只需第一次）" autocomplete="off" />
+      <button id="btn-load" class="btn btn-ghost" type="button">保存钥匙</button>
+    </div>
+    <div id="pat-ok" class="meta-line" style="display:none;">
+      钥匙已保存在本机浏览器 · <button id="btn-forget" class="btn-link" type="button">清除</button>
     </div>
 
-    <div class="write-layout">
-      <section class="write-list" aria-label="文章列表">
-        <button id="btn-new" class="btn" type="button" style="width:100%; margin-bottom:0.6rem;">＋ 新建文章</button>
-        <ul id="post-list"></ul>
-      </section>
+    <label class="field" style="margin-top:1rem;">
+      <span class="label">想写的都在这里（第一行 = 标题）</span>
+      <textarea id="w-body" class="input mono" rows="16"
+        placeholder="课例：一张地图引发的争论&#10;&#10;这节课我想让学生自己看图说话，结果争论比预想的激烈的多……&#10;&#10;（支持 Markdown：## 小节、**加粗**、列表都行）"
+        spellcheck="false"></textarea>
+    </label>
 
-      <section class="write-form" aria-label="编辑器">
-        <div class="form-grid">
-          <label class="field"><span class="label">标题</span><input id="w-title" class="input" type="text" placeholder="文章标题" autocomplete="off" /></label>
-          <label class="field"><span class="label">日期</span><input id="w-date" class="input" type="date" /></label>
-        </div>
-        <div class="form-grid">
-          <label class="field"><span class="label">文件名（英文/拼音；不填自动生成）</span><input id="w-slug" class="input" type="text" placeholder="my-first-post" autocomplete="off" /></label>
-          <label class="field"><span class="label">标签，逗号分隔</span><input id="w-tags" class="input" type="text" placeholder="文史, 随想" autocomplete="off" /></label>
-        </div>
-        <label class="field"><span class="label">摘要</span><input id="w-desc" class="input" type="text" placeholder="一句话说清这篇写什么" autocomplete="off" /></label>
-        <label class="field"><span class="label">正文（Markdown）</span>
-          <textarea id="w-body" class="input mono" rows="14" placeholder="开始写……&#10;&#10;## 小节&#10;&#10;正文段落。" spellcheck="false"></textarea>
-        </label>
-
-        <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.4rem;">
-          <button id="btn-save" class="btn" type="button">发布</button>
-          <button id="btn-export" class="btn btn-ghost" type="button">⬇ 导出 .md</button>
-          <span id="w-status" class="meta-line" aria-live="polite" style="margin:0;"></span>
-        </div>
-      </section>
-
-      <section class="write-preview" aria-label="预览">
-        <div class="preview-head">
-          <span class="eyebrow">Preview</span>
-          <span id="preview-wordcount" class="muted" style="font-size:0.78rem;"></span>
-        </div>
-        <div id="preview-body" class="prose write-preview-body"></div>
-      </section>
+    <div class="tag-row">
+      <span class="label">标签</span>
+      <input id="w-tags" class="input" style="flex:1; min-width:0;" value="随笔" autocomplete="off" />
+      <button id="btn-save" class="btn" type="button">发布 →</button>
+      <span id="w-status" class="meta-line" style="margin:0;" aria-live="polite"></span>
     </div>
+
+    <details id="preview-box" class="write-detail" style="margin-top:1.2rem;">
+      <summary class="muted">预览结果</summary>
+      <div id="preview-body" class="prose write-preview-body"></div>
+    </details>
+
+    <details id="list-box" class="write-detail">
+      <summary class="muted">已有文章（点开可继续编辑）<span id="list-count"></span></summary>
+      <ul id="post-list"></ul>
+    </details>
   </div>
 
   <script>
     import { marked } from 'marked';
 
     const $ = (id) => document.getElementById(id);
+    const patBlock = $('pat-block');
+    const patOk = $('pat-ok');
     const patEl = $('w-pat');
-    const authStatus = $('w-auth-status');
-    const postList = $('post-list');
-    const titleEl = $('w-title');
-    const dateEl = $('w-date');
-    const slugEl = $('w-slug');
-    const tagsEl = $('w-tags');
-    const descEl = $('w-desc');
     const bodyEl = $('w-body');
+    const tagsEl = $('w-tags');
+    const previewBox = $('preview-box');
     const preview = $('preview-body');
-    const wordcount = $('preview-wordcount');
     const status = $('w-status');
-    const DRAFT_KEY = 'write-draft-v2';
+    const postList = $('post-list');
+    const listBox = $('list-box');
+    const DRAFT_KEY = 'write-draft-v3';
     const PAT_KEY = 'gh-pat';
     const REPO = 'homozzy/homozzy.github.io';
     const DIR = 'src/content/blog';
 
-    dateEl.value = new Date().toISOString().slice(0, 10);
+    // 「编辑中」状态：载入已有文章后记住文件名 / 原始日期，重发即覆盖
+    let editingFile = '';
+    let editingDate = '';
 
     const getPAT = () => localStorage.getItem(PAT_KEY) || '';
     const api = async (url, opts = {}) => {
       const res = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), Authorization: `Bearer ${getPAT()}`, Accept: 'application/vnd.github+json' } });
-      if (res.status === 401) throw new Error('PAT 无效或已过期');
+      if (res.status === 401) throw new Error('钥匙无效或已过期，点下方"清除"重新填');
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || '请求失败');
       return data;
     };
 
+    const splitInput = () => {
+      const raw = (bodyEl.value || '').replace(/\r\n/g, '\n');
+      const firstBreak = raw.indexOf('\n');
+      const title = (firstBreak === -1 ? raw : raw.slice(0, firstBreak)).replace(/^#+\s*/, '').trim();
+      const rest = firstBreak === -1 ? '' : raw.slice(firstBreak + 1).replace(/^\n+/, '');
+      return { title, body: rest };
+    };
+
+    const dateStr = () => editingDate || new Date().toISOString().slice(0, 10);
+
+    const makeSlug = (title) => {
+      const ascii = title.match(/[A-Za-z][A-Za-z0-9-]{2,}/);
+      if (ascii) return ascii[0].toLowerCase();
+      const now = new Date();
+      return 'w' + now.toISOString().slice(0, 10).replace(/-/g, '') + '-' +
+        String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+    };
+
     const buildMarkdown = () => {
-      const t = titleEl.value.trim();
-      const d = descEl.value.trim();
-      const tagStr = tagsEl.value.split(/[,，]/).map(s => s.trim()).filter(Boolean).map(t => `"${t}"`).join(', ');
-      return `---\ntitle: "${t.replace(/"/g, '\\"')}"\ndescription: "${d.replace(/"/g, '\\"')}"\npubDate: ${dateEl.value}\ntags: [${tagStr}]\n---\n\n${bodyEl.value}`;
+      const { title, body } = splitInput();
+      const tags = (tagsEl.value || '').split(/[,，]/).map(s => s.trim()).filter(Boolean).map(t => `"${t}"`).join(', ');
+      const firstPara = (body.split('\n').find(l => l.trim() && !l.trim().startsWith('#')) || '').trim().slice(0, 60);
+      const q = (s) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      return `---\ntitle: "${q(title)}"\ndescription: "${q(firstPara)}"\npubDate: ${dateStr()}\ntags: [${tags}]\n---\n\n${body}`;
     };
 
     const renderPreview = () => {
-      preview.innerHTML = marked.parse(bodyEl.value || '*（暂无内容）*', { breaks: true, gfm: true });
-      wordcount.textContent = `${(bodyEl.value || '').replace(/\s/g, '').length} 字`;
+      const { title, body } = splitInput();
+      preview.innerHTML = marked.parse((title ? `# ${title}\n\n` : '') + (body || '*（换个想法就会出现在这里）*'), { breaks: true, gfm: true });
     };
 
-    const download = (name, text) => {
-      const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
-      const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: name });
-      a.click();
-      URL.revokeObjectURL(a.href);
+    const saveDraft = () => {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ body: bodyEl.value, tags: tagsEl.value, file: editingFile, date: editingDate }));
     };
 
-    const loadList = async () => {
+    const loadList = async (silent = false) => {
       const pat = getPAT();
-      if (!pat) { authStatus.textContent = '先粘贴 PAT。'; return; }
+      if (!pat) return;
       try {
         const items = await api(`https://api.github.com/repos/${REPO}/contents/${DIR}`);
-        postList.innerHTML = items
-          .filter(i => i.name.endsWith('.md'))
+        const mds = items.filter(i => i.name.endsWith('.md'));
+        postList.innerHTML = mds
           .map(i => `<li><button class="post-item-btn" data-name="${i.name}" type="button"><strong>${i.name.replace(/\.md$/, '')}</strong></button></li>`)
-          .join('') || '<li class="muted" style="padding:0.5rem;">暂无文章</li>';
-        authStatus.textContent = `已读取 ${items.filter(i => i.name.endsWith('.md')).length} 篇`;
-      } catch (err) {
-        authStatus.textContent = err.message;
-      }
+          .join('') || '<li class="muted" style="padding:0.4rem 0;">仓库里还没有文章</li>';
+        $('list-count').textContent = mds.length ? `（${mds.length}）` : '';
+        if (!silent) status.textContent = `读取到 ${mds.length} 篇`;
+      } catch {}
     };
 
     postList.addEventListener('click', async (e) => {
@@ -129,78 +134,88 @@ import { SITE } from '../consts';
         const fm = m[1], body = m[2];
         const pick = (k) => (fm.split('\n').find(l => l.startsWith(k + ':')) || '').slice(k.length + 1).trim().replace(/^"|"$/g, '');
         const pickArray = (k) => {
-          const line = fm.split('\n').find(l => l.startsWith(k + ':')) || '';
-          const r = line.slice(k.length + 1).trim().match(/^\[(.*)\]$/);
-          if (!r) return [];
-          return r[1].split(',').map(s => s.trim().replace(/^"|"$/g, '')).filter(Boolean);
+          const r = (fm.split('\n').find(l => l.startsWith(k + ':')) || '').slice(k.length + 1).trim().match(/^\[(.*)\]$/);
+          return r ? r[1].split(',').map(s => s.trim().replace(/^"|"$/g, '')).filter(Boolean) : [];
         };
-        titleEl.value = pick('title');
-        descEl.value = pick('description');
-        dateEl.value = pick('pubDate').slice(0, 10);
-        tagsEl.value = pickArray('tags').join(', ');
-        bodyEl.value = body;
-        slugEl.value = btn.dataset.name.replace(/\.md$/, '');
+        editingFile = btn.dataset.name;
+        editingDate = pick('pubDate').slice(0, 10) || dateStr();
+        tagsEl.value = pickArray('tags').join(', ') || '随笔';
+        bodyEl.value = `${pick('title')}\n\n${body}`;
         renderPreview();
-        status.textContent = '已载入';
+        saveDraft();
+        status.textContent = `已载入「${pick('title')}」，改完再点发布即覆盖原文`;
       } catch (err) {
         status.textContent = err.message;
       }
     });
 
-    $('btn-load')?.addEventListener('click', () => {
-      const pat = patEl.value.trim();
-      if (pat) localStorage.setItem(PAT_KEY, pat);
-      loadList();
-    });
-    $('btn-new')?.addEventListener('click', () => {
-      [titleEl, slugEl, tagsEl, descEl, bodyEl].forEach(el => (el.value = ''));
-      dateEl.value = new Date().toISOString().slice(0, 10);
-      renderPreview();
-    });
-    [titleEl, slugEl, tagsEl, descEl, dateEl, bodyEl].forEach(el => el.addEventListener('input', renderPreview));
-    $('btn-export')?.addEventListener('click', () => {
-      const slug = (slugEl.value.trim() || `post-${Date.now()}`).replace(/[^a-z0-9-]/gi, '-').toLowerCase();
-      download(`${slug}.md`, buildMarkdown());
-    });
+    bodyEl.addEventListener('input', () => { renderPreview(); saveDraft(); });
+    tagsEl.addEventListener('input', saveDraft);
+
     $('btn-save')?.addEventListener('click', async () => {
-      const title = titleEl.value.trim();
-      if (!title) { status.textContent = '标题不能为空'; return; }
-      const slug = (slugEl.value.trim() || `post-${Date.now()}`).replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+      const { title } = splitInput();
+      if (!title) { status.textContent = '第一行得是标题'; return; }
+      const slug = editingFile ? editingFile.replace(/\.md$/, '') : makeSlug(title);
       const path = `${DIR}/${slug}.md`;
-      const md = buildMarkdown();
-      status.textContent = '提交到 GitHub…';
+      status.textContent = '发布中…';
       try {
-        // 先看存不存在，决定是否带 sha 覆盖
         let sha;
-        try { const cur = await api(`https://api.github.com/repos/${REPO}/contents/${path}`); sha = cur.sha; } catch {}
+        try { sha = (await api(`https://api.github.com/repos/${REPO}/contents/${path}`)).sha; } catch {}
+        const md = buildMarkdown();
         const res = await api(`https://api.github.com/repos/${REPO}/contents/${path}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: `blog: ${title}`, content: btoa(unescape(encodeURIComponent(md))), ...(sha ? { sha } : {}) }),
         });
-        status.innerHTML = `已提交 <a class="accent" href="${res.commit?.html_url}" target="_blank" rel="noopener">${res.commit?.sha?.slice(0, 7)}</a> · 1–2 分钟后自动上线`;
-        await loadList();
+        editingFile = `${slug}.md`;
+        saveDraft();
+        status.innerHTML = `✅ 已发布 <a class="accent" href="/blog/${slug}/">去文章页</a>（最多 2 分钟后生效）`;
+        listBox.open = true;
+        await loadList(true);
       } catch (err) {
         status.textContent = err.message;
       }
     });
 
-    // draft autosave
-    const saveDraft = () => {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({
-        title: titleEl.value, slug: slugEl.value, desc: descEl.value,
-        date: dateEl.value, tags: tagsEl.value, body: bodyEl.value,
-      }));
-    };
-    [titleEl, slugEl, tagsEl, descEl, dateEl, bodyEl].forEach(el => el.addEventListener('input', saveDraft));
+    $('btn-load')?.addEventListener('click', async () => {
+      const pat = patEl.value.trim();
+      if (!pat) { status.textContent = '先粘贴钥匙'; return; }
+      localStorage.setItem(PAT_KEY, pat);
+      patBlock.style.display = 'none'; patOk.style.display = '';
+      await loadList();
+    });
+    $('btn-forget')?.addEventListener('click', () => {
+      localStorage.removeItem(PAT_KEY);
+      patOk.style.display = 'none'; patBlock.style.display = '';
+      postList.innerHTML = ''; $('list-count').textContent = '';
+    });
+
+    // 初始化
     try {
       const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
-      titleEl.value = d.title ?? ''; slugEl.value = d.slug ?? '';
-      tagsEl.value = d.tags ?? ''; descEl.value = d.desc ?? '';
-      dateEl.value = d.date || new Date().toISOString().slice(0, 10);
       bodyEl.value = d.body ?? '';
+      tagsEl.value = d.tags ?? '随笔';
+      editingFile = d.file ?? '';
+      editingDate = d.date ?? '';
     } catch {}
+    if (getPAT()) { patOk.style.display = ''; loadList(true); } else { patBlock.style.display = ''; }
     renderPreview();
-    if (getPAT()) { patEl.value = getPAT(); loadList(); }
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') $('btn-save').click();
+    });
   </script>
 </BaseLayout>
+
+<style>
+  .write-auth { display: flex; gap: 0.6rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
+  .write-auth .input { flex: 1; min-width: 240px; }
+  .tag-row { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.8rem; flex-wrap: wrap; }
+  .tag-row .label { white-space: nowrap; }
+  #btn-save { white-space: nowrap; }
+  .write-detail { border-top: 1px solid var(--line); margin-top: 1rem; padding-top: 0.7rem; }
+  .write-detail summary { cursor: pointer; font-size: 0.9rem; }
+  .write-preview-body { padding-top: 0.6rem; }
+  #post-list { display: flex; flex-wrap: wrap; gap: 0.45rem; list-style: none; padding: 0.6rem 0 0; }
+  .btn-link { background: none; border: none; color: var(--accent); cursor: pointer; padding: 0; text-decoration: underline; font: inherit; }
+  #w-body { width: 100%; resize: vertical; line-height: 1.8; }
+</style>

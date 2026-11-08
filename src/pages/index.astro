@@ -191,6 +191,8 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
       const slug = ascii ? ascii[0].toLowerCase()
         : 'w' + now.toISOString().slice(0, 10).replace(/-/g, '') + '-' + String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
       const md = `---\ntitle: "${q(title)}"\ndescription: "${q(firstPara)}"\npubDate: ${now.toISOString().slice(0, 10)}\ntags: [${tags}]\n---\n\n${body}`;
+      const send = $('qw-send');
+      send.disabled = true;
       status.textContent = '发布中…';
       try {
         const path = `${DIR}/${slug}.md`;
@@ -206,6 +208,8 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
         saveDraft();
       } catch (err) {
         status.textContent = err.message;
+      } finally {
+        send.disabled = false;
       }
     };
 

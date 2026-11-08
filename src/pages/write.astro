@@ -31,6 +31,11 @@ import { SITE } from '../consts';
       <span id="w-status" class="meta-line" style="margin:0;" aria-live="polite"></span>
     </div>
 
+    <div id="edit-state" class="edit-state" style="display:none;" aria-live="polite">
+      正在编辑 <code id="edit-file"></code>
+      <button id="btn-fresh" class="btn-link" type="button">新开一篇（另存新文件）</button>
+    </div>
+
     <details id="preview-box" class="write-detail" style="margin-top:1.2rem;">
       <summary class="muted">预览结果</summary>
       <div id="preview-body" class="prose write-preview-body"></div>
@@ -64,6 +69,12 @@ import { SITE } from '../consts';
     // 「编辑中」状态：载入已有文章后记住文件名 / 原始日期，重发即覆盖
     let editingFile = '';
     let editingDate = '';
+
+    const editState = $('edit-state');
+    const refreshEditState = () => {
+      editState.style.display = editingFile ? '' : 'none';
+      $('edit-file').textContent = editingFile || '';
+    };
 
     const getPAT = () => localStorage.getItem(PAT_KEY) || '';
     const api = async (url, opts = {}) => {
@@ -152,9 +163,20 @@ import { SITE } from '../consts';
     bodyEl.addEventListener('input', () => { renderPreview(); saveDraft(); });
     tagsEl.addEventListener('input', saveDraft);
 
+    $('btn-fresh')?.addEventListener('click', () => {
+      editingFile = ''; editingDate = '';
+      bodyEl.value = ''; tagsEl.value = '随笔';
+      renderPreview(); saveDraft(); refreshEditState();
+      status.textContent = '新的一篇，开写';
+      bodyEl.focus();
+    });
+
     $('btn-save')?.addEventListener('click', async () => {
       const { title } = splitInput();
       if (!title) { status.textContent = '第一行得是标题'; return; }
+      const btn = $('btn-save');
+      if (btn.disabled) return;
+      btn.disabled = true;
       const slug = editingFile ? editingFile.replace(/\.md$/, '') : makeSlug(title);
       const path = `${DIR}/${slug}.md`;
       status.textContent = '发布中…';
@@ -167,13 +189,17 @@ import { SITE } from '../consts';
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: `blog: ${title}`, content: btoa(unescape(encodeURIComponent(md))), ...(sha ? { sha } : {}) }),
         });
+        const firstPublish = !editingFile;
         editingFile = `${slug}.md`;
-        saveDraft();
-        status.innerHTML = `✅ 已发布 <a class="accent" href="/blog/${slug}/">去文章页</a>（最多 2 分钟后生效）`;
+        if (!editingDate) editingDate = dateStr();
+        saveDraft(); refreshEditState();
+        status.innerHTML = `✅ 已发布 <a class="accent" href="/blog/${slug}/">去文章页</a>（最多 2 分钟后生效）${firstPublish ? ' · 写完结了想再发新的，点下方「新开一篇」' : ''}`;
         listBox.open = true;
         await loadList(true);
       } catch (err) {
         status.textContent = err.message;
+      } finally {
+        btn.disabled = false;
       }
     });
 
@@ -198,6 +224,7 @@ import { SITE } from '../consts';
       editingFile = d.file ?? '';
       editingDate = d.date ?? '';
     } catch {}
+    refreshEditState();
     if (getPAT()) { patOk.style.display = ''; loadList(true); } else { patBlock.style.display = ''; }
     renderPreview();
     document.addEventListener('keydown', (e) => {
@@ -212,7 +239,13 @@ import { SITE } from '../consts';
   .tag-row { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.8rem; flex-wrap: wrap; }
   .tag-row .label { white-space: nowrap; }
   #btn-save { white-space: nowrap; }
-  .write-detail { border-top: 1px solid var(--line); margin-top: 1rem; padding-top: 0.7rem; }
+    .write-detail { border-top: 1px solid var(--line); margin-top: 1rem; padding-top: 0.7rem; }
+  .edit-state {
+    margin-top: 0.5rem; font-size: 0.82rem; color: var(--muted);
+    display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
+  }
+  .edit-state code { font-family: ui-monospace, Consolas, monospace; color: var(--accent); background: none; padding: 0; }
+  .btn-link { background: none; border: none; color: var(--accent); cursor: pointer; padding: 0; text-decoration: underline; font: inherit; font-size: 0.85rem; }
   .write-detail summary { cursor: pointer; font-size: 0.9rem; }
   .write-preview-body { padding-top: 0.6rem; }
   #post-list { display: flex; flex-wrap: wrap; gap: 0.45rem; list-style: none; padding: 0.6rem 0 0; }

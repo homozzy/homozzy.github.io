@@ -25,6 +25,19 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
           <a class="btn" href="/blog">看博客 →</a>
           <a class="text-link" href="/about">关于我</a>
         </div>
+
+        <div class="quickwrite" id="quickwrite">
+          <button id="qw-open" class="qw-trigger" type="button">✍ 随手写一句…</button>
+          <div id="qw-form" class="qw-form" hidden>
+            <textarea id="qw-body" rows="3" placeholder="第一行是标题，下面是正文……" spellcheck="false"></textarea>
+            <div class="qw-row">
+              <input id="qw-tags" value="随笔" aria-label="标签" autocomplete="off" />
+              <button id="qw-send" class="btn" type="button">发布 →</button>
+              <span id="qw-status" class="meta-line" style="margin:0;" aria-live="polite"></span>
+            </div>
+            <p class="qw-hint">发布后 1–2 分钟自动上线 · <a href="/write">去完整编辑器</a></p>
+          </div>
+        </div>
       </div>
 
       <div class="cover-deco" aria-hidden="true">
@@ -85,4 +98,123 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
     </section>
   </div>
 </BaseLayout>
+
+<style>
+  .quickwrite { margin-top: 1.3rem; }
+  .qw-trigger {
+    background: none; border: none; padding: 0; cursor: pointer;
+    color: var(--muted); font: inherit; font-size: 0.95rem;
+    text-decoration: underline dotted; text-underline-offset: 3px;
+  }
+  .qw-trigger:hover { color: var(--accent); }
+  .qw-form { margin-top: 0.75rem; max-width: 560px; }
+  .qw-form textarea {
+    width: 100%; box-sizing: border-box; padding: 0.6rem 0.8rem;
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--panel); color: var(--ink);
+    font: inherit; font-size: 0.95rem; line-height: 1.7; resize: vertical;
+  }
+  .qw-row { display: flex; gap: 0.5rem; margin-top: 0.55rem; align-items: center; flex-wrap: wrap; }
+  .qw-row input {
+    width: 118px; padding: 0.38rem 0.6rem;
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--panel); color: var(--ink); font: inherit; font-size: 0.9rem;
+  }
+  #qw-send { font-size: 0.9rem; padding: 0.38rem 1rem; }
+  .qw-hint { font-size: 0.78rem; margin-top: 0.4rem; color: var(--muted); }
+  html[data-theme='dark'] .qw-form textarea,
+  html[data-theme='dark'] .qw-row input { border-color: rgba(255,255,255,0.1); }
+</style>
+
+<script is:inline>
+  (() => {
+    const $ = (id) => document.getElementById(id);
+    const openBtn = $('qw-open'), form = $('qw-form');
+    if (!openBtn) return;
+    const bodyEl = $('qw-body'), tagsEl = $('qw-tags'), status = $('qw-status');
+    const PAT_KEY = 'gh-pat';
+    const DRAFT_KEY = 'write-draft-v3';
+    const REPO = 'homozzy/homozzy.github.io';
+    const DIR = 'src/content/blog';
+
+    const saveDraft = () => {
+      try {
+        const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+        d.body = bodyEl.value;
+        if (d.body && d.title === undefined) d.title = (d.body.split('\n')[0] || '').trim();
+        d.tags = tagsEl.value;
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+      } catch {}
+    };
+
+    openBtn.addEventListener('click', () => {
+      form.hidden = !form.hidden;
+      if (!form.hidden) {
+        openBtn.style.display = 'none';
+        try {
+          const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+          // 已有草稿：跳过编辑器顶部标题行，直接续写正文
+          if (d.body) {
+            const nl = d.body.indexOf('\n');
+            bodyEl.value = nl === -1 ? '' : d.body.slice(nl + 1).replace(/^\n+/, '');
+          }
+          if (d.tags) tagsEl.value = d.tags;
+        } catch {}
+        bodyEl.focus();
+      }
+    });
+
+    const api = async (url, opts = {}) => {
+      const res = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), Authorization: `Bearer ${localStorage.getItem(PAT_KEY) || ''}`, Accept: 'application/vnd.github+json' } });
+      if (res.status === 401) throw new Error('钥匙无效或过期，去 /write 重填');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || '请求失败');
+      return data;
+    };
+
+    const publish = async () => {
+      const pat = localStorage.getItem(PAT_KEY) || '';
+      if (!pat) {
+        status.innerHTML = '第一次发布需要一把钥匙 · <a class="accent" href="/write">去 /write 保存一次</a>';
+        return;
+      }
+      const raw = (bodyEl.value || '').replace(/\r\n/g, '\n');
+      const first = raw.indexOf('\n');
+      const title = (first === -1 ? raw : raw.slice(0, first)).replace(/^#+\s*/, '').trim();
+      if (!title) { status.textContent = '第一行当标题写吧'; return; }
+      const body = first === -1 ? '' : raw.slice(first + 1).replace(/^\n+/, '');
+      const tags = (tagsEl.value || '随笔').split(/[,，]/).map(s => s.trim()).filter(Boolean).map(t => `"${t}"`).join(', ');
+      const firstPara = (body.split('\n').find(l => l.trim() && !l.trim().startsWith('#')) || '').trim().slice(0, 60);
+      const q = (s) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      const ascii = title.match(/[A-Za-z][A-Za-z0-9-]{2,}/);
+      const now = new Date();
+      const slug = ascii ? ascii[0].toLowerCase()
+        : 'w' + now.toISOString().slice(0, 10).replace(/-/g, '') + '-' + String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
+      const md = `---\ntitle: "${q(title)}"\ndescription: "${q(firstPara)}"\npubDate: ${now.toISOString().slice(0, 10)}\ntags: [${tags}]\n---\n\n${body}`;
+      status.textContent = '发布中…';
+      try {
+        const path = `${DIR}/${slug}.md`;
+        let sha;
+        try { sha = (await api(`https://api.github.com/repos/${REPO}/contents/${path}`)).sha; } catch {}
+        await api(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: `blog: ${title}`, content: btoa(unescape(encodeURIComponent(md))), ...(sha ? { sha } : {}) }),
+        });
+        status.innerHTML = `✅ 已发布 <a class="accent" href="/blog/${slug}/">去文章页</a>`;
+        bodyEl.value = '';
+        saveDraft();
+      } catch (err) {
+        status.textContent = err.message;
+      }
+    };
+
+    $('qw-send').addEventListener('click', publish);
+    bodyEl.addEventListener('input', saveDraft);
+    tagsEl.addEventListener('input', saveDraft);
+    bodyEl.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') publish();
+    });
+  })();
+</script>
 

@@ -82,7 +82,16 @@ for (const [rel, buf] of local) {
   const sha = gitBlobSha(buf);
   if (remote.get(rel) !== sha) write.push({ path: rel, sha, buf });
 }
-for (const p of remote.keys()) if (!local.has(p)) del.push(p);
+// 保护：/write 在网站上发布的内容远程有、本地没有时，绝不顺带删除（本地仓库总是落后远程）
+const PROTECT_DELETE = /^src\/content\/blog\//;
+const forceDel = process.argv.includes('--force-del');
+for (const p of remote.keys()) if (!local.has(p)) {
+  if (!forceDel && PROTECT_DELETE.test(p)) {
+    console.log(`⚠ 保留远程仅 /write 发布的文件（不随推同步删除）: ${p}`);
+    continue;
+  }
+  del.push(p);
+}
 if (!write.length && !del.length) { console.log('无差异，跳过。'); process.exit(0); }
 for (const w of write) console.log(`写 ${w.path}`);
 for (const d of del) console.log(`删 ${d}`);

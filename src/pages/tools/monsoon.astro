@@ -34,24 +34,24 @@ import { SITE } from '../../consts';
         <path d="M660,120 C720,150 760,240 740,320 C725,375 690,390 665,380 C640,368 630,280 635,220 C638,170 640,130 660,120 Z" class="ms-sea" />
         <text x="680" y="255" class="ms-label">太平洋</text>
 
-        <!-- 气压标签（冬夏互换） -->
+        <!-- 气压标签（冬夏互换，置于图幅上沿避免压箭头） -->
         <g id="winter-pressure">
-          <g class="ms-pressure" transform="translate(120,140)">
-            <rect x="-8" y="-16" width="176" height="30" rx="6" />
+          <g class="ms-pressure" transform="translate(150,86)">
+            <rect x="-92" y="-16" width="184" height="32" rx="6" />
             <text>蒙古—西伯利亚 高压</text>
           </g>
-          <g class="ms-pressure sea" transform="translate(600,156)">
-            <rect x="-8" y="-16" width="120" height="30" rx="6" />
+          <g class="ms-pressure sea" transform="translate(640,86)">
+            <rect x="-64" y="-16" width="128" height="32" rx="6" />
             <text>海上 低压</text>
           </g>
         </g>
-        <g id="summer-pressure" class="hidden-p">
-          <g class="ms-pressure hot" transform="translate(120,140)">
-            <rect x="-8" y="-16" width="176" height="30" rx="6" />
+        <g id="summer-pressure">
+          <g class="ms-pressure hot" transform="translate(150,86)">
+            <rect x="-100" y="-16" width="200" height="32" rx="6" />
             <text>亚洲热低压（印度低压）</text>
           </g>
-          <g class="ms-pressure sea hot" transform="translate(600,156)">
-            <rect x="-8" y="-16" width="120" height="30" rx="6" />
+          <g class="ms-pressure sea hot" transform="translate(640,86)">
+            <rect x="-66" y="-16" width="132" height="32" rx="6" />
             <text>夏威夷 高压</text>
           </g>
         </g>
@@ -107,14 +107,14 @@ import { SITE } from '../../consts';
   .ms-sky { fill: transparent; }
   .ms-land { fill: color-mix(in srgb, var(--accent) 14%, var(--panel)); stroke: var(--line); stroke-width: 1.2; }
   .ms-sea  { fill: color-mix(in srgb, #4a7ba6 16%, var(--panel)); stroke: var(--line); stroke-width: 1.2; }
-  .ms-label { font: 600 15px var(--font-serif, serif); fill: var(--ink); }
+  .ms-label { font: 600 16px var(--font-serif, serif); fill: var(--ink); }
   .ms-sealine { stroke: var(--line); stroke-width: 1; stroke-dasharray: 4 6; opacity: 0.5; }
   .ms-cloud { fill: color-mix(in srgb, var(--ink) 7%, transparent); }
   .ms-slow1 { animation: drift 26s linear infinite alternate; }
   @keyframes drift { from { transform: translateX(-14px); } to { transform: translateX(18px); } }
 
   .ms-pressure rect { fill: var(--bg); stroke: var(--line); opacity: 0.92; }
-  .ms-pressure text { font: 500 14px ui-sans-serif, system-ui, sans-serif; fill: var(--ink); text-anchor: middle; }
+  .ms-pressure text { font: 500 15px ui-sans-serif, system-ui, sans-serif; fill: var(--ink); text-anchor: middle; dominant-baseline: middle; }
   .ms-pressure.hot rect { stroke: var(--accent); }
   .ms-pressure.hot text { fill: var(--accent); }
   .hidden-p { opacity: 0; transition: opacity 0.4s; }

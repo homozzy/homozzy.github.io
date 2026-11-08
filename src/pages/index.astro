@@ -212,8 +212,13 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
     $('qw-send').addEventListener('click', publish);
     bodyEl.addEventListener('input', saveDraft);
     tagsEl.addEventListener('input', saveDraft);
-    bodyEl.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') publish();
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !form.hidden) {
+        form.hidden = true;
+        openBtn.style.display = '';
+        openBtn.textContent = '✍ 随手写一句…';
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !form.hidden) publish();
     });
   })();
 </script>

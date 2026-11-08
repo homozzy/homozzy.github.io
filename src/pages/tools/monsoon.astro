@@ -36,34 +36,34 @@ import { SITE } from '../../consts';
 
         <!-- 气压标签（冬夏互换，置于图幅上沿避免压箭头） -->
         <g id="winter-pressure">
-          <g class="ms-pressure" transform="translate(150,86)">
-            <rect x="-92" y="-16" width="184" height="32" rx="6" />
+          <g class="ms-pressure" transform="translate(150,74)">
+            <rect x="-100" y="-17" width="200" height="34" rx="6" />
             <text>蒙古—西伯利亚 高压</text>
           </g>
-          <g class="ms-pressure sea" transform="translate(640,86)">
-            <rect x="-64" y="-16" width="128" height="32" rx="6" />
+          <g class="ms-pressure sea" transform="translate(648,74)">
+            <rect x="-72" y="-17" width="144" height="34" rx="6" />
             <text>海上 低压</text>
           </g>
         </g>
         <g id="summer-pressure">
-          <g class="ms-pressure hot" transform="translate(150,86)">
-            <rect x="-100" y="-16" width="200" height="32" rx="6" />
+          <g class="ms-pressure hot" transform="translate(150,74)">
+            <rect x="-116" y="-17" width="232" height="34" rx="6" />
             <text>亚洲热低压（印度低压）</text>
           </g>
-          <g class="ms-pressure sea hot" transform="translate(640,86)">
-            <rect x="-66" y="-16" width="132" height="32" rx="6" />
+          <g class="ms-pressure sea hot" transform="translate(648,74)">
+            <rect x="-76" y="-17" width="152" height="34" rx="6" />
             <text>夏威夷 高压</text>
           </g>
         </g>
 
         <!-- 风向箭头（JS 控制旋转与强度） -->
         <g id="wind-arrows">
-          <g class="wind" transform="translate(280,150)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
-          <g class="wind" transform="translate(300,225)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
-          <g class="wind" transform="translate(285,300)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
-          <g class="wind" transform="translate(430,180)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
-          <g class="wind" transform="translate(445,260)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
-          <g class="wind" transform="translate(520,215)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
+          <g class="wind" transform="translate(320,190)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
+          <g class="wind" transform="translate(320,265)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
+          <g class="wind" transform="translate(310,330)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
+          <g class="wind" transform="translate(450,205)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
+          <g class="wind" transform="translate(460,285)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
+          <g class="wind" transform="translate(530,245)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
         </g>
 
         <text id="ms-strength" x="400" y="360" class="ms-caption" text-anchor="middle"></text>
@@ -156,8 +156,8 @@ import { SITE } from '../../consts';
     const wp = document.getElementById('winter-pressure');
     const sp = document.getElementById('summer-pressure');
     const arrows = [...document.querySelectorAll('#wind-arrows .wind')];
-    // 冬季风（1 月）120° = 指向东南；夏季风（7 月）300° = 指向西北
-    const WINTER = 120, SUMMER = 300;
+    // 冬季风（1 月）60° = 指向东南偏南；夏季风（7 月）240° = 指向西北偏北
+    const WINTER = 60, SUMMER = 240;
 
     const cap = (m) => {
       if (m <= 2 || m >= 11)

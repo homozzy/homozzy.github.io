@@ -1,0 +1,195 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../consts';
+---
+
+<BaseLayout title={`教具 · 季风换季演示 · ${SITE.title}`} description="拖动月份滑块，看东亚季风如何随海陆热力差异而反转——风向、气压与天气一起变化。">
+  <div class="container-narrow" style="padding-top: 3rem;">
+    <p class="eyebrow">Teaching Kit · 教具</p>
+    <h1 class="page-title">季风换季演示<span class="accent">.</span></h1>
+    <p class="lead" style="font-size:1.1rem;">
+      拖动下面的月份滑块，观察<strong>东亚季风</strong>如何在冬夏之间反转：
+      风向、海陆气压与天气同时变化。核心原因只有一个——<strong>海陆热力差异</strong>
+      （陆地比热小，冬夏升温降温都快）。
+    </p>
+
+    <div class="monsoon-card">
+      <svg id="monsoon-svg" viewBox="0 0 800 430" role="img" aria-label="东亚季风示意图：左侧亚洲大陆，右侧太平洋，箭头表示风向">
+        <defs>
+          <marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)" />
+          </marker>
+        </defs>
+
+        <!-- 天空/海洋分界装饰 -->
+        <rect x="0" y="0" width="800" height="430" class="ms-sky" />
+        <path d="M0,60 C120,40 200,70 300,55 C380,45 460,65 540,50 C640,38 720,60 800,48 L800,0 L0,0 Z" class="ms-cloud ms-slow1" />
+        <path d="M0,405 L800,405" class="ms-sealine" />
+
+        <!-- 大陆 -->
+        <path d="M40,120 C110,90 180,140 210,200 C240,265 195,330 140,370 C110,392 70,380 45,340 C15,290 8,180 40,120 Z" class="ms-land" />
+        <text x="105" y="235" class="ms-label">亚洲大陆</text>
+
+        <!-- 海洋 -->
+        <path d="M660,120 C720,150 760,240 740,320 C725,375 690,390 665,380 C640,368 630,280 635,220 C638,170 640,130 660,120 Z" class="ms-sea" />
+        <text x="680" y="255" class="ms-label">太平洋</text>
+
+        <!-- 气压标签（冬夏互换） -->
+        <g id="winter-pressure">
+          <g class="ms-pressure" transform="translate(120,140)">
+            <rect x="-8" y="-16" width="176" height="30" rx="6" />
+            <text>蒙古—西伯利亚 高压</text>
+          </g>
+          <g class="ms-pressure sea" transform="translate(600,156)">
+            <rect x="-8" y="-16" width="120" height="30" rx="6" />
+            <text>海上 低压</text>
+          </g>
+        </g>
+        <g id="summer-pressure" class="hidden-p">
+          <g class="ms-pressure hot" transform="translate(120,140)">
+            <rect x="-8" y="-16" width="176" height="30" rx="6" />
+            <text>亚洲热低压（印度低压）</text>
+          </g>
+          <g class="ms-pressure sea hot" transform="translate(600,156)">
+            <rect x="-8" y="-16" width="120" height="30" rx="6" />
+            <text>夏威夷 高压</text>
+          </g>
+        </g>
+
+        <!-- 风向箭头（JS 控制旋转与强度） -->
+        <g id="wind-arrows">
+          <g class="wind" transform="translate(280,150)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
+          <g class="wind" transform="translate(300,225)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
+          <g class="wind" transform="translate(285,300)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
+          <g class="wind" transform="translate(430,180)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
+          <g class="wind" transform="translate(445,260)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
+          <g class="wind" transform="translate(520,215)"><line x1="-52" y1="0" x2="52" y2="0" marker-end="url(#arrowhead)" /></g>
+        </g>
+
+        <text id="ms-strength" x="400" y="360" class="ms-caption" text-anchor="middle"></text>
+      </svg>
+
+      <div class="ms-controls">
+        <input id="ms-slider" type="range" min="1" max="12" step="1" value="7" aria-label="选择月份" />
+        <div class="ms-months" aria-hidden="true">
+          <span>1 月</span><span>4 月</span><span>7 月</span><span>10 月</span><span>12 月</span>
+        </div>
+      </div>
+
+      <div class="ms-caption-box" aria-live="polite">
+        <p id="ms-month" class="ms-month">7 月</p>
+        <p id="ms-text"></p>
+      </div>
+    </div>
+
+    <section class="ms-notes">
+      <h2>怎么读这张图</h2>
+      <ul>
+        <li><strong>冬季（1 月前后）</strong>：陆地降温快 → 形成<strong>冷高压</strong>（蒙古—西伯利亚高压）；海洋相对是低压。风从陆地吹向海洋——<strong>西北风</strong>，寒冷干燥，我国大部分地区少雨。</li>
+        <li><strong>夏季（7 月前后）</strong>：陆地升温快 → 形成<strong>热低压</strong>；海洋上是高压。风从海洋吹向陆地——<strong>东南风</strong>，温暖湿润，把雨带带上岸，季雨来临。</li>
+        <li><strong>过渡季节（4–5 月、10 月前后）</strong>：两股势力此消彼长，风弱且换向，天气随雨带南北推移摇摆。</li>
+      </ul>
+      <p class="muted" style="font-size:0.88rem;">
+        延伸一步：南亚的夏季风（西南季风）除海陆热力差异外，还叠加了<strong>气压带、风带随季节移动</strong>
+        （东南信风越过赤道后向右偏转为西南季风）——这也是南亚雨季更强的原因。
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .monsoon-card {
+    border: 1px solid var(--line); border-radius: 14px;
+    padding: 1rem 1rem 1.2rem; background: var(--panel);
+    margin: 1.5rem 0;
+  }
+  #monsoon-svg { width: 100%; height: auto; display: block; }
+  .ms-sky { fill: transparent; }
+  .ms-land { fill: color-mix(in srgb, var(--accent) 14%, var(--panel)); stroke: var(--line); stroke-width: 1.2; }
+  .ms-sea  { fill: color-mix(in srgb, #4a7ba6 16%, var(--panel)); stroke: var(--line); stroke-width: 1.2; }
+  .ms-label { font: 600 15px var(--font-serif, serif); fill: var(--ink); }
+  .ms-sealine { stroke: var(--line); stroke-width: 1; stroke-dasharray: 4 6; opacity: 0.5; }
+  .ms-cloud { fill: color-mix(in srgb, var(--ink) 7%, transparent); }
+  .ms-slow1 { animation: drift 26s linear infinite alternate; }
+  @keyframes drift { from { transform: translateX(-14px); } to { transform: translateX(18px); } }
+
+  .ms-pressure rect { fill: var(--bg); stroke: var(--line); opacity: 0.92; }
+  .ms-pressure text { font: 500 14px ui-sans-serif, system-ui, sans-serif; fill: var(--ink); text-anchor: middle; }
+  .ms-pressure.hot rect { stroke: var(--accent); }
+  .ms-pressure.hot text { fill: var(--accent); }
+  .hidden-p { opacity: 0; transition: opacity 0.4s; }
+  #winter-pressure, #summer-pressure { transition: opacity 0.4s; }
+
+  .wind { line-height: 0; }
+  .wind line {
+    stroke: var(--accent); stroke-width: 3.4; stroke-linecap: round;
+    transition: transform 0.6s cubic-bezier(.3,.9,.3,1), opacity 0.6s;
+    transform-origin: 0 0;
+  }
+
+  .ms-caption { font: 500 14px ui-sans-serif, system-ui, sans-serif; fill: var(--muted); }
+
+  .ms-controls { padding: 0.8rem 1.2rem 0.4rem; }
+  .ms-controls input[type='range'] { width: 100%; accent-color: var(--accent); }
+  .ms-months {
+    display: flex; justify-content: space-between;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem;
+  }
+  .ms-caption-box { padding: 0.2rem 1.2rem 0.8rem; }
+  .ms-month {
+    font-family: var(--font-serif, serif);
+    font-size: 1.05rem; font-weight: 600; color: var(--ink); margin-bottom: 0.3rem;
+  }
+  #ms-text { color: var(--ink); font-size: 0.95rem; line-height: 1.7; }
+  .ms-notes h2 { font-size: 1.1rem; margin: 1.4rem 0 0.5rem; }
+  .ms-notes ul { padding-left: 1.2rem; line-height: 1.8; }
+  .ms-notes li { margin-bottom: 0.4rem; }
+</style>
+
+<script is:inline>
+  (() => {
+    const slider = document.getElementById('ms-slider');
+    const monthEl = document.getElementById('ms-month');
+    const textEl = document.getElementById('ms-text');
+    const strengthEl = document.getElementById('ms-strength');
+    const wp = document.getElementById('winter-pressure');
+    const sp = document.getElementById('summer-pressure');
+    const arrows = [...document.querySelectorAll('#wind-arrows .wind')];
+    // 冬季风（1 月）120° = 指向东南；夏季风（7 月）300° = 指向西北
+    const WINTER = 120, SUMMER = 300;
+
+    const cap = (m) => {
+      if (m <= 2 || m >= 11)
+        return '冬季风：风从陆地吹向海洋（偏西北风）。寒冷干燥，我国大部分地区少雨；北方凛冽，南方温润但降雨稀少。';
+      if (m <= 5 || m === 10)
+        return '过渡季节：海陆温差缩小，风势转弱、风向调整。雨带开始在华南一带活动，等待夏季风正式上岸。';
+      return '夏季风：风从海洋吹向陆地（偏东南风）。温暖湿润，雨带随之推进上岸，由南向北依次入雨季。';
+    };
+
+    let raf;
+    const render = () => {
+      const m = Number(slider.value);
+      // 正向 1→7 逐渐转夏，8→12 转回冬
+      const tt = m <= 7 ? (m - 1) / 6 : (13 - m) / 6;
+      const angle = WINTER + tt * (SUMMER - WINTER);
+      const strength = 0.35 + 0.65 * Math.abs(tt * 2 - 1);
+      arrows.forEach((g) => {
+        const line = g.querySelector('line');
+        line.style.transform = `rotate(${angle}deg)`;
+        line.style.opacity = strength.toFixed(2);
+      });
+      const winterish = tt < 0.5;
+      wp.style.opacity = winterish ? '1' : '0';
+      sp.style.opacity = winterish ? '0' : '1';
+      monthEl.textContent = `${m} 月`;
+      textEl.textContent = cap(m);
+      strengthEl.textContent =
+        m >= 6 && m <= 9 ? '势力：夏季风强盛期'
+        : (m <= 2 || m >= 11 ? '势力：冬季风强盛期' : '势力：换季调整期');
+    };
+    cancelAnimationFrame(raf);
+    slider.addEventListener('input', render);
+    render();
+  })();
+</script>

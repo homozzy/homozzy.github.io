@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+import { getAllPosts } from '../lib/sanity';
+
+// 「讲台」栏目：每月一篇课堂实录 / 教学反思，tag = 讲台
+const posts = (await getAllPosts())
+  .filter((p) => (p.tags ?? []).includes('讲台'))
+  .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+
+const fmt = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
+---
+
+<BaseLayout title={`讲台 · ${SITE.title}`} description="「讲台」栏目：每月一篇课堂实录或教学反思。">
+  <div class="container-narrow" style="padding-top: 3rem;">
+    <p class="eyebrow">Podium · 固定栏目</p>
+    <h1 class="page-title">讲台<span class="accent">.</span></h1>
+    <p class="lead" style="font-size:1.1rem;">
+      每月一篇：<strong>课堂里真实发生的事</strong>——一个讲到一半忽然明白的细节、
+      一张让学生争论起来的地图、一次失败的导入。
+      <span class="muted">（更新于 {fmt}）</span>
+    </p>
+
+    <hr class="rule" />
+
+    {posts.length === 0 ? (
+      <div style="padding:1.5rem 0;">
+        <p><strong>第一期还在路上。</strong></p>
+        <p class="muted">
+          栏目已立，稿未落笔。写法很简单：一篇 300–800 字的课堂片段，加上一两句自己的反思就够了。
+          在站内 <a class="accent" href="/write">/write</a> 里写，正文加上 <code>tags: 讲台</code> 即会出现在这里。
+        </p>
+      </div>
+    ) : (
+      <ul class="post-list">
+        {posts.map((p) => (
+          <li class="post-item">
+            <a href={`/blog/${p.slug.current}/`}>
+              <time>{new Date(p.pubDate).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+              <h3>{p.title}</h3>
+              <p class="muted">{p.description}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</BaseLayout>

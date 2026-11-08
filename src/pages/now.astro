@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+
+// 最近更新日期 = 构建时间（静态构建时可视为最后一次发版时间）
+const updated = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<BaseLayout title={`此刻 · ${SITE.title}`} description="我此刻在做什么：教学、阅读与写作的当前进度。">
+  <div class="container-narrow" style="padding-top: 3rem;">
+    <p class="eyebrow">Now</p>
+    <h1 class="page-title">此刻<span class="accent">.</span></h1>
+    <p class="lead" style="font-size:1.1rem;">
+      这个页面回答一个简单的问题：<strong>我最近在忙什么。</strong><br />
+      如果你一年没见过我，看这一页就够了。
+    </p>
+
+    <hr class="rule" />
+
+    <section style="margin-top:1.4rem;">
+      <h2 style="font-size:1.15rem; margin-bottom:0.6rem;">正在教</h2>
+      <p>高中地理。课堂上最近讲到：<span class="muted">TODO：写下当前专题（如：大气环流 / 人口迁移）</span></p>
+    </section>
+
+    <section style="margin-top:1.4rem;">
+      <h2 style="font-size:1.15rem; margin-bottom:0.6rem;">正在读</h2>
+      <p><span class="muted">TODO：写下当前在读的书，错一行小字记进度。</span></p>
+    </section>
+
+    <section style="margin-top:1.4rem;">
+      <h2 style="font-size:1.15rem; margin-bottom:0.6rem;">正在写</h2>
+      <p>连载小说《稻田里的沉默》——第一部《田埂上的老人》已发布，整个故事还未完结。</p>
+    </section>
+
+    <section style="margin-top:1.4rem;">
+      <h2 style="font-size:1.15rem; margin-bottom:0.6rem;">这个站</h2>
+      <p>
+        博客、读书录、微博归档全部静态化托管在 GitHub Pages；
+        站内 <a class="accent" href="/write">/write</a> 输入 GitHub PAT 就能随时写随时发。
+        最近一次更新：{updated}。
+      </p>
+    </section>
+
+    <hr class="rule" style="margin-top:2rem;" />
+    <p class="muted" style="font-size:0.85rem;">
+      /now 页面来自 Derek Sivers 的“<a class="accent" href="https://nownownow.com/about" target="_blank" rel="noopener noreferrer">now 页运动</a>”。
+      我会不定期更新——它同时也在提醒我自己少做别的事。
+    </p>
+  </div>
+</BaseLayout>

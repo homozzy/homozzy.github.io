@@ -12,7 +12,8 @@ export const GET: APIRoute = async () => {
   const entries: Array<{ title: string; url: string; excerpt: string; tag: string }> = [];
 
   const pages: Array<[string, string, string]> = [
-    ['首页 · homo', '/', '一名历史地理爱好者，读书研思，记录文史、气象与技术的随想。'],
+    ['首页 · homo', '/', '高中地理教师 × 历史地理爱好者，读书研思，记录文史、气象与技术的随想。'],
+    ['此刻 · 我在忙什么', '/now', '教学、阅读与写作的当前进度，像给一年没见的朋友报平安。'],
     ['关于我', '/about', '本科学历，现任高中地理教师；历史地理爱好者，读书、写字。'],
     ['博客', '/blog', '文史、气象与技术的随想。'],
     ['读书录', '/reading', '2015 至今的微博读书笔记，52 条原文全文收录。'],
@@ -35,6 +36,7 @@ export const GET: APIRoute = async () => {
       url: `/blog/${p.slug.current}/`,
       excerpt: p.description,
       tag: '博客',
+      y: new Date(p.pubDate).getFullYear(),
     });
   }
 
@@ -44,6 +46,7 @@ export const GET: APIRoute = async () => {
       url: `/reading/#note-${n.id}`,
       excerpt: stripTo(n.text, 160),
       tag: '读书笔记',
+      y: new Date(n.date).getFullYear(),
     });
   }
 
@@ -53,6 +56,7 @@ export const GET: APIRoute = async () => {
       url: `/weibo/#post-${p.id}`,
       excerpt: stripTo(p.text, 160),
       tag: '微博',
+      y: new Date(p.created).getFullYear(),
     });
   }
 

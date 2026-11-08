@@ -7,7 +7,7 @@
   <div class="cp-panel" role="dialog" aria-modal="true" aria-label="全站搜索">
     <div class="cp-input-row">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.3-4.3"/></svg>
-      <input id="cp-input" type="search" placeholder="搜索全站…页面 · 博客 · 读书笔记 · 微博 · 藏书" autocomplete="off" aria-label="搜索关键词" />
+      <input id="cp-input" type="search" placeholder="搜索全站… 支持 tag:读书 year:2024 过滤" autocomplete="off" aria-label="搜索关键词" />
       <kbd class="cp-kbd">Esc</kbd>
     </div>
     <ul id="cp-list" class="cp-list" role="listbox"></ul>
@@ -122,15 +122,27 @@
     count.textContent = '0';
   };
   const render = () => {
-    const q = input.value.trim();
+    const raw = input.value.trim();
     focusIdx = -1;
-    if (!q) { results = []; list.innerHTML = ''; count.textContent = '0'; return; }
+    if (!raw) { results = []; list.innerHTML = ''; count.textContent = '0'; return; }
     if (!index) { list.innerHTML = '<li class="cp-item"><a href="#">载入索引中…</a></li>'; return; }
-    const lower = q.toLowerCase();
-    results = index.filter(e => (e.title + ' ' + e.excerpt + ' ' + e.tag).toLowerCase().includes(lower)).slice(0, 12);
+    // 语法过滤：tag:xx  year:2024，剩余词做普通搜索
+    const tags = []; const years = []; const words = [];
+    raw.split(/\s+/).forEach((tok) => {
+      const m1 = tok.match(/^tag:(.+)/i), m2 = tok.match(/^year:(\d{4})$/i);
+      if (m1) tags.push(m1[1].toLowerCase());
+      else if (m2) years.push(m2[1]);
+      else words.push(tok);
+    });
+    const lower = words.join(' ').toLowerCase();
+    results = index
+      .filter(e => (!tags.length || tags.some(t => (e.tag + ' ' + e.title + ' ' + e.excerpt).toLowerCase().includes(t)))
+        && (!years.length || years.includes(String(e.y)))
+        && (!lower || (e.title + ' ' + e.excerpt + ' ' + e.tag).toLowerCase().includes(lower)))
+      .slice(0, 12);
     count.textContent = String(results.length);
-    list.innerHTML = results.map((e, i) => `<li class="cp-item"><a href="${e.url}" data-idx="${i}"><strong>${highlight(e.title, q)}</strong><em>${e.tag} · ${highlight(e.excerpt, q)}</em></a></li>`).join('')
-      || '<li class="cp-item"><a href="#">没有匹配结果</a></li>';
+    list.innerHTML = results.map((e, i) => `<li class="cp-item"><a href="${e.url}" data-idx="${i}"><strong>${highlight(e.title, words[0])}</strong><em>${e.tag}${e.y ? ' ' + e.y : ''} · ${highlight(e.excerpt, words[0])}</em></a></li>`).join('')
+      || `<li class="cp-item"><a href="#">没有匹配结果</a></li>`;
   };
   document.addEventListener('keydown', (e) => {
     const meta = e.metaKey || e.ctrlKey;

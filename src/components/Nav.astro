@@ -21,6 +21,7 @@ const active = (p: string) =>
       <a href="/reading" class={is('/reading') ? 'active' : ''} aria-current={is('/reading') ? 'page' : undefined}>读书录</a>
       <a href="/features" class={is('/features') || is('/docs') || is('/diary') || is('/surfing') || is('/sites') || is('/word') || is('/books') || is('/milestones') || is('/ledger') || is('/sync') || is('/search') || is('/weibo') ? 'active' : ''} aria-current={(is('/features') || is('/docs') || is('/diary') || is('/surfing') || is('/sites') || is('/word') || is('/books') || is('/milestones') || is('/ledger') || is('/sync') || is('/search') || is('/weibo')) ? 'page' : undefined}>全部</a>
       <a href="/about" class={is('/about') ? 'active' : ''} aria-current={is('/about') ? 'page' : undefined}>关于</a>
+      <a href="/now" class={is('/now') ? 'active' : ''} aria-current={is('/now') ? 'page' : undefined}>此刻</a>
       <button id="btn-cmdk" class="icon-btn" type="button" aria-label="全站搜索（Ctrl/Cmd+K）" title="全站搜索（Ctrl/Cmd+K）">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.3-4.3"/></svg>
         <span class="cmdk-hint">⌘K</span>

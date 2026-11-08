@@ -31,7 +31,12 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
           <div id="qw-form" class="qw-form" hidden>
             <textarea id="qw-body" rows="3" placeholder="第一行是标题，下面是正文……" spellcheck="false"></textarea>
             <div class="qw-row">
-              <input id="qw-tags" value="随笔" aria-label="标签" autocomplete="off" />
+              <div class="qw-chips" id="qw-chips" role="group" aria-label="选标签">
+                {['随笔', '讲台', '文史', '气象', '技术'].map((t) => (
+                  <button type="button" class="qw-chip" data-tag={t} aria-pressed={t === '随笔' ? 'true' : 'false'}>{t}</button>
+                ))}
+              </div>
+              <input id="qw-tags" value="随笔" hidden />
               <button id="qw-send" class="btn" type="button">发布 →</button>
               <span id="qw-status" class="meta-line" style="margin:0;" aria-live="polite"></span>
             </div>
@@ -122,6 +127,18 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
   }
   #qw-send { font-size: 0.9rem; padding: 0.38rem 1rem; }
   .qw-hint { font-size: 0.78rem; margin-top: 0.4rem; color: var(--muted); }
+  .qw-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .qw-chip {
+    border: 1px solid var(--line); background: var(--panel); color: var(--muted);
+    border-radius: 999px; padding: 0.32rem 0.88rem; font: inherit; font-size: 0.85rem;
+    cursor: pointer; transition: 0.15s ease;
+  }
+  .qw-chip:hover { color: var(--accent); border-color: var(--accent); }
+  .qw-chip.on {
+    background: var(--accent-soft); color: var(--accent);
+    border-color: var(--accent); font-weight: 600;
+  }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
   html[data-theme='dark'] .qw-form textarea,
   html[data-theme='dark'] .qw-row input { border-color: rgba(255,255,255,0.1); }
 </style>
@@ -159,6 +176,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
             bodyEl.value = nl === -1 ? '' : d.body.slice(nl + 1).replace(/^\n+/, '');
           }
           if (d.tags) tagsEl.value = d.tags;
+          syncChips();
         } catch {}
         bodyEl.focus();
       }
@@ -214,6 +232,25 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
     };
 
     $('qw-send').addEventListener('click', publish);
+
+    // 标签块：点击切换（多选），实际值存在隐藏的 #qw-tags 里
+    const chipBox = $('qw-chips');
+    const syncChips = () => {
+      const val = tagsEl.value;
+      for (const c of chipBox.querySelectorAll('.qw-chip')) {
+        const on = (' ' + val + ' ').includes(` ${c.dataset.tag} `);
+        c.classList.toggle('on', on);
+        c.setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    };
+    const setTags = (list) => { tagsEl.value = list.join(', '); syncChips(); saveDraft(); };
+    chipBox.addEventListener('click', (e) => {
+      const c = e.target?.closest?.('.qw-chip');
+      if (!c) return;
+      const cur = tagsEl.value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+      setTags(cur.includes(c.dataset.tag) ? cur.filter(t => t !== c.dataset.tag) : [...cur, c.dataset.tag]);
+    });
+    syncChips();
     bodyEl.addEventListener('input', saveDraft);
     tagsEl.addEventListener('input', saveDraft);
     document.addEventListener('keydown', (e) => {

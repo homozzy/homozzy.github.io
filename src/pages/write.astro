@@ -25,8 +25,12 @@ import { SITE } from '../consts';
     </label>
 
     <div class="tag-row">
-      <span class="label">标签</span>
-      <input id="w-tags" class="input" style="flex:1; min-width:0;" value="随笔" autocomplete="off" />
+      <div class="w-chips" id="w-chips" role="group" aria-label="选标签">
+        {['随笔', '讲台', '文史', '气象', '技术'].map((t) => (
+          <button type="button" class="w-chip" data-tag={t} aria-pressed={t === '随笔' ? 'true' : 'false'}>{t}</button>
+        ))}
+      </div>
+      <input id="w-tags" value="随笔" hidden />
       <button id="btn-save" class="btn" type="button">发布 →</button>
       <span id="w-status" class="meta-line" style="margin:0;" aria-live="polite"></span>
     </div>
@@ -151,6 +155,7 @@ import { SITE } from '../consts';
         editingFile = btn.dataset.name;
         editingDate = pick('pubDate').slice(0, 10) || dateStr();
         tagsEl.value = pickArray('tags').join(', ') || '随笔';
+        syncChips();
         bodyEl.value = `${pick('title')}\n\n${body}`;
         renderPreview();
         saveDraft();
@@ -163,10 +168,29 @@ import { SITE } from '../consts';
     bodyEl.addEventListener('input', () => { renderPreview(); saveDraft(); });
     tagsEl.addEventListener('input', saveDraft);
 
+    // 标签块：点击切换（多选），实际值存在隐藏的 #w-tags 里
+    const chipBox = $('w-chips');
+    const syncChips = () => {
+      const val = tagsEl.value;
+      for (const c of chipBox.querySelectorAll('.w-chip')) {
+        const on = (' ' + val + ' ').includes(` ${c.dataset.tag} `);
+        c.classList.toggle('on', on);
+        c.setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    };
+    chipBox.addEventListener('click', (e) => {
+      const c = e.target?.closest?.('.w-chip');
+      if (!c) return;
+      const cur = tagsEl.value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+      tagsEl.value = cur.includes(c.dataset.tag) ? cur.filter(t => t !== c.dataset.tag).join(', ') : [...cur, c.dataset.tag].join(', ');
+      syncChips(); saveDraft();
+    });
+    syncChips();
+
     $('btn-fresh')?.addEventListener('click', () => {
       editingFile = ''; editingDate = '';
       bodyEl.value = ''; tagsEl.value = '随笔';
-      renderPreview(); saveDraft(); refreshEditState();
+      renderPreview(); saveDraft(); refreshEditState(); syncChips();
       status.textContent = '新的一篇，开写';
       bodyEl.focus();
     });
@@ -240,6 +264,18 @@ import { SITE } from '../consts';
   .tag-row .label { white-space: nowrap; }
   #btn-save { white-space: nowrap; }
     .write-detail { border-top: 1px solid var(--line); margin-top: 1rem; padding-top: 0.7rem; }
+  .w-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .w-chip {
+    border: 1px solid var(--line); background: var(--panel); color: var(--muted);
+    border-radius: 999px; padding: 0.32rem 0.88rem; font: inherit; font-size: 0.85rem;
+    cursor: pointer; transition: 0.15s ease;
+  }
+  .w-chip:hover { color: var(--accent); border-color: var(--accent); }
+  .w-chip.on {
+    background: var(--accent-soft); color: var(--accent);
+    border-color: var(--accent); font-weight: 600;
+  }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
   .edit-state {
     margin-top: 0.5rem; font-size: 0.82rem; color: var(--muted);
     display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;

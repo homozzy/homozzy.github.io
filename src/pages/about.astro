@@ -1,6 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
+import { getCollection } from 'astro:content';
+import { marked } from 'marked';
+
+// 「写在后面」：src/content/pages/about-afterword.md，在 /write「页面」模式编辑
+const pageMds = await getCollection('pages').catch(() => []);
+const afterDoc = pageMds.find((e) => e.id === 'about-afterword');
+const afterHtml = afterDoc ? marked.parse(afterDoc.body ?? '', { gfm: true, breaks: true }) : '';
 ---
 
 <BaseLayout title={`关于 · ${SITE.title}`} description="关于 homo：历史地理爱好者，高中地理教师，读书研思。">
@@ -50,6 +57,14 @@ import { SITE } from '../consts';
       <span class="tag">个人知识管理</span>
       <span class="tag">前端小工具</span>
     </div>
+
+    {afterDoc && (
+      <>
+        <hr class="rule" />
+        <h2 style="font-size:1.2rem; margin-bottom: 0.8rem;">写在后面</h2>
+        <div class="prose" set:html={afterHtml} />
+      </>
+    )}
 
     <hr class="rule" />
 

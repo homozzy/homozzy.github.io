@@ -17,8 +17,27 @@ import { SITE } from '../consts';
       钥匙已保存在本机浏览器 · <button id="btn-forget" class="btn-link" type="button">清除</button>
     </div>
 
+    <div class="target-row" style="margin-top:1.1rem;">
+      <label class="field" style="margin:0;">
+        <span class="label">写在哪</span>
+        <select id="w-target" class="input" style="width:auto;" autocomplete="off">
+          <option value="blog">博客 · 新文章</option>
+          <optgroup label="页面模块（各自独立一块）">
+            <option value="now-teaching">此刻 · 正在教</option>
+            <option value="now-reading">此刻 · 正在读</option>
+            <option value="now-writing">此刻 · 正在写</option>
+            <option value="now-site">此刻 · 这个站</option>
+            <option value="about-afterword">关于我 · 写在后面</option>
+            <option value="works-log">作品 · 进行中的记录</option>
+            <option value="monsoon-notes">季风演示 · 备课随记</option>
+          </optgroup>
+        </select>
+      </label>
+      <span id="target-hint" class="meta-line"></span>
+    </div>
+
     <label class="field" style="margin-top:1rem;">
-      <span class="label">想写的都在这里（第一行 = 标题）</span>
+      <span class="label" id="body-label">想写的都在这里（第一行 = 标题）</span>
       <textarea id="w-body" class="input mono" rows="16"
         placeholder="课例：一张地图引发的争论&#10;&#10;这节课我想让学生自己看图说话，结果争论比预想的激烈的多……&#10;&#10;（支持 Markdown：## 小节、**加粗**、列表都行）"
         spellcheck="false"></textarea>
@@ -68,7 +87,22 @@ import { SITE } from '../consts';
     const DRAFT_KEY = 'write-draft-v3';
     const PAT_KEY = 'gh-pat';
     const REPO = 'homozzy/homozzy.github.io';
-    const DIR = 'src/content/blog';
+    const DIR_BLOG = 'src/content/blog';
+    const DIR_PAGES = 'src/content/pages';
+    const MODULES = {
+      'now-teaching': '此刻 · 正在教',
+      'now-reading': '此刻 · 正在读',
+      'now-writing': '此刻 · 正在写',
+      'now-site': '此刻 · 这个站',
+      'about-afterword': '关于我 · 写在后面',
+      'works-log': '作品 · 进行中的记录',
+      'monsoon-notes': '季风演示 · 备课随记',
+    };
+    const targetEl = $('w-target');
+    const targetHint = $('target-hint');
+    const bodyLabel = $('body-label');
+    const isPageMode = () => targetEl.value !== 'blog';
+    const currentDir = () => (isPageMode() ? DIR_PAGES : DIR_BLOG);
 
     // 「编辑中」状态：载入已有文章后记住文件名 / 原始日期，重发即覆盖
     let editingFile = '';
@@ -107,7 +141,7 @@ import { SITE } from '../consts';
         String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
     };
 
-    const buildMarkdown = () => {
+    const buildBlogMarkdown = () => {
       const { title, body } = splitInput();
       const tags = (tagsEl.value || '').split(/[,，]/).map(s => s.trim()).filter(Boolean).map(t => `"${t}"`).join(', ');
       const firstPara = (body.split('\n').find(l => l.trim() && !l.trim().startsWith('#')) || '').trim().slice(0, 60);
@@ -115,26 +149,66 @@ import { SITE } from '../consts';
       return `---\ntitle: "${q(title)}"\ndescription: "${q(firstPara)}"\npubDate: ${dateStr()}\ntags: [${tags}]\n---\n\n${body}`;
     };
 
+    const buildPageMarkdown = (moduleId) => {
+      const q = (s) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      return `---\ntitle: "${q(MODULES[moduleId])}"\ndescription: "页面模块"\npubDate: ${new Date().toISOString().slice(0, 10)}\ntags: []\n---\n\n${bodyEl.value.trim()}`;
+    };
+
     const renderPreview = () => {
       const { title, body } = splitInput();
+      if (isPageMode()) {
+        preview.innerHTML = marked.parse(bodyEl.value.trim() || '*（空白。写点什么存进来）*', { breaks: true, gfm: true });
+        return;
+      }
       preview.innerHTML = marked.parse((title ? `# ${title}\n\n` : '') + (body || '*（换个想法就会出现在这里）*'), { breaks: true, gfm: true });
     };
 
     const saveDraft = () => {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({ body: bodyEl.value, tags: tagsEl.value, file: editingFile, date: editingDate }));
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ target: targetEl.value, body: bodyEl.value, tags: tagsEl.value, file: editingFile, date: editingDate }));
     };
+
+    // 「写在哪」模式 UI：标题行文案、标签块显隐、提示
+    const btnFresh = $('btn-fresh');
+    const chipRow = $('w-chips');
+    const applyTargetUI = () => {
+      const pageMode = isPageMode();
+      targetHint.textContent = pageMode ? '这一块会替换页面里对应模块，发布后 1–2 分钟重渲染' : '第一行是标题，其余是正文';
+      bodyLabel.textContent = pageMode ? `「${MODULES[targetEl.value]}」模块` : '想写的都在这里（第一行 = 标题）';
+      chipRow.style.display = pageMode ? 'none' : '';
+      chipRow.parentElement.querySelector('input#w-tags').style.display = pageMode ? 'none' : '';
+      btnFresh.style.display = pageMode ? 'none' : '';
+      bodyEl.placeholder = pageMode
+        ? '这里写模块正文……支持 Markdown：**加粗**、列表、## 小节都行'
+        : '第一行：文章标题（下面空一行开始写正文）……';
+    };
+    targetEl.addEventListener('change', () => {
+      editingFile = ''; editingDate = '';
+      refreshEditState();
+      applyTargetUI();
+      loadList(true);
+      renderPreview();
+      saveDraft();
+    });
 
     const loadList = async (silent = false) => {
       const pat = getPAT();
       if (!pat) return;
       try {
-        const items = await api(`https://api.github.com/repos/${REPO}/contents/${DIR}`);
+        const dir = currentDir();
+        const items = await api(`https://api.github.com/repos/${REPO}/contents/${dir}`);
         const mds = items.filter(i => i.name.endsWith('.md'));
+        const isPage = isPageMode();
         postList.innerHTML = mds
-          .map(i => `<li><button class="post-item-btn" data-name="${i.name}" type="button"><strong>${i.name.replace(/\.md$/, '')}</strong></button></li>`)
-          .join('') || '<li class="muted" style="padding:0.4rem 0;">仓库里还没有文章</li>';
+          .map(i => {
+            const id = i.name.replace(/\.md$/, '');
+            const name = isPage ? (MODULES[id] || id) : id;
+            return `<li><button class="post-item-btn" data-name="${i.name}" type="button"><strong>${name}</strong></button></li>`;
+          })
+          .join('') || (isPage
+            ? '<li class="muted" style="padding:0.4rem 0;">各模块还未写过内容——选中上方模块直接写，发布即建块</li>'
+            : '<li class="muted" style="padding:0.4rem 0;">仓库里还没有文章</li>');
         $('list-count').textContent = mds.length ? `（${mds.length}）` : '';
-        if (!silent) status.textContent = `读取到 ${mds.length} 篇`;
+        if (!silent) status.textContent = `读取到 ${mds.length} 块`;
       } catch {}
     };
 
@@ -154,12 +228,19 @@ import { SITE } from '../consts';
         };
         editingFile = btn.dataset.name;
         editingDate = pick('pubDate').slice(0, 10) || dateStr();
-        tagsEl.value = pickArray('tags').join(', ') || '随笔';
+        if (isPageMode()) {
+          tagsEl.value = '随笔';
+          bodyEl.value = body.trim();
+        } else {
+          tagsEl.value = pickArray('tags').join(', ') || '随笔';
+          bodyEl.value = `${pick('title')}\n\n${body}`;
+        }
         syncChips();
-        bodyEl.value = `${pick('title')}\n\n${body}`;
         renderPreview();
         saveDraft();
-        status.textContent = `已载入「${pick('title')}」，改完再点发布即覆盖原文`;
+        status.textContent = isPageMode()
+          ? `已载入「${MODULES[editingFile.replace(/\.md$/, '')] || editingFile}」，改完再点发布即覆盖`
+          : `已载入「${pick('title')}」，改完再点发布即覆盖原文`;
       } catch (err) {
         status.textContent = err.message;
       }
@@ -196,29 +277,36 @@ import { SITE } from '../consts';
     });
 
     $('btn-save')?.addEventListener('click', async () => {
-      const { title } = splitInput();
-      if (!title) { status.textContent = '第一行得是标题'; return; }
       const btn = $('btn-save');
       if (btn.disabled) return;
+      const pageMode = isPageMode();
+      const moduleId = targetEl.value;
+      const { title } = pageMode ? { title: MODULES[moduleId] } : splitInput();
+      if (pageMode && !bodyEl.value.trim()) { status.textContent = '这个模块还是空的'; return; }
+      if (!pageMode && !title) { status.textContent = '第一行得是标题'; return; }
       btn.disabled = true;
-      const slug = editingFile ? editingFile.replace(/\.md$/, '') : makeSlug(title);
-      const path = `${DIR}/${slug}.md`;
+      const slug = editingFile ? editingFile.replace(/\.md$/, '') : (pageMode ? moduleId : makeSlug(title));
+      const path = `${currentDir()}/${slug}.md`;
       status.textContent = '发布中…';
       try {
         let sha;
         try { sha = (await api(`https://api.github.com/repos/${REPO}/contents/${path}`)).sha; } catch {}
-        const md = buildMarkdown();
-        const res = await api(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+        const md = pageMode ? buildPageMarkdown(moduleId) : buildBlogMarkdown();
+        await api(`https://api.github.com/repos/${REPO}/contents/${path}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: `blog: ${title}`, content: btoa(unescape(encodeURIComponent(md))), ...(sha ? { sha } : {}) }),
+          body: JSON.stringify({ message: pageMode ? `page: ${title}` : `blog: ${title}`, content: btoa(unescape(encodeURIComponent(md))), ...(sha ? { sha } : {}) }),
         });
         const firstPublish = !editingFile;
         editingFile = `${slug}.md`;
         if (!editingDate) editingDate = dateStr();
         saveDraft(); refreshEditState();
-        status.innerHTML = `✅ 已发布 <a class="accent" href="/blog/${slug}/">去文章页</a>（最多 2 分钟后生效）${firstPublish ? ' · 写完结了想再发新的，点下方「新开一篇」' : ''}`;
-        listBox.open = true;
+        if (pageMode) {
+          status.innerHTML = `✅ 已更新「${title}」模块 · 最多 2 分钟后页面重渲染`;
+        } else {
+          status.innerHTML = `✅ 已发布 <a class="accent" href="/blog/${slug}/">去文章页</a>（最多 2 分钟后生效）${firstPublish ? ' · 写完结了想再发新的，点下方「新开一篇」' : ''}`;
+          listBox.open = true;
+        }
         await loadList(true);
       } catch (err) {
         status.textContent = err.message;
@@ -243,11 +331,13 @@ import { SITE } from '../consts';
     // 初始化
     try {
       const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+      if (d.target) targetEl.value = d.target;
       bodyEl.value = d.body ?? '';
       tagsEl.value = d.tags ?? '随笔';
       editingFile = d.file ?? '';
       editingDate = d.date ?? '';
     } catch {}
+    applyTargetUI();
     refreshEditState();
     if (getPAT()) { patOk.style.display = ''; loadList(true); } else { patBlock.style.display = ''; }
     renderPreview();
@@ -260,6 +350,7 @@ import { SITE } from '../consts';
 <style>
   .write-auth { display: flex; gap: 0.6rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
   .write-auth .input { flex: 1; min-width: 240px; }
+  .target-row { display: flex; gap: 0.9rem; align-items: flex-end; flex-wrap: wrap; }
   .tag-row { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.8rem; flex-wrap: wrap; }
   .tag-row .label { white-space: nowrap; }
   #btn-save { white-space: nowrap; }

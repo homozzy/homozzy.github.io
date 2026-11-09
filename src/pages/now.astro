@@ -1,6 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
+import { getCollection } from 'astro:content';
+import { marked } from 'marked';
+
+// 每个模块一个 md 文件（src/content/pages/<id>.md），在 /write「页面」模式单独编辑；
+// 未发布过的模块回退到默认占位文案。
+const pageMds = await getCollection('pages').catch(() => []);
+const md = (id: string) => pageMds.find((e) => e.id === id);
+const htmlOf = (id: string) => {
+  const e = md(id);
+  return e ? marked.parse(e.body ?? '', { gfm: true, breaks: true }) : '';
+};
 
 // 最近更新日期 = 构建时间（静态构建时可视为最后一次发版时间）
 const updated = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -19,26 +30,36 @@ const updated = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month:
 
     <section style="margin-top:1.4rem;">
       <h2 style="font-size:1.15rem; margin-bottom:0.6rem;">正在教</h2>
-      <p>高中地理。课堂上最近讲到：<span class="muted">TODO：写下当前专题（如：大气环流 / 人口迁移）</span></p>
+      {md('now-teaching')
+        ? <div class="prose" set:html={htmlOf('now-teaching')} />
+        : <p>高中地理。课堂上最近讲到：<span class="muted">TODO：写下当前专题（如：大气环流 / 人口迁移）</span></p>}
     </section>
 
     <section style="margin-top:1.4rem;">
       <h2 style="font-size:1.15rem; margin-bottom:0.6rem;">正在读</h2>
-      <p><span class="muted">TODO：写下当前在读的书，错一行小字记进度。</span></p>
+      {md('now-reading')
+        ? <div class="prose" set:html={htmlOf('now-reading')} />
+        : <p><span class="muted">TODO：写下当前在读的书，错一行小字记进度。</span></p>}
     </section>
 
     <section style="margin-top:1.4rem;">
       <h2 style="font-size:1.15rem; margin-bottom:0.6rem;">正在写</h2>
-      <p>连载小说《稻田里的沉默》——第一部《田埂上的老人》已发布，整个故事还未完结。</p>
+      {md('now-writing')
+        ? <div class="prose" set:html={htmlOf('now-writing')} />
+        : <p>连载小说《稻田里的沉默》——第一部《田埂上的老人》已发布，整个故事还未完结。</p>}
     </section>
 
     <section style="margin-top:1.4rem;">
       <h2 style="font-size:1.15rem; margin-bottom:0.6rem;">这个站</h2>
-      <p>
-        博客、读书录、微博归档全部静态化托管在 GitHub Pages；
-        站内 <a class="accent" href="/write">/write</a> 输入 GitHub PAT 就能随时写随时发。
-        最近一次更新：{updated}。
-      </p>
+      {md('now-site')
+        ? <div class="prose" set:html={htmlOf('now-site')} />
+        : (
+          <p>
+            博客、读书录、微博归档全部静态化托管在 GitHub Pages；
+            站内 <a class="accent" href="/write">/write</a> 输入 GitHub PAT 就能随时写随时发。
+            最近一次更新：{updated}。
+          </p>
+        )}
     </section>
 
     <hr class="rule" style="margin-top:2rem;" />

@@ -1,6 +1,13 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { SITE } from '../../consts';
+import { getCollection } from 'astro:content';
+import { marked } from 'marked';
+
+// 「备课随记」：src/content/pages/monsoon-notes.md，在 /write「页面」模式编辑
+const pageMds = await getCollection('pages').catch(() => []);
+const notesDoc = pageMds.find((e) => e.id === 'monsoon-notes');
+const notesHtml = notesDoc ? marked.parse(notesDoc.body ?? '', { gfm: true, breaks: true }) : '';
 ---
 
 <BaseLayout title={`教具 · 季风换季演示 · ${SITE.title}`} description="拖动月份滑块，看东亚季风如何随海陆热力差异而反转——风向、气压与天气一起变化。">
@@ -94,6 +101,13 @@ import { SITE } from '../../consts';
         （东南信风越过赤道后向右偏转为西南季风）——这也是南亚雨季更强的原因。
       </p>
     </section>
+
+    {notesDoc && (
+      <section class="ms-notes" style="margin-top:1.5rem;">
+        <h2>备课随记</h2>
+        <div class="prose" set:html={notesHtml} />
+      </section>
+    )}
   </div>
 </BaseLayout>
 

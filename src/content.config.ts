@@ -14,4 +14,16 @@ const blog = defineCollection({
   }),
 });
 
-export const collections = { blog };
+// 每个页面一块可编辑内容：now / about / works / monsoon，
+// 在 /write 的「页面」模式下编辑，发布后整页重渲染
+const pages = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/pages' }),
+  schema: z.object({
+    title: z.string().default(''),
+    description: z.string().default(''),
+    pubDate: z.coerce.date().optional(),
+    tags: z.array(z.string()).default([]),
+  }),
+});
+
+export const collections = { blog, pages };

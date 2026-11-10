@@ -5,6 +5,9 @@ import ThemeToggle from './ThemeToggle.astro';
 const path = Astro.url.pathname;
 const is = (p: string) =>
   p === '/' ? path === '/' : path.startsWith(p);
+// 「全部」覆盖的板块：与底部导航保持一致
+const ALL_PATHS = ['/features', '/sites', '/word', '/books', '/milestones', '/ledger', '/sync', '/search', '/weibo', '/podium', '/tools', '/works', '/changelog', '/write'];
+const isAll = ALL_PATHS.some(is);
 const active = (p: string) =>
   is(p) ? { class: 'active', 'aria-current': 'page' as const } : { class: '', 'aria-current': undefined };
 ---
@@ -19,7 +22,7 @@ const active = (p: string) =>
       <a href="/" class={is('/') ? 'active' : ''} aria-current={is('/') ? 'page' : undefined}>首页</a>
       <a href="/blog" class={is('/blog') ? 'active' : ''} aria-current={is('/blog') ? 'page' : undefined}>博客</a>
       <a href="/reading" class={is('/reading') ? 'active' : ''} aria-current={is('/reading') ? 'page' : undefined}>读书录</a>
-      <a href="/features" class={is('/features') || is('/docs') || is('/diary') || is('/surfing') || is('/sites') || is('/word') || is('/books') || is('/milestones') || is('/ledger') || is('/sync') || is('/search') || is('/weibo') || is('/podium') || is('/tools') || is('/works') || is('/changelog') ? 'active' : ''} aria-current={(is('/features') || is('/docs') || is('/diary') || is('/surfing') || is('/sites') || is('/word') || is('/books') || is('/milestones') || is('/ledger') || is('/sync') || is('/search') || is('/weibo') || is('/podium') || is('/tools') || is('/works') || is('/changelog')) ? 'page' : undefined}>全部</a>
+      <a href="/features" class={isAll ? 'active' : ''} aria-current={isAll ? 'page' : undefined}>全部</a>
       <a href="/about" class={is('/about') ? 'active' : ''} aria-current={is('/about') ? 'page' : undefined}>关于</a>
       <a href="/now" class={is('/now') ? 'active' : ''} aria-current={is('/now') ? 'page' : undefined}>此刻</a>
       <button id="btn-cmdk" class="icon-btn" type="button" aria-label="全站搜索（Ctrl/Cmd+K）" title="全站搜索（Ctrl/Cmd+K）">

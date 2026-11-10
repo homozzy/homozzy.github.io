@@ -24,7 +24,7 @@ const notesHtml = notesDoc ? marked.parse(notesDoc.body ?? '', { gfm: true, brea
       <svg id="monsoon-svg" viewBox="0 0 800 430" role="img" aria-label="东亚季风示意图：左侧亚洲大陆，右侧太平洋，箭头表示风向">
         <defs>
           <marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)" />
+            <path d="M0,0 L10,5 L0,10 z" />
           </marker>
         </defs>
 
@@ -140,6 +140,7 @@ const notesHtml = notesDoc ? marked.parse(notesDoc.body ?? '', { gfm: true, brea
     transition: transform 0.6s cubic-bezier(.3,.9,.3,1), opacity 0.6s;
     transform-origin: 0 0;
   }
+  #arrowhead path { fill: var(--accent); }
 
   .ms-caption { font: 500 14px ui-sans-serif, system-ui, sans-serif; fill: var(--muted); }
 
@@ -159,6 +160,13 @@ const notesHtml = notesDoc ? marked.parse(notesDoc.body ?? '', { gfm: true, brea
   .ms-notes h2 { font-size: 1.1rem; margin: 1.4rem 0 0.5rem; }
   .ms-notes ul { padding-left: 1.2rem; line-height: 1.8; }
   .ms-notes li { margin-bottom: 0.4rem; }
+
+  /* 小屏：SVG 会整体缩小，字号相应放大保证可读 */
+  @media (max-width: 560px) {
+    .ms-label { font-size: 24px; }
+    .ms-pressure text { font-size: 18px; }
+    .ms-caption { font-size: 18px; }
+  }
 </style>
 
 <script is:inline>

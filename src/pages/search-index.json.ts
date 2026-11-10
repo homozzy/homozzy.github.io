@@ -23,6 +23,7 @@ export const GET: APIRoute = async () => {
     ['微博归档', '/weibo', '2015–2026 原创微博全文，按年份归档，可搜索。'],
     ['作品', '/works', '个人工作台等个人项目。'],
     ['功能总览', '/features', '本站全部功能板块一览。'],
+    ['更新日志', '/changelog', 'homo 个人网站的迭代记录。'],
     ['藏书阁', '/books', '55 本（部）书，9 个分类，链接到读书笔记。'],
     ['大事记', '/milestones', '2015 至今的时间线。'],
     ['日进一词', '/word', '每天一枚成语，附释义与出处。'],
@@ -67,4 +68,3 @@ export const GET: APIRoute = async () => {
     headers: { 'Content-Type': 'application/json; charset=utf-8' },
   });
 };
-

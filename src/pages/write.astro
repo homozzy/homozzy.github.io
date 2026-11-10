@@ -30,6 +30,7 @@ import { SITE } from '../consts';
             <option value="about-afterword">关于我 · 写在后面</option>
             <option value="works-log">作品 · 进行中的记录</option>
             <option value="monsoon-notes">季风演示 · 备课随记</option>
+            <option value="podium-intro">讲台 · 栏目导语</option>
           </optgroup>
         </select>
       </label>
@@ -51,7 +52,7 @@ import { SITE } from '../consts';
       </div>
       <input id="w-tags" value="随笔" hidden />
       <button id="btn-save" class="btn" type="button">发布 →</button>
-      <span id="w-status" class="meta-line" style="margin:0;" aria-live="polite"></span>
+      <span id="w-status" class="meta-line" style="margin:0;" aria-live="polite" tabindex="-1"></span>
     </div>
 
     <div id="edit-state" class="edit-state" style="display:none;" aria-live="polite">
@@ -97,6 +98,7 @@ import { SITE } from '../consts';
       'about-afterword': '关于我 · 写在后面',
       'works-log': '作品 · 进行中的记录',
       'monsoon-notes': '季风演示 · 备课随记',
+      'podium-intro': '讲台 · 栏目导语',
     };
     const targetEl = $('w-target');
     const targetHint = $('target-hint');
@@ -111,15 +113,29 @@ import { SITE } from '../consts';
     const editState = $('edit-state');
     const refreshEditState = () => {
       editState.style.display = editingFile ? '' : 'none';
-      $('edit-file').textContent = editingFile || '';
+      $('edit-file').textContent = isPageMode()
+        ? (MODULES[editingFile.replace(/\.md$/, '')] || editingFile)
+        : editingFile;
     };
 
     const getPAT = () => localStorage.getItem(PAT_KEY) || '';
+    const friendlyErr = (err) => {
+      const m = String(err?.message || err || '');
+      if (/fetch|network|load failed/i.test(m)) return '网络连接失败，检查网络再试一次';
+      if (/unexpected|json/i.test(m)) return 'GitHub 返回了异常内容，稍后再试';
+      if (m.startsWith('403') || m.includes('rate limit') || m.includes('Forbidden')) return '权限不够或请求太频繁（GitHub 限流），等一会儿再试';
+      if (m.startsWith('404') || m.includes('Not Found')) return '仓库或文件不存在（刚发布的内容要等 2 分钟构建）';
+      if (m.startsWith('422')) return '提交冲突（GitHub 还没记下上一笔），重试一次即可';
+      return m.slice(0, 60) || '未知错误';
+    };
     const api = async (url, opts = {}) => {
-      const res = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), Authorization: `Bearer ${getPAT()}`, Accept: 'application/vnd.github+json' } });
+      let res;
+      try { res = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), Authorization: `Bearer ${getPAT()}`, Accept: 'application/vnd.github+json' } }); }
+      catch { throw new Error('网络连接失败，检查网络再试一次'); }
       if (res.status === 401) throw new Error('钥匙无效或已过期，点下方"清除"重新填');
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || '请求失败');
+      let data;
+      try { data = await res.json(); } catch { throw new Error('GitHub 返回了异常内容，稍后再试'); }
+      if (!res.ok) throw new Error(`${res.status} ${data.message || '请求失败'}`);
       return data;
     };
 
@@ -167,6 +183,12 @@ import { SITE } from '../consts';
       localStorage.setItem(DRAFT_KEY, JSON.stringify({ target: targetEl.value, body: bodyEl.value, tags: tagsEl.value, file: editingFile, date: editingDate }));
     };
 
+    // 「写在哪」切换时按目标分桶保存正文：博客草稿不会误灌进页面模块，反之亦然
+    const BODIES_KEY = 'write-draft-bodies';
+    const loadBodies = () => { try { return JSON.parse(localStorage.getItem(BODIES_KEY) || '{}'); } catch { return {}; } };
+    const saveBodies = (m) => { try { localStorage.setItem(BODIES_KEY, JSON.stringify(m)); } catch {} };
+    let currentTarget = targetEl.value;
+
     // 「写在哪」模式 UI：标题行文案、标签块显隐、提示
     const btnFresh = $('btn-fresh');
     const chipRow = $('w-chips');
@@ -182,6 +204,13 @@ import { SITE } from '../consts';
         : '第一行：文章标题（下面空一行开始写正文）……';
     };
     targetEl.addEventListener('change', () => {
+      const bodies = loadBodies();
+      if (currentTarget !== targetEl.value) {
+        bodies[currentTarget] = bodyEl.value;
+        currentTarget = targetEl.value;
+        bodyEl.value = typeof bodies[currentTarget] === 'string' ? bodies[currentTarget] : '';
+        saveBodies(bodies);
+      }
       editingFile = ''; editingDate = '';
       refreshEditState();
       applyTargetUI();
@@ -190,6 +219,21 @@ import { SITE } from '../consts';
       saveDraft();
     });
 
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    /* frontmatter 解析贵在只写一次：列表和载入共用 */
+    const parseFront = (raw) => {
+      const m = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+      if (!m) return null;
+      const fm = m[1], body = m[2];
+      const pick = (k) => (fm.split('\n').find(l => l.startsWith(k + ':')) || '').slice(k.length + 1).trim().replace(/^"|"$/g, '');
+      const pickArray = (k) => {
+        const r = (fm.split('\n').find(l => l.startsWith(k + ':')) || '').slice(k.length + 1).trim().match(/^\[(.*)\]$/);
+        return r ? r[1].split(',').map(s => s.trim().replace(/^"|"$/g, '')).filter(Boolean) : [];
+      };
+      return { fm, body, pick, pickArray };
+    };
+    const fileSha = new Map(); // 列表时顺手记下 sha，删除时省一次请求
+
     const loadList = async (silent = false) => {
       const pat = getPAT();
       if (!pat) return;
@@ -197,53 +241,98 @@ import { SITE } from '../consts';
         const dir = currentDir();
         const items = await api(`https://api.github.com/repos/${REPO}/contents/${dir}`);
         const mds = items.filter(i => i.name.endsWith('.md'));
+        fileSha.clear();
+        mds.forEach(i => fileSha.set(i.name, i.sha));
         const isPage = isPageMode();
+        /* 博客模式下逐篇抓标题与标签（文章不多，代价可接受）：
+           用户认得出「地理 · 讲台」，而不是背文件编号 w20261108-1838 */
+        const extra = {};
+        if (!isPage) {
+          await Promise.all(mds.map(async (i) => {
+            try {
+              const it = await api(`https://api.github.com/repos/${REPO}/contents/${dir}/${i.name}`);
+              const p = parseFront(decodeURIComponent(escape(atob(it.content))));
+              extra[i.name] = p ? { title: p.pick('title') || i.name, tags: p.pickArray('tags') } : { title: i.name, tags: [] };
+            } catch { extra[i.name] = { title: i.name, tags: [] }; }
+          }));
+        }
         postList.innerHTML = mds
           .map(i => {
             const id = i.name.replace(/\.md$/, '');
-            const name = isPage ? (MODULES[id] || id) : id;
-            return `<li><button class="post-item-btn" data-name="${i.name}" type="button"><strong>${name}</strong></button></li>`;
+            const meta = extra[i.name];
+            const label = isPage ? (MODULES[id] || id) : (meta?.title || id);
+            const tags = meta?.tags?.length ? `<span class="li-tags">${esc(meta.tags.join(' / '))}</span>` : '';
+            const file = `<span class="li-file">${i.name}</span>`;
+            return `<li class="li-row"><button class="post-item-btn" data-name="${i.name}" type="button"><strong>${esc(label)}</strong>${tags}${file}</button><button class="post-item-del" data-del="${i.name}" type="button" title="从仓库删除这篇（构建后文章页消失）">删</button></li>`;
           })
           .join('') || (isPage
             ? '<li class="muted" style="padding:0.4rem 0;">各模块还未写过内容——选中上方模块直接写，发布即建块</li>'
             : '<li class="muted" style="padding:0.4rem 0;">仓库里还没有文章</li>');
         $('list-count').textContent = mds.length ? `（${mds.length}）` : '';
         if (!silent) status.textContent = `读取到 ${mds.length} 块`;
-      } catch {}
+      } catch (err) {
+        if (!postList.innerHTML || postList.innerHTML.includes('还没有')) {
+          status.textContent = '文章列表加载失败：' + friendlyErr(err);
+        }
+      }
     };
 
-    postList.addEventListener('click', async (e) => {
-      const btn = e.target?.closest?.('.post-item-btn');
-      if (!btn) return;
+    const loadPostFile = async (name) => {
+      const dir = currentDir();
       try {
-        const item = await api(`https://api.github.com/repos/${REPO}/contents/${DIR}/${btn.dataset.name}`);
+        const item = await api(`https://api.github.com/repos/${REPO}/contents/${dir}/${name}`);
         const raw = decodeURIComponent(escape(atob(item.content)));
-        const m = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-        if (!m) { status.textContent = '文件格式无法解析'; return; }
-        const fm = m[1], body = m[2];
-        const pick = (k) => (fm.split('\n').find(l => l.startsWith(k + ':')) || '').slice(k.length + 1).trim().replace(/^"|"$/g, '');
-        const pickArray = (k) => {
-          const r = (fm.split('\n').find(l => l.startsWith(k + ':')) || '').slice(k.length + 1).trim().match(/^\[(.*)\]$/);
-          return r ? r[1].split(',').map(s => s.trim().replace(/^"|"$/g, '')).filter(Boolean) : [];
-        };
-        editingFile = btn.dataset.name;
-        editingDate = pick('pubDate').slice(0, 10) || dateStr();
+        const p = parseFront(raw);
+        if (!p) { status.textContent = '文件格式无法解析'; return false; }
+        editingFile = name;
+        editingDate = p.pick('pubDate').slice(0, 10) || dateStr();
         if (isPageMode()) {
           tagsEl.value = '随笔';
-          bodyEl.value = body.trim();
+          bodyEl.value = p.body.trim();
         } else {
-          tagsEl.value = pickArray('tags').join(', ') || '随笔';
-          bodyEl.value = `${pick('title')}\n\n${body}`;
+          tagsEl.value = p.pickArray('tags').join(', ') || '随笔';
+          bodyEl.value = `${p.pick('title')}\n\n${p.body}`;
         }
         syncChips();
         renderPreview();
         saveDraft();
+        refreshEditState();
         status.textContent = isPageMode()
-          ? `已载入「${MODULES[editingFile.replace(/\.md$/, '')] || editingFile}」，改完再点发布即覆盖`
-          : `已载入「${pick('title')}」，改完再点发布即覆盖原文`;
+          ? `已载入「${MODULES[name.replace(/\.md$/, '')] || name}」，改完再点发布即覆盖`
+          : `已载入「${p.pick('title') || name}」，改完再点发布即覆盖原文`;
+        return true;
       } catch (err) {
-        status.textContent = err.message;
+        status.textContent = friendlyErr(err);
+        return false;
       }
+    };
+
+    postList.addEventListener('click', async (e) => {
+      const del = e.target?.closest?.('.post-item-del');
+      if (del) {
+        const name = del.dataset.del;
+        if (!confirm(`确定删除「${name}」？删除后这篇会从站点消失，不可撤销。`)) return;
+        try {
+          const dir = currentDir();
+          const sha = fileSha.get(name) || (await api(`https://api.github.com/repos/${REPO}/contents/${dir}/${name}`)).sha;
+          status.textContent = '删除中…';
+          await api(`https://api.github.com/repos/${REPO}/contents/${dir}/${name}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: `write: 删除 ${name}`, sha }),
+          });
+          if (editingFile === name) { editingFile = ''; editingDate = ''; refreshEditState(); }
+          status.textContent = `✅ 已删除 ${name}（最多 2 分钟后生效）`;
+          await loadList(true);
+        } catch (err) {
+          status.textContent = '删除失败：' + friendlyErr(err);
+        }
+        return;
+      }
+      const btn = e.target?.closest?.('.post-item-btn');
+      if (!btn) return;
+      await loadPostFile(btn.dataset.name);
+      listBox.open = true;
     });
 
     bodyEl.addEventListener('input', () => { renderPreview(); saveDraft(); });
@@ -271,6 +360,11 @@ import { SITE } from '../consts';
     $('btn-fresh')?.addEventListener('click', () => {
       editingFile = ''; editingDate = '';
       bodyEl.value = ''; tagsEl.value = '随笔';
+      try {
+        const bodies = loadBodies();
+        delete bodies[currentTarget];
+        saveBodies(bodies);
+      } catch {}
       renderPreview(); saveDraft(); refreshEditState(); syncChips();
       status.textContent = '新的一篇，开写';
       bodyEl.focus();
@@ -309,7 +403,8 @@ import { SITE } from '../consts';
         }
         await loadList(true);
       } catch (err) {
-        status.textContent = err.message;
+        status.textContent = friendlyErr(err);
+        status.focus();
       } finally {
         btn.disabled = false;
       }
@@ -321,6 +416,8 @@ import { SITE } from '../consts';
       localStorage.setItem(PAT_KEY, pat);
       patBlock.style.display = 'none'; patOk.style.display = '';
       await loadList();
+      /* 带 ?edit= 进来但当时没钥匙的：钥匙存好立刻补载入 */
+      if (pendingEdit) { const ok = await loadPostFile(pendingEdit); if (ok) { listBox.open = true; bodyEl.focus(); } }
     });
     $('btn-forget')?.addEventListener('click', () => {
       localStorage.removeItem(PAT_KEY);
@@ -332,17 +429,41 @@ import { SITE } from '../consts';
     try {
       const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
       if (d.target) targetEl.value = d.target;
+      currentTarget = targetEl.value;
       bodyEl.value = d.body ?? '';
       tagsEl.value = d.tags ?? '随笔';
       editingFile = d.file ?? '';
       editingDate = d.date ?? '';
+      const bodies = loadBodies();
+      if (typeof bodies[targetEl.value] === 'string') bodyEl.value = bodies[targetEl.value];
     } catch {}
+
+    /* ?edit=w20261108-1838.md —— 文章页「✎ 编辑这篇」跳过来时自动载入那篇 */
+    const editParam = (new URLSearchParams(location.search).get('edit') || '').trim();
+    const pendingEdit = editParam ? (editParam.endsWith('.md') ? editParam : editParam + '.md') : '';
+    if (pendingEdit) targetEl.value = 'blog';
+
     applyTargetUI();
     refreshEditState();
-    if (getPAT()) { patOk.style.display = ''; loadList(true); } else { patBlock.style.display = ''; }
+    if (getPAT()) {
+      patOk.style.display = '';
+      (async () => {
+        await loadList(true);
+        if (pendingEdit) {
+          const ok = await loadPostFile(pendingEdit);
+          if (ok) { listBox.open = true; bodyEl.focus(); }
+        }
+      })();
+    } else {
+      patBlock.style.display = '';
+      if (pendingEdit) status.textContent = `要编辑「${pendingEdit}」：粘贴 GitHub 钥匙并保存，会自动载入这篇`;
+    }
     renderPreview();
     document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') $('btn-save').click();
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        if (document.activeElement === patEl) return;
+        $('btn-save').click();
+      }
     });
   </script>
 </BaseLayout>
@@ -367,6 +488,20 @@ import { SITE } from '../consts';
     border-color: var(--accent); font-weight: 600;
   }
   .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  /* 已有文章列表：标题 + 标签 + 文件名，右上角一个「删」。
+     列表内容是运行时注入的，scoped 选择器套不上，统一用 :global */
+  :global(#post-list) { display: flex; flex-wrap: wrap; gap: 0.45rem; list-style: none; padding: 0.6rem 0 0; }
+  :global(#post-list .li-row) { position: relative; }
+  :global(#post-list .post-item-btn) { padding-right: 2.6rem; }
+  :global(#post-list .li-tags) { font-size: 0.78rem; color: var(--accent); }
+  :global(#post-list .li-file) { font-size: 0.7rem; color: var(--muted); opacity: 0.7; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  :global(#post-list .post-item-del) {
+    position: absolute; top: 0.5rem; right: 0.5rem;
+    border: 1px solid var(--line); background: var(--panel); color: var(--muted);
+    border-radius: 6px; font: inherit; font-size: 0.72rem;
+    padding: 0.4rem 0.7rem; cursor: pointer; transition: 0.15s ease;
+  }
+  :global(#post-list .post-item-del:hover) { color: #b3261e; border-color: #b3261e; }
   .edit-state {
     margin-top: 0.5rem; font-size: 0.82rem; color: var(--muted);
     display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
@@ -375,7 +510,5 @@ import { SITE } from '../consts';
   .btn-link { background: none; border: none; color: var(--accent); cursor: pointer; padding: 0; text-decoration: underline; font: inherit; font-size: 0.85rem; }
   .write-detail summary { cursor: pointer; font-size: 0.9rem; }
   .write-preview-body { padding-top: 0.6rem; }
-  #post-list { display: flex; flex-wrap: wrap; gap: 0.45rem; list-style: none; padding: 0.6rem 0 0; }
-  .btn-link { background: none; border: none; color: var(--accent); cursor: pointer; padding: 0; text-decoration: underline; font: inherit; }
   #w-body { width: 100%; resize: vertical; line-height: 1.8; }
 </style>

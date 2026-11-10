@@ -27,7 +27,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
         </div>
 
         <div class="quickwrite" id="quickwrite">
-          <button id="qw-open" class="qw-trigger" type="button">✍ 随手写一句…</button>
+          <button id="qw-open" class="qw-trigger" type="button" aria-expanded="false" aria-controls="qw-form">✍ 随手写一句…</button>
           <div id="qw-form" class="qw-form" hidden>
             <textarea id="qw-body" rows="3" placeholder="第一行是标题，下面是正文……" spellcheck="false"></textarea>
             <div class="qw-row">
@@ -38,7 +38,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
               </div>
               <input id="qw-tags" value="随笔" hidden />
               <button id="qw-send" class="btn" type="button">发布 →</button>
-              <span id="qw-status" class="meta-line" style="margin:0;" aria-live="polite"></span>
+              <span id="qw-status" class="meta-line" style="margin:0;" aria-live="polite" tabindex="-1"></span>
             </div>
             <p class="qw-hint">发布后 1–2 分钟自动上线 · <a href="/write">去完整编辑器</a></p>
           </div>
@@ -158,23 +158,20 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
       try {
         const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
         d.body = bodyEl.value;
-        if (d.body && d.title === undefined) d.title = (d.body.split('\n')[0] || '').trim();
         d.tags = tagsEl.value;
         localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
       } catch {}
     };
 
     openBtn.addEventListener('click', () => {
-      form.hidden = !form.hidden;
+      const opening = form.hidden;
+      form.hidden = !opening;
+      openBtn.setAttribute('aria-expanded', opening ? 'true' : 'false');
       if (!form.hidden) {
         openBtn.style.display = 'none';
         try {
           const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
-          // 已有草稿：跳过编辑器顶部标题行，直接续写正文
-          if (d.body) {
-            const nl = d.body.indexOf('\n');
-            bodyEl.value = nl === -1 ? '' : d.body.slice(nl + 1).replace(/^\n+/, '');
-          }
+          if (d.body) bodyEl.value = d.body;
           if (d.tags) tagsEl.value = d.tags;
           syncChips();
         } catch {}
@@ -190,7 +187,19 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
       return data;
     };
 
+    const friendlyErr = (err) => {
+      const m = String(err?.message || err || '');
+      if (/fetch|network|load failed/i.test(m)) return '网络连接失败，检查网络再试一次';
+      if (/unexpected|json/i.test(m)) return 'GitHub 返回了异常内容，稍后再试';
+      if (m.startsWith('403')) return '权限不够或请求太频繁（GitHub 限流），等一会儿再试';
+      if (m.startsWith('404')) return '仓库或文件不存在';
+      if (m.startsWith('422')) return '提交冲突（可能刚发过一次同内容），重试一次即可';
+      return m.slice(0, 60) || '未知错误';
+    };
+
     const publish = async () => {
+      const send = $('qw-send');
+      if (send?.disabled) return;
       const pat = localStorage.getItem(PAT_KEY) || '';
       if (!pat) {
         status.innerHTML = '第一次发布需要一把钥匙 · <a class="accent" href="/write">去 /write 保存一次</a>';
@@ -224,8 +233,9 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
         status.innerHTML = `✅ 已发布 <a class="accent" href="/blog/${slug}/">去文章页</a>`;
         bodyEl.value = '';
         saveDraft();
+        status.focus();
       } catch (err) {
-        status.textContent = err.message;
+        status.textContent = friendlyErr(err);
       } finally {
         send.disabled = false;
       }
@@ -257,7 +267,9 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('zh-CN', { year: 'nume
       if (e.key === 'Escape' && !form.hidden) {
         form.hidden = true;
         openBtn.style.display = '';
+        openBtn.setAttribute('aria-expanded', 'false');
         openBtn.textContent = '✍ 随手写一句…';
+        openBtn.focus();
       }
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !form.hidden) publish();
     });

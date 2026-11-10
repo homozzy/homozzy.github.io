@@ -66,7 +66,8 @@
 }
 .cp-item a:hover, .cp-item a.active { background: var(--accent-soft); }
 .cp-item strong { font-weight: 600; }
-.cp-item em { font-style: normal; color: var(--muted); font-size: 0.78rem; margin-left: auto; flex: none; font-family: ui-sans-serif, system-ui, sans-serif; white-space: nowrap; }
+.cp-item em { font-style: normal; color: var(--muted); font-size: 0.78rem; margin-left: auto; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-family: ui-sans-serif, system-ui, sans-serif; white-space: nowrap; }
+.cp-item .cp-empty { display: block; padding: 0.55rem 0.7rem; color: var(--muted); font-size: 0.85rem; }
 .cp-item mark { background: #f2e3a8; color: inherit; padding: 0 1px; border-radius: 2px; }
 .cp-foot {
   display: flex; justify-content: space-between; align-items: center;
@@ -86,6 +87,7 @@
   const count = root.querySelector('#cp-count');
   let index = null;
   let loading = false;
+  let loadFailed = false;
   let focusIdx = -1;
   let results = [];
   const highlight = (text, q) => {
@@ -105,9 +107,12 @@
     root.classList.add('on');
     root.inert = false;
     document.body.style.overflow = 'hidden';
-    if (!index && !loading) {
+    if (!index && !loading && !loadFailed) {
       loading = true;
-      fetch('/search-index.json').then(r => r.json()).then(d => { index = d; loading = false; }).catch(() => { loading = false; });
+      fetch('/search-index.json')
+        .then(r => { if (!r.ok) throw new Error('bad'); return r.json(); })
+        .then(d => { index = d; loading = false; render(); })
+        .catch(() => { loading = false; loadFailed = true; render(); });
     }
     setTimeout(() => input.focus(), 10);
   };
@@ -125,7 +130,13 @@
     const raw = input.value.trim();
     focusIdx = -1;
     if (!raw) { results = []; list.innerHTML = ''; count.textContent = '0'; return; }
-    if (!index) { list.innerHTML = '<li class="cp-item"><a href="#">载入索引中…</a></li>'; return; }
+    if (!index) {
+      list.innerHTML = loadFailed
+        ? '<li class="cp-item"><span class="cp-empty">索引载入失败，按 Esc 关闭后重试</span></li>'
+        : '<li class="cp-item"><span class="cp-empty">载入索引中…</span></li>';
+      count.textContent = '0';
+      return;
+    }
     // 语法过滤：tag:xx  year:2024，剩余词做普通搜索
     const tags = []; const years = []; const words = [];
     raw.split(/\s+/).forEach((tok) => {
@@ -142,7 +153,7 @@
       .slice(0, 12);
     count.textContent = String(results.length);
     list.innerHTML = results.map((e, i) => `<li class="cp-item"><a href="${e.url}" data-idx="${i}"><strong>${highlight(e.title, words[0])}</strong><em>${e.tag}${e.y ? ' ' + e.y : ''} · ${highlight(e.excerpt, words[0])}</em></a></li>`).join('')
-      || `<li class="cp-item"><a href="#">没有匹配结果</a></li>`;
+      || '<li class="cp-item"><span class="cp-empty">没有匹配结果</span></li>';
   };
   document.addEventListener('keydown', (e) => {
     const meta = e.metaKey || e.ctrlKey;

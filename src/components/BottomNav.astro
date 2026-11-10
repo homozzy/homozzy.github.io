@@ -2,6 +2,9 @@
 import Icon from './Icon.astro';
 const path = Astro.url.pathname;
 const is = (p: string) => (p === '/' ? path === '/' : path.startsWith(p));
+// 与桌面端「全部」保持一致
+const ALL_PATHS = ['/features', '/sites', '/word', '/books', '/milestones', '/ledger', '/sync', '/search', '/weibo', '/podium', '/tools', '/works', '/changelog', '/write'];
+const isAll = ALL_PATHS.some(is);
 const active = (p: string) => is(p) ? 'active' : '';
 ---
 
@@ -18,7 +21,7 @@ const active = (p: string) => is(p) ? 'active' : '';
     <Icon name="book" size={20} />
     <span>读书录</span>
   </a>
-  <a href="/features" class={active('/features') || active('/search') ? 'active' : ''} aria-current={is('/features') || is('/search') ? 'page' : undefined}>
+  <a href="/features" class={isAll ? 'active' : ''} aria-current={isAll ? 'page' : undefined}>
     <Icon name="stack" size={20} />
     <span>全部</span>
   </a>

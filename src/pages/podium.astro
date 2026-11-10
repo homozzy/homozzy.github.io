@@ -2,6 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
 import { getAllPosts } from '../lib/sanity';
+import { getCollection } from 'astro:content';
+import { marked } from 'marked';
 
 // 「讲台」栏目：每月一篇课堂实录 / 教学反思，tag = 讲台
 const posts = (await getAllPosts())
@@ -9,17 +11,27 @@ const posts = (await getAllPosts())
   .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
 
 const fmt = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
+
+// 栏目导语可在 /write「页面模式 · 讲台」单独编辑（src/content/pages/podium-intro.md），
+// 没写过时用下面这段默认文案。
+const pageMds = await getCollection('pages').catch(() => []);
+const introEntry = pageMds.find((e) => e.id === 'podium-intro');
+const introHtml = introEntry ? marked.parse(introEntry.body ?? '', { gfm: true, breaks: true }) : '';
 ---
 
 <BaseLayout title={`讲台 · ${SITE.title}`} description="「讲台」栏目：每月一篇课堂实录或教学反思。">
   <div class="container-narrow" style="padding-top: 3rem;">
     <p class="eyebrow">Podium · 固定栏目</p>
     <h1 class="page-title">讲台<span class="accent">.</span></h1>
-    <p class="lead" style="font-size:1.1rem;">
-      每月一篇：<strong>课堂里真实发生的事</strong>——一个讲到一半忽然明白的细节、
-      一张让学生争论起来的地图、一次失败的导入。
-      <span class="muted">（更新于 {fmt}）</span>
-    </p>
+    {introEntry ? (
+      <div class="prose" set:html={introHtml} />
+    ) : (
+      <p class="lead" style="font-size:1.1rem;">
+        每月一篇：<strong>课堂里真实发生的事</strong>——一个讲到一半忽然明白的细节、
+        一张让学生争论起来的地图、一次失败的导入。
+        <span class="muted">（更新于 {fmt}）</span>
+      </p>
+    )}
 
     <hr class="rule" />
 

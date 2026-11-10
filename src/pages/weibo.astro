@@ -167,7 +167,6 @@ const total = list.length;
 
       // —— 懒加载其余年份 ——
       fetch('/weibo-data.json').then(r => r.json()).then(all => {
-        const bf = new Date(b => b.created).getTime;
         document.querySelectorAll('.year-group[data-lazy]').forEach(g => {
           const y = Number(g.dataset.yearGroup);
           const box = g.querySelector('.note-list');

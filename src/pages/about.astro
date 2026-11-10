@@ -13,7 +13,7 @@ const afterHtml = afterDoc ? marked.parse(afterDoc.body ?? '', { gfm: true, brea
 <BaseLayout title={`关于 · ${SITE.title}`} description="关于 homo：历史地理爱好者，高中地理教师，读书研思。">
   <div class="container-narrow" style="padding-top: 3rem;">
     <p class="eyebrow">About</p>
-    <div style="display:flex; align-items:center; gap:0.9rem; margin:0.2rem 0 0.4rem;"><svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="27" fill="#a63f2c"/><text x="28" y="37" text-anchor="middle" font-family="Georgia, serif" font-size="26" font-style="italic" fill="#faf6ee">h</text></svg><h1 class="page-title" style="margin:0;">关于我</h1></div>
+    <div style="display:flex; align-items:center; gap:0.9rem; margin:0.2rem 0 0.4rem;"><svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="27" style="fill:var(--accent)"/><text x="28" y="37" text-anchor="middle" font-family="Georgia, serif" font-size="26" font-style="italic" style="fill:var(--bg)">h</text></svg><h1 class="page-title" style="margin:0;">关于我</h1></div>
 
     <p class="lead" style="font-size:1.1rem;">
       我是 <strong>homo</strong>，一名历史地理爱好者。书斋、课堂与四季的天象，是我平日最常驻足的三个地方。
@@ -70,11 +70,11 @@ const afterHtml = afterDoc ? marked.parse(afterDoc.body ?? '', { gfm: true, brea
 
     <h2 style="font-size:1.2rem; margin-bottom: 0.8rem;">关于本站 · Colophon</h2>
     <ul class="colophon">
-      <li><span>构建</span><p>Astro 7 + Markdown；博客正文存于 Sanity CMS；构建时静态生成，发布即生效</p></li>
+      <li><span>构建</span><p>Astro 7 + Markdown；博客正文：仓库 Markdown（优先）＋ Sanity CMS 兜底；构建时静态生成，发布即生效</p></li>
       <li><span>托管</span><p>GitHub Pages 主站 homozzy.github.io；Vercel 作为实验部署</p></li>
       <li><span>字体</span><p>中文：Noto Serif SC / Songti SC / SimSun；英文与数字：Georgia，配 <code>font-feature-settings: "onum"</code> 旧时代数字</p></li>
       <li><span>配色</span><p>米纸 #faf8f5 · 墨 #292520 · 砖红 #a63f2c；暗色模式对应 #171512 / #e9e4d8 / #d08a5a</p></li>
-      <li><span>内容</span><p>51 条读书笔记 + 1 篇创作连载；627 条原创微博（2015–2026，已去转发/推广）；不收集、不追踪、无广告</p></li>
+      <li><span>内容</span><p>52 条读书笔记与创作；627 条原创微博（2015–2026，已去转发/推广）；不收集、不追踪、无广告</p></li>
       <li><span>源码</span><p><a href="https://github.com/homozzy/homozzy.github.io">github.com/homozzy/homozzy.github.io</a>（MIT）</p></li>
       <li><span>订阅</span><p><a href="/rss.xml">RSS</a> · <a href="/sitemap-index.xml">Sitemap</a> · 欢迎来信 {SITE.email}</p></li>
     </ul>

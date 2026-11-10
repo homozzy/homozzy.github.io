@@ -6,6 +6,5 @@ export const SITE = {
   email: '1191615708@qq.com',
   tagline: '读书研思',
   footerNote: '以文字记录，以行走丈量。',
-  // TODO: 拿到正式域名后替换
-  url: 'https://example.com',
+  url: 'https://homozzy.github.io',
 } as const;

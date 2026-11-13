@@ -14,7 +14,7 @@ const todayPair = MILESTONES[dayIndex % MILESTONES.length];
     <h1 class="page-title">日进一词<span class="accent">.</span></h1>
     <p class="muted">每天一枚成语。同一天看到的是同一枚；明天，下一枚。</p>
 
-    <div class="word-display" style="margin-top: 1.4rem;">
+    <div class="word-display" style="margin-top: 1.4rem;" aria-live="polite">
       <div class="word" id="w-word"></div>
       <div class="pinyin" id="w-pinyin"></div>
       <p class="meaning" id="w-meaning"></p>
@@ -28,7 +28,10 @@ const todayPair = MILESTONES[dayIndex % MILESTONES.length];
       <button class="btn btn-ghost btn-sm" id="w-next" type="button">下一枚 →</button>
     </div>
 
-    <a href={`/milestones#${todayPair.id}`} class="word-pair" aria-label={`今日此刻：${todayPair.title}，查看大事记`}>
+    <!-- 不加 aria-label：这条链接的可见文本（年份 + 标题 + 摘要 + 「去大事记 →」）
+         本身就是完整描述，硬塞一个 aria-label 反而与可见文本不一致
+         （Lighthouse label-content-name-mismatch）。 -->
+    <a href={`/milestones#${todayPair.id}`} class="word-pair">
       <span class="eyebrow">今日 × 此刻</span>
       <span class="word-pair-year">{todayPair.year}</span>
       <strong class="word-pair-title">{todayPair.title}</strong>
@@ -63,8 +66,9 @@ const todayPair = MILESTONES[dayIndex % MILESTONES.length];
       document.getElementById('w-next')?.addEventListener('click', () => { offset++; render(); });
       document.getElementById('w-today')?.addEventListener('click', () => { offset = 0; render(); });
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') { offset--; render(); }
-        else if (e.key === 'ArrowRight') { offset++; render(); }
+        if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '')) return;
+        if (e.key === 'ArrowLeft') { e.preventDefault(); offset--; render(); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); offset++; render(); }
       });
       render();
     })();

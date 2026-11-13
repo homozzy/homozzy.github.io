@@ -10,7 +10,7 @@ import { SITE } from '../consts';
     <p class="muted">规则很简单：<strong>第一行是标题，其余全是正文</strong>。草稿自动存本机。发布后 1–2 分钟自动上线。</p>
 
     <div id="pat-block" class="write-auth" style="display:none;">
-      <input id="w-pat" class="input" type="password" placeholder="GitHub PAT（只需第一次）" autocomplete="off" />
+      <input id="w-pat" class="input" type="password" placeholder="GitHub PAT（只需第一次）" aria-label="GitHub 访问令牌" autocomplete="off" />
       <button id="btn-load" class="btn btn-ghost" type="button">保存钥匙</button>
     </div>
     <div id="pat-ok" class="meta-line" style="display:none;">
@@ -263,7 +263,7 @@ import { SITE } from '../consts';
             const label = isPage ? (MODULES[id] || id) : (meta?.title || id);
             const tags = meta?.tags?.length ? `<span class="li-tags">${esc(meta.tags.join(' / '))}</span>` : '';
             const file = `<span class="li-file">${i.name}</span>`;
-            return `<li class="li-row"><button class="post-item-btn" data-name="${i.name}" type="button"><strong>${esc(label)}</strong>${tags}${file}</button><button class="post-item-del" data-del="${i.name}" type="button" title="从仓库删除这篇（构建后文章页消失）">删</button></li>`;
+            return `<li class="li-row"><button class="post-item-btn" data-name="${i.name}" type="button"><strong>${esc(label)}</strong>${tags}${file}</button><button class="post-item-del" data-del="${i.name}" type="button" aria-label="删除《${esc(label)}》" title="从仓库删除这篇（构建后文章页消失）">删</button></li>`;
           })
           .join('') || (isPage
             ? '<li class="muted" style="padding:0.4rem 0;">各模块还未写过内容——选中上方模块直接写，发布即建块</li>'

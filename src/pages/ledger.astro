@@ -35,6 +35,7 @@ import { SITE } from '../consts';
       </div>
     </div>
 
+    <p id="ledger-status" class="meta-line" aria-live="polite" style="margin:0 0 0.4rem;"></p>
     <div class="table-wrap"><table class="ledger">
       <thead><tr><th>日期</th><th>分类</th><th>备注</th><th>金额</th><th></th></tr></thead>
       <tbody id="ledger-body"></tbody>
@@ -64,6 +65,13 @@ import { SITE } from '../consts';
 
       const monthEl = $('f-month'); const bodyEl = $('ledger-body');
       const sumEl = $('ledger-sum'); const countEl = $('ledger-count'); const emptyEl = $('ledger-empty');
+      const statusEl = $('ledger-status');
+      let statusTimer;
+      const flash = (msg) => {
+        statusEl.textContent = msg;
+        clearTimeout(statusTimer);
+        statusTimer = setTimeout(() => { statusEl.textContent = ''; }, 3000);
+      };
 
       const refreshMonths = (rows) => {
         const months = [...new Set(rows.map(r => monthOf(r.date)))].sort().reverse();
@@ -96,19 +104,22 @@ import { SITE } from '../consts';
 
       document.getElementById('ledger-form').addEventListener('submit', (e) => {
         e.preventDefault();
+        const amount = Number(document.getElementById('f-amount').value);
+        if (!Number.isFinite(amount) || amount <= 0) { flash('金额要填一个大于 0 的数字'); return; }
         const rows = load();
         rows.push({
           id: Date.now(),
           date: dateEl.value,
           type: typeEl.value,
           cat: catEl.value,
-          amount: Number(document.getElementById('f-amount').value),
+          amount,
           note: document.getElementById('f-note').value.trim(),
         });
         save(rows);
         document.getElementById('f-amount').value = '';
         document.getElementById('f-note').value = '';
         render();
+        flash(`已记一笔 ${typeEl.value === 'income' ? '+' : '-'}${fmt(amount)} 元`);
       });
 
       // 快速填入：只选类型与分类，金额自己填
@@ -136,9 +147,11 @@ import { SITE } from '../consts';
       bodyEl.addEventListener('click', (e) => {
         const id = e.target?.getAttribute?.('data-del');
         if (!id) return;
+        if (!confirm('删除这一笔？')) return;
         const rows = load().filter(r => String(r.id) !== String(id));
         save(rows);
         render();
+        flash('已删除一笔');
       });
       monthEl.addEventListener('change', render);
       render();

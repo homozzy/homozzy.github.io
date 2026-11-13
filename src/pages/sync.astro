@@ -56,6 +56,7 @@ import { SITE } from '../consts';
           ledger: JSON.parse(localStorage.getItem(KEY) || '[]'),
         };
         download(`homo-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(data, null, 2));
+        $('import-msg').textContent = `已导出备份文件（${data.ledger.length} 笔）。`;
       });
 
       let pending = null;
@@ -75,12 +76,12 @@ import { SITE } from '../consts';
       });
 
       $('btn-replace')?.addEventListener('click', () => {
-        if (!pending) return;
+        if (!pending) { $('import-msg').textContent = '先选择备份文件。'; return; }
         localStorage.setItem(KEY, JSON.stringify(pending.ledger));
-        $('import-msg').textContent = '已替换本机账本。';
+        $('import-msg').textContent = `已替换本机账本（${pending.ledger.length} 笔）。`;
       });
       $('btn-merge')?.addEventListener('click', () => {
-        if (!pending) return;
+        if (!pending) { $('import-msg').textContent = '先选择备份文件。'; return; }
         const cur = JSON.parse(localStorage.getItem(KEY) || '[]');
         const ids = new Set(cur.map(r => r.id));
         const merged = [...cur, ...pending.ledger.filter(r => !ids.has(r.id))];
@@ -90,7 +91,7 @@ import { SITE } from '../consts';
       $('btn-delete')?.addEventListener('click', () => {
         if (confirm('确定清空本机账本数据？此操作不可恢复。')) {
           localStorage.removeItem(KEY);
-          alert('已清空。');
+          $('import-msg').textContent = '已清空本机账本数据。';
         }
       });
     })();

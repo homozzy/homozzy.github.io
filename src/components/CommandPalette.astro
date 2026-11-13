@@ -7,10 +7,10 @@
   <div class="cp-panel" role="dialog" aria-modal="true" aria-label="全站搜索">
     <div class="cp-input-row">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.3-4.3"/></svg>
-      <input id="cp-input" type="search" placeholder="搜索全站… 支持 tag:读书 year:2024 过滤" autocomplete="off" aria-label="搜索关键词" />
+      <input id="cp-input" type="search" placeholder="搜索全站… 支持 tag:读书 year:2024 过滤" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="cp-list" aria-autocomplete="list" aria-label="搜索关键词" />
       <kbd class="cp-kbd">Esc</kbd>
     </div>
-    <ul id="cp-list" class="cp-list" role="listbox"></ul>
+    <ul id="cp-list" class="cp-list" role="listbox" aria-label="搜索结果"></ul>
     <div class="cp-foot"><span>Ctrl / ⌘ K 唤起</span><span>结果 <b id="cp-count">0</b></span></div>
   </div>
 </div>
@@ -68,6 +68,12 @@
 .cp-item strong { font-weight: 600; }
 .cp-item em { font-style: normal; color: var(--muted); font-size: 0.78rem; margin-left: auto; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-family: ui-sans-serif, system-ui, sans-serif; white-space: nowrap; }
 .cp-item .cp-empty { display: block; padding: 0.55rem 0.7rem; color: var(--muted); font-size: 0.85rem; }
+.cp-retry {
+  display: block; width: 100%; text-align: left; padding: 0.5rem 0.7rem;
+  background: var(--accent-soft); color: var(--accent); border: 0;
+  border-radius: 9px; font: inherit; font-size: 0.85rem; cursor: pointer;
+}
+.cp-retry:hover { filter: brightness(0.97); }
 .cp-item mark { background: #f2e3a8; color: inherit; padding: 0 1px; border-radius: 2px; }
 .cp-foot {
   display: flex; justify-content: space-between; align-items: center;
@@ -90,24 +96,36 @@
   let loadFailed = false;
   let focusIdx = -1;
   let results = [];
+  let lastFocused = null;
   const highlight = (text, q) => {
     const esc = (s) => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     if (!q) return esc(text);
-    const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const eq = esc(q);
+    const re = new RegExp(eq.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
     return esc(text).replace(re, m => `<mark>${m}</mark>`);
   };
   const setFocus = (i) => {
-    const items = [...list.querySelectorAll('a')];
+    const items = [...list.querySelectorAll('li[role=option]')];
     if (!items.length) return;
     focusIdx = (i + items.length) % items.length;
-    items.forEach((el, j) => el.classList.toggle('active', j === focusIdx));
-    items[focusIdx].scrollIntoView({ block: 'nearest' });
+    items.forEach((el, j) => {
+      el.classList.toggle('active', j === focusIdx);
+      el.setAttribute('aria-selected', j === focusIdx ? 'true' : 'false');
+    });
+    /* 焦点留在输入框，用 aria-activedescendant 告诉读屏选中的是第几条 */
+    const cur = items[focusIdx];
+    input.setAttribute('aria-activedescendant', cur.id);
+    cur.scrollIntoView({ block: 'nearest' });
   };
   const open = () => {
+    lastFocused = document.activeElement;
     root.classList.add('on');
     root.inert = false;
     document.body.style.overflow = 'hidden';
-    if (!index && !loading && !loadFailed) {
+    if (!index && !loading) {
+      /* 上次拉取失败也允许再试：原来 loadFailed 是永久闸门，
+         空态却写着「关闭后重试」——用户根本没法重试。 */
+      loadFailed = false;
       loading = true;
       fetch('/search-index.json')
         .then(r => { if (!r.ok) throw new Error('bad'); return r.json(); })
@@ -125,15 +143,23 @@
     input.value = '';
     list.innerHTML = '';
     count.textContent = '0';
+    if (lastFocused && document.contains(lastFocused)) lastFocused.focus();
   };
   const render = () => {
     const raw = input.value.trim();
     focusIdx = -1;
+    input.removeAttribute('aria-activedescendant');
+    input.setAttribute('aria-expanded', 'false');
     if (!raw) { results = []; list.innerHTML = ''; count.textContent = '0'; return; }
     if (!index) {
       list.innerHTML = loadFailed
-        ? '<li class="cp-item"><span class="cp-empty">索引载入失败，按 Esc 关闭后重试</span></li>'
+        ? '<li class="cp-item"><span class="cp-empty">索引载入失败 —— 点下面重试，或刷新页面</span></li><li class="cp-item"><button type="button" id="cp-retry" class="cp-retry">重试载入索引</button></li>'
         : '<li class="cp-item"><span class="cp-empty">载入索引中…</span></li>';
+      if (loadFailed) {
+        list.querySelector('#cp-retry')?.addEventListener('click', () => {
+          loadFailed = false; loading = false; open();
+        });
+      }
       count.textContent = '0';
       return;
     }
@@ -145,14 +171,30 @@
       else if (m2) years.push(m2[1]);
       else words.push(tok);
     });
-    const lower = words.join(' ').toLowerCase();
+    /* 多词要「每个词都命中」（把词拼成一串去找会让「读书 笔记」永远搜不到），
+       排序按相关度：标题命中 > 标签命中 > 摘要命中。 */
+    const lower = words.map((w) => w.toLowerCase()).filter(Boolean);
+    const hay = (e) => ((e.title || '') + ' ' + (e.excerpt || '') + ' ' + (e.tag || '')).toLowerCase();
+    const score = (e) => {
+      const t = (e.title || '').toLowerCase();
+      const x = (e.excerpt || '').toLowerCase();
+      const g = (e.tag || '').toLowerCase();
+      if (lower.some((w) => t.includes(w))) return 0;
+      if (lower.some((w) => g.includes(w))) return 1;
+      if (lower.some((w) => x.includes(w))) return 2;
+      return 3;
+    };
     results = index
-      .filter(e => (!tags.length || tags.some(t => (e.tag + ' ' + e.title + ' ' + e.excerpt).toLowerCase().includes(t)))
+      .map((e, i) => ({ e, i }))
+      .filter(({ e }) => (!tags.length || tags.some((t) => hay(e).includes(t)))
         && (!years.length || years.includes(String(e.y)))
-        && (!lower || (e.title + ' ' + e.excerpt + ' ' + e.tag).toLowerCase().includes(lower)))
-      .slice(0, 12);
+        && (!lower.length || lower.every((w) => hay(e).includes(w))))
+      .sort((a, b) => score(a.e) - score(b.e) || a.i - b.i)
+      .slice(0, 12)
+      .map((x) => x.e);
     count.textContent = String(results.length);
-    list.innerHTML = results.map((e, i) => `<li class="cp-item"><a href="${e.url}" data-idx="${i}"><strong>${highlight(e.title, words[0])}</strong><em>${e.tag}${e.y ? ' ' + e.y : ''} · ${highlight(e.excerpt, words[0])}</em></a></li>`).join('')
+    input.setAttribute('aria-expanded', results.length ? 'true' : 'false');
+    list.innerHTML = results.map((e, i) => `<li class="cp-item" role="option" id="cp-${i}" aria-selected="false"><a href="${e.url}" data-idx="${i}" tabindex="-1"><strong>${highlight(e.title, words[0])}</strong><em>${e.tag}${e.y ? ' ' + e.y : ''} · ${highlight(e.excerpt, words[0])}</em></a></li>`).join('')
       || '<li class="cp-item"><span class="cp-empty">没有匹配结果</span></li>';
   };
   document.addEventListener('keydown', (e) => {
@@ -160,6 +202,15 @@
     if (meta && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); root.classList.contains('on') ? close() : open(); return; }
     if (e.key === 'Escape') { close(); return; }
     if (!root.classList.contains('on')) return;
+    if (e.key === 'Tab') {
+      const items = [input, ...list.querySelectorAll('a')].filter(Boolean);
+      if (!items.length) { e.preventDefault(); input.focus(); return; }
+      const idx = items.indexOf(document.activeElement);
+      e.preventDefault();
+      if (e.shiftKey) (idx <= 0 ? items[items.length - 1] : items[idx - 1]).focus();
+      else (idx === -1 || idx === items.length - 1 ? items[0] : items[idx + 1]).focus();
+      return;
+    }
     if (e.key === 'ArrowDown') { e.preventDefault(); setFocus(focusIdx + 1); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setFocus(focusIdx - 1); }
     else if (e.key === 'Enter' && focusIdx >= 0) { e.preventDefault(); list.querySelector(`a[data-idx="${focusIdx}"]`)?.click(); }

@@ -69,7 +69,7 @@ const total = list.length;
     <p id="weibo-meta" class="meta-line" aria-live="polite">共 {total} 条微博</p>
 
     <section class="year-group" data-year-group={firstYear}>
-      <h3 class="year-head">{firstYear} <span class="count">{firstList.length} 条</span></h3>
+      <h2 class="year-head">{firstYear} <span class="count">{firstList.length} 条</span></h2>
       <div class="note-list">
         {firstList.map((p) => (
           <details
@@ -103,7 +103,7 @@ const total = list.length;
 
     {years.slice(1).map((y) => (
       <section class="year-group" data-year-group={y} data-lazy="1">
-        <h3 class="year-head">{y} <span class="count">{byYear.get(y)!.length} 条</span></h3>
+        <h2 class="year-head">{y} <span class="count">{byYear.get(y)!.length} 条</span></h2>
         <div class="note-list"></div>
       </section>
     ))}

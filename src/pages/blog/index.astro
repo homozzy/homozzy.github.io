@@ -32,12 +32,12 @@ const readingMinutes = (s: string | undefined) => Math.max(1, Math.ceil(wordCoun
     <h1 class="page-title">博客<span class="accent">.</span></h1>
     <p class="muted">文史、气象与技术的随想。<a href="/rss.xml" class="accent" style="text-decoration:underline;text-underline-offset:3px;">RSS 订阅</a> · <a href="/write" class="accent" style="text-decoration:underline;text-underline-offset:3px;">写新博客</a></p>
     {years.length > 0 && (
-      <div class="year-chips" style="margin-top:0.8rem;">
+      <div class="year-chips" style="margin-top:0.8rem;" role="group" aria-label="按年份跳转">
         {years.map(y => <a class="chip" href={`#year-${y}`}>{y} <span style="opacity:.6;">{byYear.get(y)!.length}</span></a>)}
       </div>
     )}
     {allTags.length > 0 && (
-      <div class="year-chips" id="tag-chips" style="margin-top:0.5rem;" aria-label="按标签筛选">
+      <div class="year-chips" id="tag-chips" style="margin-top:0.5rem;" role="group" aria-label="按标签筛选">
         <button class="chip on" data-tag="">全部 <span style="opacity:.6;">{total}</span></button>
         {allTags.map(([tag, count]) => <button class="chip" data-tag={tag}>#{tag} <span style="opacity:.6;">{count}</span></button>)}
       </div>
@@ -85,9 +85,15 @@ const readingMinutes = (s: string | undefined) => Math.max(1, Math.ceil(wordCoun
             g.style.display = visible ? '' : 'none';
           });
           countLine.textContent = tag ? `共 ${shown} 篇 · #${tag}` : `共 ${shown} 篇`;
-          chips.forEach(c => c.classList.toggle('on', c.dataset.tag === tag));
+          /* 筛选是单选状态：视觉上有 .on，读屏也要知道（aria-pressed） */
+          chips.forEach(c => {
+            const on = c.dataset.tag === tag;
+            c.classList.toggle('on', on);
+            c.setAttribute('aria-pressed', on ? 'true' : 'false');
+          });
         };
         chips.forEach(chip => chip.addEventListener('click', () => render(chip.dataset.tag || '')));
+        render('');
       })();
     </script>
   </div>

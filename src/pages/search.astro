@@ -9,9 +9,9 @@ import { SITE } from '../consts';
     <h1 class="page-title">全站搜索<span class="accent">.</span></h1>
     <p class="muted">覆盖全站页面、博客与 52 条读书笔记。结果在本地计算，不上传关键词。<span style="white-space:nowrap;"><kbd>/</kbd> 聚焦 · <kbd>↑↓</kbd> 选择 · <kbd>Enter</kbd> 打开 · <kbd>Esc</kbd> 清空</span></p>
 
-    <input id="q" class="input" type="search" placeholder="输入关键词，例如：重阳、活着、威斯特伐利亚…" autocomplete="off" aria-label="搜索全站内容" style="margin-top: 1rem;" />
+    <input id="q" class="input" type="search" placeholder="输入关键词，例如：重阳、活着、威斯特伐利亚…" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="results" aria-autocomplete="list" aria-label="搜索全站内容" style="margin-top: 1rem;" />
     <p id="meta" class="meta-line" aria-live="polite"></p>
-    <ul id="results" class="search-results"></ul>
+    <ul id="results" class="search-results" role="listbox" aria-label="搜索结果"></ul>
     <p id="empty" class="muted" style="text-align:center; padding: 2rem 0; display:none;">没有找到匹配内容</p>
   </div>
 
@@ -23,52 +23,91 @@ import { SITE } from '../consts';
       const empty = document.getElementById('empty');
 
       let index = [];
-      try {
-        const res = await fetch('/search-index.json');
-        index = await res.json();
-      } catch {
-        meta.textContent = '搜索索引加载失败，请刷新重试。';
-        return;
-      }
+      /* 索引拉取失败时给一条真能点的「重试」——只写一句「请刷新重试」
+         等于把活推给用户，而重试本来只要再发一次请求。 */
+      const loadIndex = async () => {
+        try {
+          const res = await fetch('/search-index.json');
+          if (!res.ok) throw new Error('bad status');
+          index = await res.json();
+          meta.textContent = '';
+          return true;
+        } catch {
+          meta.innerHTML = '搜索索引加载失败 —— <button type="button" class="linklike" id="retry-index">重试</button>（或刷新页面）';
+          meta.querySelector('#retry-index')?.addEventListener('click', async () => {
+            meta.textContent = '正在重试…';
+            if (await loadIndex()) render();
+          });
+          return false;
+        }
+      };
+      if (!(await loadIndex())) return;
 
       const esc = (s) => s.replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
       const highlight = (text, q) => {
         if (!q) return esc(text);
-        const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+        const eq = esc(q);
+        const re = new RegExp(eq.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
         return esc(text).replace(re, (m) => `<mark>${m}</mark>`);
       };
 
       let hits = [];
       let focusIdx = -1;
+      /* 匹配与排序：多词查询要「每个词都命中」（而不是把词拼成一串去找），
+         否则「读书 笔记」这种查询永远搜不到任何东西。
+         排序按相关度：标题命中 > 标签命中 > 摘要命中。 */
+      const score = (e, words) => {
+        const t = (e.title || '').toLowerCase();
+        const x = (e.excerpt || '').toLowerCase();
+        const g = (e.tag || '').toLowerCase();
+        if (words.some((w) => t.includes(w))) return 0;
+        if (words.some((w) => g.includes(w))) return 1;
+        if (words.some((w) => x.includes(w))) return 2;
+        return 3;
+      };
       const render = () => {
         const q = input.value.trim();
         focusIdx = -1;
+        input.removeAttribute('aria-activedescendant');
         if (!q) {
           list.innerHTML = '';
           meta.textContent = `索引 ${index.length} 条 · 输入关键词开始搜索`;
           empty.style.display = 'none';
+          input.setAttribute('aria-expanded', 'false');
           return;
         }
-        const lower = q.toLowerCase();
-        hits = index.filter((e) =>
-          (e.title + ' ' + e.excerpt + ' ' + e.tag).toLowerCase().includes(lower),
-        );
+        const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+        hits = index
+          .filter((e) => {
+            const hay = ((e.title || '') + ' ' + (e.excerpt || '') + ' ' + (e.tag || '')).toLowerCase();
+            return words.every((w) => hay.includes(w));
+          })
+          .map((e, i) => ({ e, i }))
+          .sort((a, b) => score(a.e, words) - score(b.e, words) || a.i - b.i)
+          .map((x) => x.e);
         meta.textContent = `${hits.length} 条结果 · 搜索「${q}」`;
         empty.style.display = hits.length ? 'none' : 'block';
+        input.setAttribute('aria-expanded', hits.length ? 'true' : 'false');
         list.innerHTML = hits.slice(0, 50).map((e, i) => `
-          <li class="search-result">
-            <a href="${e.url}" data-idx="${i}">
+          <li class="search-result" role="option" id="sr-${i}" aria-selected="false">
+            <a href="${e.url}" data-idx="${i}" tabindex="-1">
               <strong>${highlight(e.title, q)}</strong>
               <div class="meta">${esc(e.tag)} · ${highlight(e.excerpt, q)}</div>
             </a>
           </li>`).join('');
       };
       const setFocus = (i) => {
-        const items = [...list.querySelectorAll('a')];
+        const items = [...list.querySelectorAll('li[role=option]')];
         if (!items.length) return;
         focusIdx = (i + items.length) % items.length;
-        items.forEach((el, j) => el.classList.toggle('active', j === focusIdx));
-        items[focusIdx].scrollIntoView({ block: 'nearest' });
+        items.forEach((el, j) => {
+          el.classList.toggle('active', j === focusIdx);
+          el.setAttribute('aria-selected', j === focusIdx ? 'true' : 'false');
+        });
+        /* 焦点留在输入框，用 aria-activedescendant 告诉读屏「现在选中的是第几条」 */
+        const cur = items[focusIdx];
+        input.setAttribute('aria-activedescendant', cur.id);
+        cur.scrollIntoView({ block: 'nearest' });
       };
       document.addEventListener('keydown', (e) => {
         const tag = (document.activeElement?.tagName || '').toUpperCase();
@@ -93,4 +132,10 @@ import { SITE } from '../consts';
       render();
     })();
   </script>
+  <style>
+    .linklike {
+      background: none; border: 0; padding: 0; font: inherit; cursor: pointer;
+      color: var(--accent); text-decoration: underline;
+    }
+  </style>
 </BaseLayout>

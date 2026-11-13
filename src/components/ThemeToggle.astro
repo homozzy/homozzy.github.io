@@ -22,6 +22,12 @@
       const dark = document.documentElement.dataset.theme === 'dark';
       moon.style.display = dark ? 'none' : 'block';
       sun.style.display = dark ? 'block' : 'none';
+      /* 读屏用户要知道「点下去会变成什么」：图标画的是目标模式，
+         可访问名也该说目标，而不是笼统的「切换亮 / 暗主题」。 */
+      if (btn) {
+        btn.setAttribute('aria-label', dark ? '切换到浅色主题' : '切换到深色主题');
+        btn.title = dark ? '切换到浅色主题' : '切换到深色主题';
+      }
     };
     sync();
 
